@@ -17,7 +17,6 @@ from .attack import AttackData, load_attack
 from .cis import Safeguard, load_cis
 from .sigma import SigmaRule, load_rules, logsource_cost
 
-
 # Deploying/tuning one Sigma rule is assumed to cost 1/20 of onboarding a standard log source
 # (see docs/adr/0004-cost-model.md). Keeps "onboard + deploy what it unlocks" comparable.
 RULE_COST = 0.05

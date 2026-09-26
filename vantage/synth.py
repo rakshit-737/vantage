@@ -39,7 +39,7 @@ def random_org(cat: Catalog, seed: int = 0, maturity: float = 0.5, name: str | N
     Claims are deliberately inflated relative to reality to model the paper-vs-real gap."""
     if not 0.0 <= maturity <= 1.0:
         raise ValueError("maturity must be in [0,1]")
-    rng = random.Random(seed)
+    rng = random.Random(seed)  # reproducible synthetic data, not crypto; nosec B311
     pick = lambda xs, p: {x for x in sorted(xs) if rng.random() < p}  # noqa: E731
     claim_p = min(1.0, 0.4 + 0.6 * maturity)
     ingested = pick(cat.log_sources, 0.2 + 0.7 * maturity)

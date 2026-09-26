@@ -21,7 +21,8 @@ import math
 import random
 import re
 from collections import Counter
-from typing import Iterable, Protocol
+from collections.abc import Iterable
+from typing import Protocol
 
 from .models import Catalog, Control
 
@@ -69,7 +70,7 @@ class _Tfidf:
 
 
 def _top(ids: list[str], scores: Iterable[float], k: int) -> list[tuple[str, float]]:
-    pairs = sorted(zip(ids, scores), key=lambda x: (-x[1], x[0]))
+    pairs = sorted(zip(ids, scores, strict=False), key=lambda x: (-x[1], x[0]))
     return [(t, round(float(s), 4)) for t, s in pairs[:k] if s > 0]
 
 
@@ -148,13 +149,13 @@ class MitigationBridgeMapper:
 
     def scores(self, text: str) -> list[float]:
         best = [0.0] * len(self.ids)
-        for m, s in zip(self.mits, self._msims(text)):
+        for m, s in zip(self.mits, self._msims(text), strict=False):
             for t in m.techniques:
                 i = self.idx.get(t)
                 if i is not None and s > best[i]:
                     best[i] = float(s)
         direct = self.direct.scores(text)
-        return [b + self.alpha * float(d) for b, d in zip(best, direct)]
+        return [b + self.alpha * float(d) for b, d in zip(best, direct, strict=False)]
 
     def rank(self, text: str, k: int = 5) -> list[tuple[str, float]]:
         return _top(self.ids, self.scores(text), k)
@@ -185,7 +186,7 @@ class RandomBaseline:
         self.seed = seed
 
     def rank(self, text: str, k: int = 5) -> list[tuple[str, float]]:
-        rng = random.Random(f"{self.seed}:{text}")
+        rng = random.Random(f"{self.seed}:{text}")  # benchmark baseline, not crypto; nosec B311
         return [(t, 1.0) for t in rng.sample(self.ids, min(k, len(self.ids)))]
 
 

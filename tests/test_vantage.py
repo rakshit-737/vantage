@@ -8,8 +8,7 @@ from vantage.coverage import compute_coverage, live_detections
 from vantage.failure import rank_spofs, simulate_failure
 from vantage.graph import build_graph, techniques_reachable_from, to_cypher, to_json
 from vantage.io import load_org, org_from_dict, org_to_dict, save_org
-from vantage.models import (CoverageStatus, Detection, OrgPosture, Segment, Technique,
-                            ValidationError, ZeroTrustFacts)
+from vantage.models import CoverageStatus, Detection, OrgPosture, Segment, Technique, ValidationError, ZeroTrustFacts
 from vantage.recommend import recommend
 from vantage.report import audit_report
 from vantage.seed import load_seed_catalog

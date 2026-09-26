@@ -1,7 +1,7 @@
 """Render the markdown audit report to PDF (optional dependency: reportlab)."""
 from __future__ import annotations
 
-from xml.sax.saxutils import escape
+from html import escape
 
 
 def markdown_to_pdf(md: str, path: str, max_table_rows: int = 400) -> None:
@@ -9,8 +9,7 @@ def markdown_to_pdf(md: str, path: str, max_table_rows: int = 400) -> None:
         from reportlab.lib import colors
         from reportlab.lib.pagesizes import A4, landscape
         from reportlab.lib.styles import getSampleStyleSheet
-        from reportlab.platypus import (Paragraph, Preformatted, SimpleDocTemplate, Spacer, Table,
-                                        TableStyle)
+        from reportlab.platypus import Paragraph, Preformatted, SimpleDocTemplate, Spacer, Table, TableStyle
     except ImportError as e:  # pragma: no cover
         raise RuntimeError("pip install 'vantage[report]' for PDF export") from e
 

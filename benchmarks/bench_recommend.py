@@ -23,8 +23,8 @@ import numpy as np
 from common import FIGS, RESULTS, md_table, write_result
 from scipy.optimize import Bounds, LinearConstraint, milp
 
-from vantage.cli import REAL_DEMO_ORG
 from vantage.catalog import load_catalog
+from vantage.cli import REAL_DEMO_ORG
 from vantage.coverage import live_detections
 from vantage.io import load_org
 from vantage.recommend import recommend

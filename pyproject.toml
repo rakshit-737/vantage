@@ -36,3 +36,11 @@ markers = ["realdata: needs the downloaded datasets (skipped when absent)",
 
 [tool.ruff]
 line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+# Explicit rule set so results do not change when ruff's defaults change between versions.
+select = ["E", "F", "W", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+"vantage/seed.py" = ["E501"]  # data table
