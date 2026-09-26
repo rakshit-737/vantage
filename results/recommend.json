@@ -13,8 +13,8 @@
       "most-rules": 8,
       "cheapest": 0,
       "random(mean)": 1.1,
-      "greedy_ms": 441,
-      "ilp_ms": 100
+      "greedy_ms": 201,
+      "ilp_ms": 42
     },
     {
       "budget": 2,
@@ -24,8 +24,8 @@
       "most-rules": 51,
       "cheapest": 6,
       "random(mean)": 4.6,
-      "greedy_ms": 732,
-      "ilp_ms": 88
+      "greedy_ms": 176,
+      "ilp_ms": 23
     },
     {
       "budget": 3,
@@ -35,8 +35,8 @@
       "most-rules": 33,
       "cheapest": 7,
       "random(mean)": 3.8,
-      "greedy_ms": 1157,
-      "ilp_ms": 220
+      "greedy_ms": 302,
+      "ilp_ms": 79
     },
     {
       "budget": 5,
@@ -46,8 +46,8 @@
       "most-rules": 61,
       "cheapest": 8,
       "random(mean)": 11.0,
-      "greedy_ms": 1762,
-      "ilp_ms": 284
+      "greedy_ms": 934,
+      "ilp_ms": 251
     },
     {
       "budget": 8,
@@ -57,8 +57,8 @@
       "most-rules": 152,
       "cheapest": 9,
       "random(mean)": 19.5,
-      "greedy_ms": 1250,
-      "ilp_ms": 58
+      "greedy_ms": 1287,
+      "ilp_ms": 59
     },
     {
       "budget": 12,
@@ -68,8 +68,8 @@
       "most-rules": 155,
       "cheapest": 10,
       "random(mean)": 25.7,
-      "greedy_ms": 2376,
-      "ilp_ms": 46
+      "greedy_ms": 2384,
+      "ilp_ms": 52
     },
     {
       "budget": 20,
@@ -79,8 +79,8 @@
       "most-rules": 185,
       "cheapest": 13,
       "random(mean)": 51.4,
-      "greedy_ms": 4427,
-      "ilp_ms": 61
+      "greedy_ms": 5880,
+      "ilp_ms": 58
     }
   ],
   "greedy_plan": [

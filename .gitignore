@@ -11,3 +11,4 @@ data/
 *.part
 report.pdf
 .env
+site/

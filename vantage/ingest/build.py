@@ -15,6 +15,7 @@ from pathlib import Path
 from .. import paths
 from .attack import AttackData, load_attack
 from .cis import Safeguard, load_cis
+from .nist import NistControl, load_nist
 from .sigma import SigmaRule, load_rules, logsource_cost
 
 # Deploying/tuning one Sigma rule is assumed to cost 1/20 of onboarding a standard log source
@@ -88,6 +89,36 @@ def build_catalog(attack: AttackData, safeguards: dict[str, Safeguard], rules: l
     }
 
 
+def nist_controls(controls: dict[str, NistControl], attack: AttackData) -> tuple[dict, dict]:
+    """NIST 800-53 rev5 controls as catalog controls, ids carried from ATT&CK v16.1 to current."""
+    stats = Counter()
+    out = {}
+    for cid, c in sorted(controls.items()):
+        ids = set()
+        for t in c.techniques:
+            new = attack.resolve(t)
+            if new is None:
+                stats["dropped_deprecated_or_unknown"] += 1
+            else:
+                stats["carried_forward_revoked" if new != t else "unchanged"] += 1
+                ids.add(new)
+        out[cid] = {"id": cid, "framework": "NIST SP 800-53 rev5", "title": f"{c.control} {c.title}",
+                    "text": f"{c.family_name}: {c.title}", "mitigates": sorted(ids), "ig": None,
+                    "function": c.family}
+    return out, dict(stats)
+
+
+def with_nist(cat: dict, controls: dict[str, NistControl], meta: dict, attack: AttackData) -> dict:
+    ctrls, stats = nist_controls(controls, attack)
+    out = dict(cat)
+    out["meta"] = dict(cat["meta"]) | {"nist": {**meta, "controls": len(ctrls),
+                                                "mapped_controls": sum(1 for c in ctrls.values() if c["mitigates"]),
+                                                "pairs_current": sum(len(c["mitigates"]) for c in ctrls.values()),
+                                                **stats}}
+    out["controls"] = ctrls
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     d = paths.data_dir()
     need = [paths.ATTACK_FILE, paths.CIS_FILE, paths.SIGMA_FILE]
@@ -105,6 +136,15 @@ def main(argv: list[str] | None = None) -> int:
     print(json.dumps(cat["meta"]["cis"] | {"sigma": cat["meta"]["sigma"],
                                            "techniques": len(cat["techniques"])}, indent=2))
     print(f"wrote {out} ({Path(out).stat().st_size / 1e6:.1f} MB)")
+    if (d / paths.NIST_FILE).exists():
+        nist, meta = load_nist(d / paths.NIST_FILE)
+        ncat = with_nist(cat, nist, meta, attack)
+        ncat["meta"]["sources"] = dict(ncat["meta"]["sources"]) | {"nist": paths.NIST_FILE}
+        paths.nist_catalog_path().write_text(json.dumps(ncat), encoding="utf-8")
+        print(json.dumps(ncat["meta"]["nist"], indent=2))
+        print(f"wrote {paths.nist_catalog_path()}")
+    else:
+        print(f"({paths.NIST_FILE} not found: skipping the NIST 800-53 catalog)")
     return 0
 
 

@@ -1,7 +1,8 @@
 """Posture-file selectors so real-catalog org files stay short.
 
 claimed_controls:      "@ig1" / "@ig2" / "@ig3" (all CIS safeguards up to that Implementation
-                       Group), "@all", or glob patterns such as "CIS-8.*".
+                       Group), "@family:AC|IA" (NIST 800-53 families), "@all", or globs
+                       such as "CIS-8.*" / "NIST-AC-*".
 ingested_log_sources:  "@all" or globs such as "windows/*", "aws/cloudtrail".
 deployed_detections:   "@all", "@status:stable", "@min-level:high", or globs over rule ids.
 Several "@..." terms in one entry are AND-ed with "&": "@status:stable&@min-level:medium".
@@ -35,6 +36,9 @@ def _match_detection(cat: Catalog, did: str, term: str) -> bool:
 def _match_control(cat: Catalog, cid: str, term: str) -> bool:
     if term == "@all":
         return True
+    if term.lower().startswith("@family:"):   # NIST 800-53 family, e.g. @family:AC|IA
+        fams = term.split(":", 1)[1].upper().split("|")
+        return cid.startswith("NIST-") and cid[5:].split("-", 1)[0] in fams
     if term.lower() in ("@ig1", "@ig2", "@ig3"):
         ig = cat.controls[cid].ig
         return ig is not None and ig <= int(term[-1])

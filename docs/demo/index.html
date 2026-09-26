@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VANTAGE coverage</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo">&#9670;</span> VANTAGE <span class="muted" id="org">loading...</span></div>
+  <div class="muted small" id="catalog"></div>
+  <div class="banner">Sensitive: this page is a map of blind spots. Keep it local.</div>
+</header>
+
+<section class="kpis" id="kpis"></section>
+
+<main class="layout">
+  <aside class="side">
+    <h2>What-if: log sources</h2>
+    <p class="muted small">Toggle telemetry to see which techniques go dark or light up. Nothing is persisted.</p>
+    <input id="lsfilter" type="search" placeholder="filter, e.g. windows/" aria-label="filter log sources">
+    <div class="row">
+      <button id="reset" type="button">Reset</button>
+      <label class="small"><input type="checkbox" id="allrules"> deploy every rule</label>
+    </div>
+    <ul id="lslist" class="lslist"></ul>
+  </aside>
+
+  <section class="matrixwrap">
+    <div class="legend" id="legend">
+      <button data-f="all" class="on" type="button">All</button>
+      <button data-f="defended" type="button"><i class="sw defended"></i>Defended</button>
+      <button data-f="paper_only" type="button"><i class="sw paper_only"></i>Paper-only</button>
+      <button data-f="detected_only" type="button"><i class="sw detected_only"></i>Detected, no control</button>
+      <button data-f="blind" type="button"><i class="sw blind"></i>Blind</button>
+      <span class="muted small">Cell colour = technique; bar = share of sub-techniques defended.</span>
+    </div>
+    <div class="matrix" id="matrix" role="grid" aria-label="ATT&CK coverage matrix"></div>
+  </section>
+
+  <aside class="detail">
+    <div id="tech" class="card"><h2>Technique</h2><p class="muted">Click a cell in the matrix.</p></div>
+    <div class="card"><h2>Single points of failure</h2><ol id="spof" class="list"></ol></div>
+    <div class="card"><h2>Cheapest coverage wins</h2><ol id="recs" class="list"></ol></div>
+    <div class="card">
+      <h2>Auto-map a control</h2>
+      <textarea id="amtext" rows="3" placeholder="e.g. Require MFA for all remote access and VPN logins"></textarea>
+      <div class="row">
+        <select id="ammethod" aria-label="mapping method">
+          <option value="bridge">mitigation bridge (TF-IDF)</option>
+          <option value="tfidf">TF-IDF direct</option>
+          <option value="bridge-embed">mitigation bridge (embeddings)</option>
+          <option value="embed">embeddings direct</option>
+        </select>
+        <button id="amgo" type="button">Map</button>
+      </div>
+      <ol id="amout" class="list"></ol>
+    </div>
+    <div class="card small">Static snapshot of the synthetic Acme posture &middot;
+      <a href="../">Back to the docs</a></div>
+  </aside>
+</main>
+<script>window.VANTAGE_STATIC = "data/";</script>
+<script src="app.js"></script>
+</body>
+</html>

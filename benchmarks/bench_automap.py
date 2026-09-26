@@ -11,6 +11,7 @@ as an upper-bound-ish "prior only" reference).
 from __future__ import annotations
 
 import argparse
+import statistics
 import time
 
 from common import FIGS, RESULTS, eval_catalog_v82, md_table, write_result
@@ -33,15 +34,37 @@ def mappers(cat, embed: bool):
             yield automap.MitigationBridgeMapper(cat, "embed", model=m)
 
 
+def random_seeds(cat, seeds: int = 10) -> dict:
+    """The random baseline over several seeds: mean and sd of each metric."""
+    runs = [automap.evaluate_mapper(automap.RandomBaseline(cat, s), cat, KS) for s in range(seeds)]
+    keys = [k for k in runs[0] if k not in ("mapper", "controls")]
+    return {"mapper": f"baseline-random ({seeds} seeds)", "controls": runs[0]["controls"],
+            **{k: round(statistics.mean(r[k] for r in runs), 3) for k in keys},
+            **{f"{k}_sd": round(statistics.stdev(r[k] for r in runs), 3) for k in keys}}
+
+
 def run(cat, embed: bool) -> list[dict]:
     rows = []
     for m in mappers(cat, embed):
         t0 = time.perf_counter()
-        r = automap.evaluate_mapper(m, cat, KS)
+        r = automap.evaluate_mapper(m, cat, KS, ci=True)
         r["seconds"] = round(time.perf_counter() - t0, 2)
         print(r)
         rows.append(r)
     return rows
+
+
+def fmt(rows: list[dict]) -> list[dict]:
+    """Table rows with the 95% bootstrap interval next to each headline metric."""
+    out = []
+    for r in rows:
+        o = dict(r)
+        for k in ("P@10", "R@20", "R@50", "MAP@200"):
+            if f"{k}_ci" in r:
+                lo, hi = r[f"{k}_ci"]
+                o[k] = f"{r[k]:.3f} [{lo:.3f}, {hi:.3f}]"
+        out.append(o)
+    return out
 
 
 def figure(rows: list[dict], path) -> None:
@@ -80,14 +103,21 @@ def main() -> None:
     rows82 = run(v82, embed)
     real = load_catalog("real")
     print(f"== ATT&CK v19.2 universe (labels carried forward): {len(real.techniques)} techniques")
+    real.controls = {k: c for k, c in real.controls.items() if c.framework.startswith("CIS")}
     rows19 = run(real, embed)
-    cols = ["mapper", "P@5", "P@10", "R@10", "R@20", "R@50", "MAP@200", "seconds"]
-    md = ["### ATT&CK v8.2 (labels exactly as published)", "", md_table(rows82, cols), "",
-          "### ATT&CK v19.2 (labels carried forward via revoked-by)", "", md_table(rows19, cols)]
+    rnd = random_seeds(v82)
+    cols = ["mapper", "P@10", "R@20", "R@50", "MAP@200", "seconds"]
+    md = ["### ATT&CK v8.2 (labels exactly as published)", "",
+          "Cells are the macro mean over mapped safeguards with a 95% percentile bootstrap interval "
+          "(1,000 resamples of safeguards, seed 0).", "", md_table(fmt(rows82), cols), "",
+          f"Random baseline over 10 seeds: P@10 {rnd['P@10']} +/- {rnd['P@10_sd']}, "
+          f"R@20 {rnd['R@20']} +/- {rnd['R@20_sd']}, MAP@200 {rnd['MAP@200']} +/- {rnd['MAP@200_sd']}.", "",
+          "### ATT&CK v19.2 (labels carried forward via revoked-by)", "", md_table(fmt(rows19), cols)]
     RESULTS.mkdir(exist_ok=True)
     (RESULTS / "automap.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     write_result("automap", {"ground_truth": "CIS Controls v8 -> MITRE Enterprise ATT&CK v8.2 master mapping",
-                             "mapped_safeguards": rows82[0]["controls"], "v8.2": rows82, "v19.2": rows19})
+                             "mapped_safeguards": rows82[0]["controls"], "v8.2": rows82, "v19.2": rows19,
+                             "random_10_seeds": rnd})
     FIGS.mkdir(parents=True, exist_ok=True)
     figure(rows82, FIGS / "automap.png")
     print("\n".join(md))

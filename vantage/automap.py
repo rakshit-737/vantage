@@ -201,32 +201,51 @@ def _ranked(mapper, c: Control, depth: int) -> list[str]:
     return [t for t, _ in mapper.rank(control_text(c), depth)]
 
 
-def evaluate_mapper(mapper, cat: Catalog, ks: tuple[int, ...] = (5, 10, 20, 50),
-                    depth: int = 200) -> dict:
-    """Evaluate against each control's `mitigates` set (ground truth). Controls with no
-    mapped techniques are skipped. Returns macro-averaged P@k, R@k and MAP@depth."""
+def per_control_scores(mapper, cat: Catalog, ks: tuple[int, ...] = (5, 10, 20, 50),
+                       depth: int = 200) -> dict[str, list[float]]:
+    """Per-control P@k, R@k and AP@depth against each control's `mitigates` set (controls
+    with no mapped techniques are skipped). Lists are aligned by control."""
     ctrls = [c for c in cat.controls.values() if c.mitigates]
-    p = {k: 0.0 for k in ks}
-    r = {k: 0.0 for k in ks}
-    ap_sum = 0.0
+    out: dict[str, list[float]] = {f"P@{k}": [] for k in ks} | {f"R@{k}": [] for k in ks}
+    out[f"MAP@{depth}"] = []
     for c in ctrls:
         ranked = _ranked(mapper, c, max(depth, *ks))
         gold = c.mitigates
         for k in ks:
             hit = len(set(ranked[:k]) & gold)
-            p[k] += hit / k
-            r[k] += hit / len(gold)
+            out[f"P@{k}"].append(hit / k)
+            out[f"R@{k}"].append(hit / len(gold))
         hits, ap = 0, 0.0
         for i, t in enumerate(ranked[:depth], 1):
             if t in gold:
                 hits += 1
                 ap += hits / i
-        ap_sum += ap / min(len(gold), depth)
-    n = len(ctrls) or 1
-    out = {"mapper": getattr(mapper, "name", type(mapper).__name__), "controls": len(ctrls)}
-    out |= {f"P@{k}": round(p[k] / n, 3) for k in ks}
-    out |= {f"R@{k}": round(r[k] / n, 3) for k in ks}
-    out[f"MAP@{depth}"] = round(ap_sum / n, 3)
+        out[f"MAP@{depth}"].append(ap / min(len(gold), depth))
+    return out
+
+
+def bootstrap_ci(values: list[float], n: int = 1000, seed: int = 0, alpha: float = 0.05) -> tuple[float, float]:
+    """Percentile bootstrap CI of the mean (resampling controls with replacement)."""
+    if not values:
+        return (0.0, 0.0)
+    rng = random.Random(seed)  # nosec B311 - statistics, not security
+    m = len(values)
+    means = sorted(sum(rng.choices(values, k=m)) / m for _ in range(n))
+    return (means[int(alpha / 2 * n)], means[min(n - 1, int((1 - alpha / 2) * n))])
+
+
+def evaluate_mapper(mapper, cat: Catalog, ks: tuple[int, ...] = (5, 10, 20, 50),
+                    depth: int = 200, ci: bool = False) -> dict:
+    """Macro-averaged P@k, R@k and MAP@depth. With ci=True also adds `<metric>_ci` = 95%
+    bootstrap interval over controls."""
+    scores = per_control_scores(mapper, cat, ks, depth)
+    n = len(scores[f"MAP@{depth}"])
+    out = {"mapper": getattr(mapper, "name", type(mapper).__name__), "controls": n}
+    for key, vals in scores.items():
+        out[key] = round(sum(vals) / (n or 1), 3)
+        if ci:
+            lo, hi = bootstrap_ci(vals)
+            out[f"{key}_ci"] = [round(lo, 3), round(hi, 3)]
     return out
 
 

@@ -38,10 +38,11 @@ def _load_json(path: str) -> Catalog:
 
 
 def load_catalog(which: str | None = None) -> Catalog:
-    """which: 'seed' (default, offline toy), 'real' (built catalog), or a path to catalog JSON."""
+    """which: 'seed' (default, offline toy), 'real' (built catalog, CIS v8 controls), 'nist'
+    (built catalog with NIST SP 800-53 rev5 controls), or a path to catalog JSON."""
     if which in (None, "", "seed"):
         return load_seed_catalog()
-    path = paths.catalog_path() if which == "real" else Path(which)
+    path = {"real": paths.catalog_path(), "nist": paths.nist_catalog_path()}.get(which) or Path(which)
     if not path.exists():
         raise ValidationError(f"catalog {path} not found: run scripts/download_data.py and "
                               "python -m vantage.ingest.build")

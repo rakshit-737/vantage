@@ -6,6 +6,7 @@
 Part A - telemetry tiers x CIS Implementation Group claims (deterministic profiles).
 Part B - 100 random synthetic orgs (vantage.synth.random_org) across four maturity levels.
 Part C - engine performance (fast one-pass SPOF ranking vs brute-force recomputation).
+Part D - the same telemetry tiers with NIST SP 800-53 rev5 claims (CTID mapping), if built.
 """
 from __future__ import annotations
 
@@ -55,6 +56,7 @@ def part_a(cat) -> list[dict]:
             detected = len(cov.detected_set())
             rows.append({"tier": tier, "claims": f"IG{ig}", "log_sources": len(ingested),
                          "claimed_pct": s["claimed_pct"], "true_pct": s["true_pct"],
+                         "weighted_true_pct": s["weighted_true_pct"],
                          "gap_pp": round(s["claimed_pct"] - s["true_pct"], 1),
                          "detectable_pct": round(100 * detected / s["techniques"], 1),
                          "paper_only": s["paper_only"], "detected_only": s["detected_only"],
@@ -72,8 +74,10 @@ def part_b(cat, seeds: int = 25) -> list[dict]:
             tr.append(cov.true_pct)
             gap.append(cov.claimed_pct - cov.true_pct)
         f = lambda xs: f"{statistics.mean(xs):.1f} +/- {statistics.stdev(xs):.1f}"  # noqa: E731
+        half = 2.064 * statistics.stdev(gap) / seeds ** 0.5  # t(0.975, df=24) for 25 orgs
+        mg = statistics.mean(gap)
         rows.append({"maturity": m, "orgs": seeds, "claimed_pct": f(cl), "true_pct": f(tr), "gap_pp": f(gap),
-                     "gap_mean": round(statistics.mean(gap), 1)})
+                     "gap_mean": round(mg, 1), "gap_95ci": f"[{mg - half:.1f}, {mg + half:.1f}]"})
     return rows
 
 
@@ -101,6 +105,23 @@ def part_c(cat) -> dict:
     return {"deployed_rules": len(org.deployed_detections), "ingested_log_sources": len(org.ingested_log_sources),
             "coverage_ms": round(cov_ms, 1), "spof_fast_s": round(fast_s, 3), "spof_bruteforce_s": round(brute_s, 2),
             "speedup": round(brute_s / fast_s, 1), "identical_results": same}
+
+
+def part_d() -> list[dict]:
+    from vantage import paths
+    if not paths.nist_catalog_path().exists():
+        return []
+    cat = load_catalog("nist")
+    rows = []
+    for i, (tier, _) in enumerate(TIERS):
+        org = expand_org(cat, OrgPosture(f"{tier}/NIST", {"@all"}, tier_sources(cat, i), {"@status:stable|test"}))
+        cov = compute_coverage(cat, org)
+        s = cov.summary()
+        rows.append({"tier": tier, "claims": "NIST 800-53 rev5 (all mapped)", "claimed_pct": s["claimed_pct"],
+                     "detectable_pct": round(100 * len(cov.detected_set()) / s["techniques"], 1),
+                     "true_pct": s["true_pct"], "weighted_true_pct": s["weighted_true_pct"],
+                     "gap_pp": round(s["claimed_pct"] - s["true_pct"], 1), "paper_only": s["paper_only"]})
+    return rows
 
 
 def figure(rows, path):
@@ -131,15 +152,23 @@ def main() -> None:
     a = part_a(cat)
     b = part_b(cat)
     c = part_c(cat)
+    d = part_d()
     md = ["### A. Telemetry tier x claimed CIS Implementation Group", "",
-          md_table(a, ["tier", "claims", "log_sources", "claimed_pct", "detectable_pct", "true_pct", "gap_pp",
-                       "paper_only", "dead_rules"]),
+          md_table(a, ["tier", "claims", "log_sources", "claimed_pct", "detectable_pct", "true_pct",
+                       "weighted_true_pct", "gap_pp", "paper_only", "dead_rules"]),
+          "", "`weighted_true_pct` scores each defended technique by rule quality (ADR 0007) instead of 0/1.",
           "", "### B. Random synthetic orgs (25 per maturity level)", "",
-          md_table(b, ["maturity", "orgs", "claimed_pct", "true_pct", "gap_pp"]),
+          md_table(b, ["maturity", "orgs", "claimed_pct", "true_pct", "gap_pp", "gap_95ci"]),
+          "", "Values are mean +/- sd over 25 orgs (seeds 0-24); gap_95ci is a t-interval of the mean gap.",
           "", "### C. Engine performance", "", md_table([c], list(c))]
+    if d:
+        md += ["", "### D. NIST SP 800-53 rev5 claims (CTID mapping, ATT&CK v16.1 carried to v19.2)", "",
+               md_table(d, ["tier", "claimed_pct", "detectable_pct", "true_pct", "weighted_true_pct", "gap_pp",
+                            "paper_only"])]
     RESULTS.mkdir(exist_ok=True)
     (RESULTS / "coverage.md").write_text("\n".join(md) + "\n", encoding="utf-8")
-    write_result("coverage", {"catalog": cat.meta, "tiers": a, "random_orgs": b, "performance": c})
+    write_result("coverage", {"catalog": cat.meta, "tiers": a, "random_orgs": b, "performance": c,
+                             "nist_tiers": d})
     FIGS.mkdir(parents=True, exist_ok=True)
     figure(a, FIGS / "coverage_gap.png")
     print("\n".join(md))

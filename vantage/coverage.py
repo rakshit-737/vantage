@@ -3,7 +3,21 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from .models import Catalog, CoverageStatus, OrgPosture
+from .models import Catalog, CoverageStatus, Detection, OrgPosture
+
+# Rule-quality weights (ADR 0007). A tag is not a detection guarantee: a "critical"/"stable"
+# rule is treated as more trustworthy than an "informational"/"experimental" one. These are
+# assumptions, not measured precision/recall.
+LEVEL_WEIGHT = {"critical": 1.0, "high": 0.9, "medium": 0.7, "low": 0.5, "informational": 0.3}
+STATUS_WEIGHT = {"stable": 1.0, "test": 0.8, "experimental": 0.6}
+DEFAULT_LEVEL_WEIGHT = 0.7
+DEFAULT_STATUS_WEIGHT = 0.8
+
+
+def rule_quality(d: Detection) -> float:
+    """Confidence in (0, 1] that a live rule really detects its tagged techniques."""
+    return (LEVEL_WEIGHT.get(d.level, DEFAULT_LEVEL_WEIGHT)
+            * STATUS_WEIGHT.get(d.status, DEFAULT_STATUS_WEIGHT))
 
 
 def live_detections(cat: Catalog, deployed: set[str], ingested: set[str]) -> set[str]:
@@ -17,6 +31,21 @@ class CoverageResult:
     claimed: dict[str, set[str]]          # technique -> controls claiming it
     detected_by: dict[str, set[str]]      # technique -> live detections
     dead_detections: set[str] = field(default_factory=set)  # deployed but log source missing
+    catalog: Catalog | None = field(default=None, repr=False, compare=False)
+    _confidence: dict[str, float] | None = field(default=None, repr=False, compare=False)
+
+    @property
+    def confidence(self) -> dict[str, float]:
+        """technique -> 1 - prod(1 - quality(rule)) over its live rules (computed lazily)."""
+        if self._confidence is None:
+            conf = {}
+            for t, ds in self.detected_by.items():
+                miss = 1.0
+                for did in ds:
+                    miss *= 1.0 - (rule_quality(self.catalog.detections[did]) if self.catalog else 1.0)
+                conf[t] = 1.0 - miss
+            self._confidence = conf
+        return self._confidence
 
     def by_status(self, s: CoverageStatus) -> list[str]:
         return sorted(t for t, v in self.status.items() if v == s)
@@ -38,6 +67,14 @@ class CoverageResult:
     def true_pct(self) -> float:
         return self.pct(CoverageStatus.DEFENDED)
 
+    @property
+    def weighted_true_pct(self) -> float:
+        """Defended coverage where each claimed technique counts by its detection confidence
+        (noisy-OR of live rule qualities) instead of 0/1."""
+        if not self.total:
+            return 0.0
+        return 100.0 * sum(self.confidence.get(t, 0.0) for t in self.status if self.claimed[t]) / self.total
+
     def detected_set(self) -> set[str]:
         return {t for t, d in self.detected_by.items() if d}
 
@@ -46,6 +83,7 @@ class CoverageResult:
             "techniques": self.total,
             "claimed_pct": round(self.claimed_pct, 1),
             "true_pct": round(self.true_pct, 1),
+            "weighted_true_pct": round(self.weighted_true_pct, 1),
             **{s.value: len(self.by_status(s)) for s in CoverageStatus},
             "dead_detections": sorted(self.dead_detections),
         }
@@ -82,4 +120,4 @@ def compute_coverage(
             else CoverageStatus.DETECTED_ONLY if d
             else CoverageStatus.BLIND
         )
-    return CoverageResult(status, claimed, detected, set(deployed) - live)
+    return CoverageResult(status, claimed, detected, set(deployed) - live, cat)

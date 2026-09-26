@@ -60,7 +60,8 @@ def audit_report(cat: Catalog, org: OrgPosture) -> str:
         "",
         f"- Techniques in scope: {s['techniques']}",
         f"- Claimed (paper) coverage: **{s['claimed_pct']}%**",
-        f"- True (defended) coverage: **{s['true_pct']}%**",
+        f"- True (defended) coverage: **{s['true_pct']}%** "
+        f"(rule-quality weighted: {s['weighted_true_pct']}%, see ADR 0007)",
         f"- Paper-only techniques: {s['paper_only']}  |  Blind: {s['blind']}  |  "
         f"Detected without control: {s['detected_only']}",
         f"- Deployed-but-dead detections (log source not ingested): {len(cov.dead_detections)}",

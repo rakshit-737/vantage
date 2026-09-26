@@ -14,6 +14,8 @@ ATTACK_FILE = f"enterprise-attack-{ATTACK_VERSION}.json"
 ATTACK_CIS_FILE = f"enterprise-attack-{ATTACK_CIS_VERSION}.json"
 SIGMA_FILE = f"sigma_all_rules-{SIGMA_RELEASE}.zip"
 CIS_FILE = "cis_v8_attack_v82_master_mapping.xlsx"
+NIST_ATTACK_VERSION = "16.1"     # ATT&CK release the CTID NIST 800-53 rev5 mapping targets
+NIST_FILE = f"nist_800_53-rev5_attack-{NIST_ATTACK_VERSION}-enterprise.json"
 
 
 def data_dir() -> Path:
@@ -27,6 +29,11 @@ def processed_dir() -> Path:
 
 def catalog_path() -> Path:
     return processed_dir() / "catalog.json"
+
+
+def nist_catalog_path() -> Path:
+    """Same techniques/rules as catalog.json, but NIST SP 800-53 rev5 controls instead of CIS v8."""
+    return processed_dir() / "catalog-nist.json"
 
 
 def have_real_data() -> bool:

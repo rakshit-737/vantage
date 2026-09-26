@@ -66,6 +66,7 @@
       "log_sources": 3,
       "claimed_pct": 46.9,
       "true_pct": 10.5,
+      "weighted_true_pct": 8.7,
       "gap_pp": 36.4,
       "detectable_pct": 13.2,
       "paper_only": 254,
@@ -78,6 +79,7 @@
       "log_sources": 3,
       "claimed_pct": 53.9,
       "true_pct": 11.2,
+      "weighted_true_pct": 9.2,
       "gap_pp": 42.7,
       "detectable_pct": 13.2,
       "paper_only": 298,
@@ -90,6 +92,7 @@
       "log_sources": 3,
       "claimed_pct": 54.2,
       "true_pct": 11.2,
+      "weighted_true_pct": 9.2,
       "gap_pp": 43.0,
       "detectable_pct": 13.2,
       "paper_only": 300,
@@ -102,6 +105,7 @@
       "log_sources": 8,
       "claimed_pct": 46.9,
       "true_pct": 14.9,
+      "weighted_true_pct": 12.5,
       "gap_pp": 32.0,
       "detectable_pct": 22.0,
       "paper_only": 223,
@@ -114,6 +118,7 @@
       "log_sources": 8,
       "claimed_pct": 53.9,
       "true_pct": 16.5,
+      "weighted_true_pct": 13.6,
       "gap_pp": 37.4,
       "detectable_pct": 22.0,
       "paper_only": 261,
@@ -126,6 +131,7 @@
       "log_sources": 8,
       "claimed_pct": 54.2,
       "true_pct": 16.5,
+      "weighted_true_pct": 13.6,
       "gap_pp": 37.7,
       "detectable_pct": 22.0,
       "paper_only": 263,
@@ -138,6 +144,7 @@
       "log_sources": 31,
       "claimed_pct": 46.9,
       "true_pct": 26.1,
+      "weighted_true_pct": 23.7,
       "gap_pp": 20.8,
       "detectable_pct": 41.3,
       "paper_only": 145,
@@ -150,6 +157,7 @@
       "log_sources": 31,
       "claimed_pct": 53.9,
       "true_pct": 29.4,
+      "weighted_true_pct": 26.6,
       "gap_pp": 24.5,
       "detectable_pct": 41.3,
       "paper_only": 171,
@@ -162,6 +170,7 @@
       "log_sources": 31,
       "claimed_pct": 54.2,
       "true_pct": 29.7,
+      "weighted_true_pct": 26.9,
       "gap_pp": 24.5,
       "detectable_pct": 41.3,
       "paper_only": 171,
@@ -174,6 +183,7 @@
       "log_sources": 46,
       "claimed_pct": 46.9,
       "true_pct": 29.1,
+      "weighted_true_pct": 26.1,
       "gap_pp": 17.8,
       "detectable_pct": 46.1,
       "paper_only": 124,
@@ -186,6 +196,7 @@
       "log_sources": 46,
       "claimed_pct": 53.9,
       "true_pct": 32.7,
+      "weighted_true_pct": 29.2,
       "gap_pp": 21.2,
       "detectable_pct": 46.1,
       "paper_only": 148,
@@ -198,6 +209,7 @@
       "log_sources": 46,
       "claimed_pct": 54.2,
       "true_pct": 33.0,
+      "weighted_true_pct": 29.5,
       "gap_pp": 21.2,
       "detectable_pct": 46.1,
       "paper_only": 148,
@@ -210,6 +222,7 @@
       "log_sources": 72,
       "claimed_pct": 46.9,
       "true_pct": 32.6,
+      "weighted_true_pct": 29.1,
       "gap_pp": 14.3,
       "detectable_pct": 50.6,
       "paper_only": 100,
@@ -222,6 +235,7 @@
       "log_sources": 72,
       "claimed_pct": 53.9,
       "true_pct": 36.4,
+      "weighted_true_pct": 32.6,
       "gap_pp": 17.5,
       "detectable_pct": 50.6,
       "paper_only": 122,
@@ -234,6 +248,7 @@
       "log_sources": 72,
       "claimed_pct": 54.2,
       "true_pct": 36.7,
+      "weighted_true_pct": 32.8,
       "gap_pp": 17.5,
       "detectable_pct": 50.6,
       "paper_only": 122,
@@ -246,6 +261,7 @@
       "log_sources": 116,
       "claimed_pct": 46.9,
       "true_pct": 33.4,
+      "weighted_true_pct": 29.9,
       "gap_pp": 13.5,
       "detectable_pct": 52.1,
       "paper_only": 94,
@@ -258,6 +274,7 @@
       "log_sources": 116,
       "claimed_pct": 53.9,
       "true_pct": 37.4,
+      "weighted_true_pct": 33.5,
       "gap_pp": 16.5,
       "detectable_pct": 52.1,
       "paper_only": 115,
@@ -270,6 +287,7 @@
       "log_sources": 116,
       "claimed_pct": 54.2,
       "true_pct": 37.7,
+      "weighted_true_pct": 33.7,
       "gap_pp": 16.5,
       "detectable_pct": 52.1,
       "paper_only": 115,
@@ -284,7 +302,8 @@
       "claimed_pct": "50.5 +/- 1.8",
       "true_pct": "17.2 +/- 5.0",
       "gap_pp": "33.3 +/- 5.2",
-      "gap_mean": 33.3
+      "gap_mean": 33.3,
+      "gap_95ci": "[31.2, 35.4]"
     },
     {
       "maturity": 0.4,
@@ -292,7 +311,8 @@
       "claimed_pct": "52.0 +/- 1.5",
       "true_pct": "23.6 +/- 4.3",
       "gap_pp": "28.4 +/- 4.6",
-      "gap_mean": 28.4
+      "gap_mean": 28.4,
+      "gap_95ci": "[26.5, 30.3]"
     },
     {
       "maturity": 0.6,
@@ -300,7 +320,8 @@
       "claimed_pct": "52.9 +/- 1.3",
       "true_pct": "29.5 +/- 3.1",
       "gap_pp": "23.4 +/- 3.3",
-      "gap_mean": 23.4
+      "gap_mean": 23.4,
+      "gap_95ci": "[22.0, 24.8]"
     },
     {
       "maturity": 0.8,
@@ -308,16 +329,79 @@
       "claimed_pct": "53.6 +/- 0.6",
       "true_pct": "33.5 +/- 1.5",
       "gap_pp": "20.1 +/- 1.5",
-      "gap_mean": 20.1
+      "gap_mean": 20.1,
+      "gap_95ci": "[19.4, 20.7]"
     }
   ],
   "performance": {
     "deployed_rules": 2877,
     "ingested_log_sources": 46,
-    "coverage_ms": 5.0,
-    "spof_fast_s": 0.004,
-    "spof_bruteforce_s": 62.88,
-    "speedup": 17058.5,
+    "coverage_ms": 3.9,
+    "spof_fast_s": 0.011,
+    "spof_bruteforce_s": 282.84,
+    "speedup": 25746.8,
     "identical_results": true
-  }
+  },
+  "nist_tiers": [
+    {
+      "tier": "T0 classic Windows event logs",
+      "claims": "NIST 800-53 rev5 (all mapped)",
+      "claimed_pct": 66.9,
+      "detectable_pct": 13.2,
+      "true_pct": 11.2,
+      "weighted_true_pct": 9.2,
+      "gap_pp": 55.7,
+      "paper_only": 388
+    },
+    {
+      "tier": "T1 + PowerShell logging",
+      "claims": "NIST 800-53 rev5 (all mapped)",
+      "claimed_pct": 66.9,
+      "detectable_pct": 22.0,
+      "true_pct": 16.6,
+      "weighted_true_pct": 13.6,
+      "gap_pp": 50.3,
+      "paper_only": 350
+    },
+    {
+      "tier": "T2 + Sysmon/EDR-class endpoint",
+      "claims": "NIST 800-53 rev5 (all mapped)",
+      "claimed_pct": 66.9,
+      "detectable_pct": 41.3,
+      "true_pct": 31.4,
+      "weighted_true_pct": 28.2,
+      "gap_pp": 35.5,
+      "paper_only": 247
+    },
+    {
+      "tier": "T3 + cloud & identity audit",
+      "claims": "NIST 800-53 rev5 (all mapped)",
+      "claimed_pct": 66.9,
+      "detectable_pct": 46.1,
+      "true_pct": 35.6,
+      "weighted_true_pct": 31.6,
+      "gap_pp": 31.3,
+      "paper_only": 218
+    },
+    {
+      "tier": "T4 + network, web, Linux, macOS",
+      "claims": "NIST 800-53 rev5 (all mapped)",
+      "claimed_pct": 66.9,
+      "detectable_pct": 50.6,
+      "true_pct": 39.2,
+      "weighted_true_pct": 34.8,
+      "gap_pp": 27.7,
+      "paper_only": 193
+    },
+    {
+      "tier": "T5 every Sigma log source",
+      "claims": "NIST 800-53 rev5 (all mapped)",
+      "claimed_pct": 66.9,
+      "detectable_pct": 52.1,
+      "true_pct": 40.3,
+      "weighted_true_pct": 35.9,
+      "gap_pp": 26.6,
+      "paper_only": 185
+    }
+  ]
 }

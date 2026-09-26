@@ -59,7 +59,7 @@ def create_app(catalog: str | None = "seed", org_path: str | None = None) -> Fas
     if org_path:
         org = load_org(org_path)
     elif catalog not in (None, "", "seed") and REAL_DEMO_ORG.exists():
-        org = load_org(REAL_DEMO_ORG)
+        org = load_org(REAL_DEMO_ORG.with_name("acme-nist.yaml") if catalog == "nist" else REAL_DEMO_ORG)
     else:
         org = demo_org()
     expand_org(cat, org)

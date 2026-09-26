@@ -1,14 +1,17 @@
 # VANTAGE
 
 [![ci](https://github.com/rakshit-737/vantage/actions/workflows/ci.yml/badge.svg)](https://github.com/rakshit-737/vantage/actions/workflows/ci.yml)
+[![docs](https://github.com/rakshit-737/vantage/actions/workflows/docs.yml/badge.svg)](https://rakshit-737.github.io/vantage/)
 ![python](https://img.shields.io/badge/python-3.10%2B-blue)
 [![license: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 ![ATT&CK](https://img.shields.io/badge/ATT%26CK-v19.2-red)
 ![Sigma](https://img.shields.io/badge/SigmaHQ-r2026--07--01-purple)
 
+**Docs: <https://rakshit-737.github.io/vantage/>** · [static UI demo](https://rakshit-737.github.io/vantage/demo/) · image `ghcr.io/rakshit-737/vantage`
+
 **VANTAGE joins your controls, your detections and MITRE ATT&CK into one graph, then shows the gap between *compliant* and *defensible*.**
 
-Organisations pass CIS or ISO audits and still get breached, because "we have a control" does not mean "we can detect the technique it is meant to stop". VANTAGE models the enterprise as a graph (Control → Technique ← Detection ← LogSource) with a segmentation/IAM trust layer. It works out which ATT&CK techniques are actually defended and which are covered only on paper. It runs on **real public data**: the full ATT&CK Enterprise STIX bundle, the **official CIS Controls v8 → ATT&CK mapping**, and the **SigmaHQ** ruleset (2,877 ATT&CK-tagged rules).
+Organisations pass CIS or ISO audits and still get breached, because "we have a control" does not mean "we can detect the technique it is meant to stop". VANTAGE models the enterprise as a graph (Control → Technique ← Detection ← LogSource) with a segmentation/IAM trust layer. It works out which ATT&CK techniques are actually defended and which are covered only on paper. It runs on **real public data**: the full ATT&CK Enterprise STIX bundle, the **official CIS Controls v8 → ATT&CK mapping**, the **CTID NIST SP 800-53 rev5 → ATT&CK mapping**, and the **SigmaHQ** ruleset (2,877 ATT&CK-tagged rules).
 
 > **Lab-only / defensive.** VANTAGE is a read-only analysis tool that works on a *declared* posture file. It never scans, connects to, or changes any system, and it contains no exploit code. The org profiles are synthetic. The mappings and rules are public.
 
@@ -28,11 +31,13 @@ All numbers come from `benchmarks/*.py` run on ATT&CK v19.2 (697 techniques), CI
 | T3 + cloud & identity audit | 46 | 53.9 | 46.1 | 32.7 | 21.2 |
 | T5 every Sigma log source | 116 | 53.9 | 52.1 | 37.4 | 16.5 |
 
-Across 100 random synthetic orgs, the mean gap falls from 33.3 ± 5.2 pp (maturity 0.2) to 20.1 ± 1.5 pp (maturity 0.8). Two structural ceilings show up. The official CIS mapping touches only about 54% of current ATT&CK, because it was authored against v8.2. SigmaHQ can detect about 52% even with every log source ingested.
+Weighting each defended technique by rule quality (Sigma level × status, noisy-OR; [ADR 0007](docs/adr/0007-rule-quality-weighting.md)) lowers the defended share by another 2-4 pp (T5: 37.4% → 33.5%). With **NIST SP 800-53 rev5** claims instead (every mapped control, [ADR 0008](docs/adr/0008-nist-800-53.md)), paper coverage rises to 66.9% but defended coverage only to 40.3% at T5, so the gap is wider: 26.6 pp (55.7 pp at T0).
+
+Across 100 random synthetic orgs (25 seeds per level), the mean gap falls from 33.3 ± 5.2 pp (maturity 0.2; 95% CI of the mean 31.2-35.4) to 20.1 ± 1.5 pp (maturity 0.8; CI 19.4-20.7). Two structural ceilings show up. The official CIS mapping touches only about 54% of current ATT&CK, because it was authored against v8.2. SigmaHQ can detect about 52% even with every log source ingested.
 
 ![paper vs real coverage](docs/figures/coverage_gap.png)
 
-**2. Auto-mapping controls to ATT&CK, validated against the official CIS mapping.** Each mapper sees only the safeguard's title and description. Scores are macro-averaged over the 105 mapped safeguards (ATT&CK v8.2, labels as published).
+**2. Auto-mapping controls to ATT&CK, validated against the official CIS mapping.** Each mapper sees only the safeguard's title and description. Scores are macro-averaged over the 105 mapped safeguards (ATT&CK v8.2, labels as published). 95% bootstrap intervals (1,000 resamples of safeguards) are in [`results/automap.md`](results/automap.md); for example MAP@200 is 0.343 [0.281, 0.401] for the TF-IDF bridge vs 0.161 [0.129, 0.196] for the popularity prior, so the gap is well outside the noise. The random baseline is also averaged over 10 seeds.
 
 | Mapper | P@10 | R@20 | R@50 | MAP@200 |
 |---|---:|---:|---:|---:|
@@ -48,7 +53,7 @@ Matching control prose directly to adversary-behaviour prose does no better than
 
 **3. The greedy recommender matches the exact optimum.** The task is choosing which log sources to onboard under a budget. Starting from the Acme posture (153 techniques already detectable, 99 candidate sources), greedy equalled an exact ILP (scipy/HiGHS) at all seven budgets tested (1, 2, 3, 5, 8, 12, 20); this is an empirical result on this instance, not a guarantee, since greedy budgeted set cover is only approximate in general. It beat "most rules first" by up to 31 techniques and random ordering by 4-17×. Its top pick is `windows/ps_script` (cost 1.15, unlocks 134 rules, +51 techniques), followed by `windows/process_creation` (+101).
 
-**4. Engine speed.** One coverage pass over the full catalog takes 5 ms. The one-pass single-point-of-failure ranking takes 4 ms, against 63 s for brute-force recomputation, with identical output.
+**4. Engine speed.** One coverage pass over the full catalog takes 4-5 ms. The one-pass single-point-of-failure ranking takes about 10 ms, against 63 s (v0.2.0 run) to 283 s (v1.0.0 re-run on a busy machine) for brute-force recomputation, with identical output.
 
 ## What it computes
 
@@ -107,6 +112,7 @@ python scripts/download_data.py         # resumable, sha256-verified
 python -m vantage.ingest.build          # -> $VANTAGE_DATA_DIR/processed/catalog.json
 
 python -m vantage demo      --catalog real
+python -m vantage demo      --catalog nist                     # NIST SP 800-53 rev5 claims
 python -m vantage coverage  --catalog real --org examples/real/acme-real.yaml
 python -m vantage failure   --catalog real --top 10
 python -m vantage recommend --catalog real --log-sources-only --steps 5
@@ -150,6 +156,7 @@ zero_trust: {segments: [...], open_flows: [[finance, general]], mfa_coverage: 0.
 |---|---|---:|---|---|
 | MITRE ATT&CK Enterprise STIX 2.1 | v19.2 and v8.2 | 54 MB + 22 MB | [ATT&CK Terms of Use](https://attack.mitre.org/resources/legal-and-branding/terms-of-use/) | The MITRE Corporation, [attack-stix-data](https://github.com/mitre-attack/attack-stix-data) |
 | CIS Controls v8 Master Mapping to MITRE Enterprise ATT&CK v8.2 | 2021 | 1.2 MB | CC BY-NC-ND 4.0 | Center for Internet Security, [white paper](https://www.cisecurity.org/insights/white-papers/cis-controls-v8-master-mapping-to-mitre-enterprise-attck-v82) |
+| NIST SP 800-53 rev5 → ATT&CK v16.1 (CTID Mappings Explorer) | 2025-04-16 | 2.0 MB | Apache-2.0 | Center for Threat-Informed Defense, [mappings-explorer](https://github.com/center-for-threat-informed-defense/mappings-explorer) |
 | SigmaHQ rule release (`sigma_all_rules.zip`) | r2026-07-01 | 3.2 MB | [DRL 1.1](https://github.com/SigmaHQ/Detection-Rule-License) | SigmaHQ, [sigma](https://github.com/SigmaHQ/sigma) |
 
 None of these files are committed. `scripts/download_data.py` fetches them with pinned sha256 digests. The CIS workbook is non-commercial / no-derivatives: it is read locally, and only ids and aggregate metrics are published. Sigma rules keep their authors' attribution in the upstream files.
@@ -161,7 +168,7 @@ python scripts/download_data.py && python -m vantage.ingest.build
 python benchmarks/bench_automap.py      # ~2 min on CPU (embeddings); --no-embed for TF-IDF only
 python benchmarks/bench_coverage.py     # ~1 min (includes the 63 s brute-force SPOF check)
 python benchmarks/bench_recommend.py    # ~20 s (needs scipy for the ILP)
-python -m pytest -q                     # 83 tests; 3 realdata tests skip without the catalog
+python -m pytest -q                     # 90 tests; realdata tests skip without the catalog
 ```
 
 Results were produced on Windows 11, Python 3.14, CPU only. Everything is deterministic except embedding timing.
@@ -180,11 +187,13 @@ Results were produced on Windows 11, Python 3.14, CPU only. Everything is determ
 
 ## Limitations
 
-- **"Detectable" means a live rule is tagged with the technique.** A Sigma tag is not proof of detection quality: rules differ in precision and recall and in how much of a technique's procedure space they cover. Sub-techniques and parent techniques are scored separately.
+- **"Detectable" means a live rule is tagged with the technique.** A Sigma tag is not proof of detection quality: rules differ in precision and recall and in how much of a technique's procedure space they cover. The rule-quality weighted score uses assumed weights, not measured precision/recall. Sub-techniques and parent techniques are scored separately.
 - **The CIS mapping is from 2021 (ATT&CK v8.2).** 134 ids were carried forward via revoked-by and 14 deprecated ids were dropped. Techniques added since then cannot be "claimed" through CIS.
 - **Costs are assumptions** (ADR 0004), not measurements. The Zero-Trust facts and all org profiles are synthetic; no public dataset of enterprise postures exists.
 - **Auto-mapping is a suggestion tool.** The mitigation bridge benefits from CIS having built its mapping via ATT&CK mitigations, so results on other frameworks may be lower.
 - There is no live telemetry ingestion: "ingested" is declared in the posture file, not measured.
+- The NIST mapping (ATT&CK v16.1) has no low/moderate/high baseline data, so the NIST demo claims every mapped control: an upper bound.
+- The static Pages demo cannot run what-ifs or auto-mapping; those need the local API.
 
 ## Roadmap
 
@@ -192,10 +201,13 @@ Results were produced on Windows 11, Python 3.14, CPU only. Everything is determ
 - [x] Coverage, failure propagation, recommender, Zero-Trust score on the real catalog
 - [x] Auto-mapper benchmark against the official CIS mapping
 - [x] FastAPI + heatmap UI, PDF audit report, Navigator export, Docker
-- [ ] NIST 800-53 → ATT&CK (CTID Mappings Explorer) as a second control framework
-- [ ] Rule-quality weighting (Sigma level/status, false-positive notes) in the defended score
-- [ ] Asset/identity graph beyond segment-level facts; live Neo4j sync
-- [ ] Posture ingestion from SIEM APIs (log-source health) instead of declarations
+- [x] NIST 800-53 rev5 → ATT&CK (CTID Mappings Explorer) as a second control framework (v1.0.0)
+- [x] Rule-quality weighting (Sigma level/status) in the defended score (v1.0.0)
+- [x] Docs site, static UI demo, container image on GHCR, tagged releases (v1.0.0)
+- [ ] NIST SP 800-53B baselines as selectors (needs the baseline tables as another pinned dataset)
+- [ ] Sigma false-positive notes in rule quality (free text: needs human labelling)
+- [ ] Asset/identity graph beyond segment-level facts; live Neo4j sync (needs a running Neo4j and real asset data)
+- [ ] Posture ingestion from SIEM APIs (log-source health) instead of declarations (needs a live SIEM)
 
 ## Safety
 

@@ -21,6 +21,7 @@ from .synth import demo_org, random_org
 from .zerotrust import score_zero_trust
 
 REAL_DEMO_ORG = Path(__file__).resolve().parent.parent / "examples" / "real" / "acme-real.yaml"
+NIST_DEMO_ORG = REAL_DEMO_ORG.with_name("acme-nist.yaml")
 
 
 def _catalog(args):
@@ -36,7 +37,7 @@ def _org(args):
     if getattr(args, "org", None):
         org = load_org(args.org)
     elif is_real(args):
-        org = load_org(REAL_DEMO_ORG)
+        org = load_org(NIST_DEMO_ORG if args.catalog == "nist" else REAL_DEMO_ORG)
     else:
         org = demo_org()
     expand_org(cat, org)
@@ -185,7 +186,7 @@ def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="vantage", description=__doc__)
     sub = p.add_subparsers(dest="cmd", required=True)
     cat_help = ("catalog: 'seed' (offline toy, default), 'real' (ATT&CK + CIS + Sigma built by "
-                "`python -m vantage.ingest.build`) or a catalog JSON path")
+                "`python -m vantage.ingest.build`), 'nist' (same, NIST 800-53 rev5 controls) or a JSON path")
 
     def add(name, fn, help_, org=True):
         sp = sub.add_parser(name, help=help_)

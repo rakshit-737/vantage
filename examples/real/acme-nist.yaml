@@ -1,0 +1,36 @@
+# Same synthetic Acme telemetry as acme-real.yaml, but the claims are NIST SP 800-53 rev5
+# controls (CTID Mappings Explorer). It claims every mapped control: an upper bound on paper.
+# Run: python -m vantage demo --catalog nist
+name: Acme Corp (synthetic, NIST 800-53 catalog)
+claimed_controls:
+  - "@all"
+ingested_log_sources:
+  - windows/security
+  - windows/system
+  - windows/application
+  - windows/windefend
+  - azure/*
+  - aws/cloudtrail
+  - m365/*
+  - okta/okta
+  - proxy
+  - webserver
+deployed_detections:
+  - "@status:stable|test"
+zero_trust:
+  segments:
+    - {name: finance, criticality: 3}
+    - {name: hr, criticality: 2}
+    - {name: general, criticality: 1}
+    - {name: servers, criticality: 3}
+    - {name: guest, criticality: 1}
+  open_flows:
+    - [finance, general]
+    - [hr, general]
+    - [servers, general]
+  mfa_coverage: 0.6
+  privileged_accounts: 20
+  pam_vaulted: 5
+  device_posture_checks: false
+  stale_accounts: 40
+  total_accounts: 400
