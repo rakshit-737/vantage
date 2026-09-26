@@ -25,6 +25,11 @@ class Technique:
     name: str
     tactic: str
     description: str = ""
+    tactics: tuple[str, ...] = ()   # all kill-chain phases (real ATT&CK); tactic is the primary one
+
+    @property
+    def all_tactics(self) -> tuple[str, ...]:
+        return self.tactics or (self.tactic,)
 
     def __post_init__(self) -> None:
         if not TECHNIQUE_RE.match(self.id):
@@ -38,6 +43,8 @@ class Control:
     title: str
     mitigates: frozenset[str] = frozenset()
     text: str = ""
+    ig: int | None = None             # CIS Implementation Group that first includes the safeguard
+    function: str = ""                # CIS security function (Identify/Protect/Detect/Respond/Recover)
 
 
 @dataclass(frozen=True)
@@ -58,6 +65,8 @@ class Detection:
     techniques: frozenset[str]
     requires: frozenset[str]  # log source ids (all must be ingested)
     cost: float = 1.0
+    level: str = ""           # Sigma level (informational..critical)
+    status: str = ""          # Sigma status (stable/test/experimental)
 
     def __post_init__(self) -> None:
         for t in self.techniques:
@@ -108,12 +117,23 @@ class OrgPosture:
     zero_trust: ZeroTrustFacts = field(default_factory=ZeroTrustFacts)
 
 
+@dataclass(frozen=True)
+class Mitigation:
+    """ATT&CK course-of-action (Mxxxx) and the techniques it mitigates (from STIX relationships)."""
+    id: str
+    name: str
+    description: str
+    techniques: frozenset[str]
+
+
 @dataclass
 class Catalog:
     techniques: dict[str, Technique]
     controls: dict[str, Control]
     log_sources: dict[str, LogSource]
     detections: dict[str, Detection]
+    mitigations: dict[str, Mitigation] = field(default_factory=dict)
+    meta: dict = field(default_factory=dict)  # provenance: versions, counts, sources
 
     def validate(self) -> None:
         for c in self.controls.values():
