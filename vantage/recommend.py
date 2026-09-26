@@ -34,9 +34,14 @@ def _covered(cat: Catalog, deployed: set[str], ingested: set[str]) -> set[str]:
     return out
 
 
+ACTIONS = ("deploy_detection", "onboard_log_source")
+
+
 def recommend(
-    cat: Catalog, org: OrgPosture, *, budget: float | None = None, max_steps: int = 10
+    cat: Catalog, org: OrgPosture, *, budget: float | None = None, max_steps: int = 10,
+    actions: tuple[str, ...] = ACTIONS,
 ) -> list[Recommendation]:
+    """Greedy plan. `actions` restricts the action types (e.g. only log-source onboarding)."""
     deployed = set(org.deployed_detections)
     ingested = set(org.ingested_log_sources)
     plan: list[Recommendation] = []
@@ -45,6 +50,8 @@ def recommend(
         covered = _covered(cat, deployed, ingested)
         candidates: list[Recommendation] = []
         for did, det in cat.detections.items():
+            if "deploy_detection" not in actions:
+                break
             if did in deployed or not det.requires <= ingested:
                 continue
             new = det.techniques - covered
@@ -52,6 +59,8 @@ def recommend(
                 candidates.append(Recommendation("deploy_detection", did, det.cost,
                                                  tuple(sorted(new)), (did,)))
         for lid, ls in cat.log_sources.items():
+            if "onboard_log_source" not in actions:
+                break
             if lid in ingested:
                 continue
             ing2 = ingested | {lid}
