@@ -18,6 +18,11 @@ from .cis import Safeguard, load_cis
 from .sigma import SigmaRule, load_rules, logsource_cost
 
 
+# Deploying/tuning one Sigma rule is assumed to cost 1/20 of onboarding a standard log source
+# (see docs/adr/0004-cost-model.md). Keeps "onboard + deploy what it unlocks" comparable.
+RULE_COST = 0.05
+
+
 def forward_cis(safeguards: dict[str, Safeguard], attack: AttackData) -> tuple[dict, dict]:
     """Carry v8.2 technique ids to the current release. Returns (safeguard -> ids, stats)."""
     stats = Counter()
@@ -51,7 +56,7 @@ def build_catalog(attack: AttackData, safeguards: dict[str, Safeguard], rules: l
         rstats["kept"] += 1
         ls_counts[r.logsource] += 1
         detections[r.id] = {"id": r.id, "title": r.title, "techniques": techs,
-                            "requires": [r.logsource], "cost": 1.0, "level": r.level,
+                            "requires": [r.logsource], "cost": RULE_COST, "level": r.level,
                             "status": r.status, "path": r.path}
     techniques = {}
     for tid, t in attack.techniques.items():
