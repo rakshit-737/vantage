@@ -38,6 +38,10 @@ FILES = {
 }
 # sha256 of the exact files the published results were produced from
 SHA256 = {
+    paths.ATTACK_FILE: "dc1639caa5501d720e280cf1cbd8fbe009884a0c9b3e6e9ed9d0c25166c3d8f4",
+    paths.ATTACK_CIS_FILE: "8af8ba82d52c2735b1ae6804ab4f2cb8812121d8cdc37e5523ffba671d9ea69b",
+    paths.SIGMA_FILE: "5725c91b5813587ad6a4b0b8e0233fa44348b1595f818d8b7fd39d6033385085",
+    paths.CIS_FILE: "f1d3343dc72158ed935b383a10df640f873fec56e00d3e5fd72c64093c74af91",
 }
 
 
