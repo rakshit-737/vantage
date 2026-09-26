@@ -1,3 +1,7 @@
+# Runtime + API + data/report extras (used by pip-audit in CI). ML extras are optional.
 networkx>=3.0
 PyYAML>=6.0
-pytest>=7
+openpyxl>=3.1
+fastapi>=0.110
+uvicorn>=0.29
+reportlab>=4.0
