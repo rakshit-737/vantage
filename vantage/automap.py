@@ -186,7 +186,8 @@ class RandomBaseline:
         self.seed = seed
 
     def rank(self, text: str, k: int = 5) -> list[tuple[str, float]]:
-        rng = random.Random(f"{self.seed}:{text}")  # benchmark baseline, not crypto; nosec B311
+        # benchmark baseline, not a security use
+        rng = random.Random(f"{self.seed}:{text}")  # nosec B311
         return [(t, 1.0) for t in rng.sample(self.ids, min(k, len(self.ids)))]
 
 
