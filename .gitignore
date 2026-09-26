@@ -12,3 +12,4 @@ data/
 report.pdf
 .env
 site/
+!docs/demo/data/
