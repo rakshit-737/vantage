@@ -1,0 +1,15 @@
+title: Fixture - LSASS Access
+id: 00000000-0000-0000-0000-000000000003
+status: experimental
+level: critical
+logsource:
+  product: windows
+  category: process_access
+detection:
+  selection:
+    TargetImage|endswith: '\lsass.exe'
+  condition: selection
+tags:
+  - attack.credential-access
+  - attack.t1003.001
+  - attack.t1086

@@ -1,0 +1,14 @@
+title: Fixture - Scheduled Task Created
+id: 00000000-0000-0000-0000-000000000002
+status: stable
+level: medium
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4698
+  condition: selection
+tags:
+  - attack.persistence
+  - attack.t1053.005

@@ -1,0 +1,11 @@
+title: Fixture - Rule Without ATT&CK Tags
+id: 00000000-0000-0000-0000-000000000004
+status: test
+level: low
+logsource:
+  product: windows
+  service: system
+detection:
+  selection:
+    EventID: 7045
+  condition: selection
