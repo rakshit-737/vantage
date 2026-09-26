@@ -1,8 +1,22 @@
-# OPTIONAL: VANTAGE runs fully in-memory (NetworkX). This Neo4j is only for exploring
-# `python -m vantage graph --format cypher` output. Bound to localhost; change the password.
+# Everything binds to 127.0.0.1 only: the coverage map is a list of your blind spots.
+#   VANTAGE_DATA=/path/to/datasets/vantage VANTAGE_CATALOG=real docker compose up --build
 services:
+  vantage:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      VANTAGE_CATALOG: ${VANTAGE_CATALOG:-seed}
+      VANTAGE_API_TOKEN: ${VANTAGE_API_TOKEN:-}
+    volumes:
+      - ${VANTAGE_DATA:-./data}:/data:ro
+    read_only: true
+    tmpfs: [/tmp]
+
+  # OPTIONAL: explore `python -m vantage graph --format cypher` output in Neo4j.
   neo4j:
     image: neo4j:5
+    profiles: [neo4j]
     ports:
       - "127.0.0.1:7474:7474"
       - "127.0.0.1:7687:7687"
