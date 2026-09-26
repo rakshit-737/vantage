@@ -30,8 +30,9 @@ def markdown_to_pdf(md: str, path: str, max_table_rows: int = 400) -> None:
             return
         rows = [r for r in table if not set("".join(r)) <= set("- :")]
         rows = rows[: max_table_rows + 1]
-        data = [[Paragraph(inline(c), cell) for c in r] for r in rows]
-        t = Table(data, repeatRows=1)
+        data = [[Paragraph(inline(c if len(c) < 700 else c[:700] + " ..."), cell) for c in r] for r in rows]
+        width = landscape(A4)[0] - 56
+        t = Table(data, repeatRows=1, colWidths=[width / len(rows[0])] * len(rows[0]))
         t.setStyle(TableStyle([("GRID", (0, 0), (-1, -1), 0.25, colors.grey),
                                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e8e8e8")),
                                ("VALIGN", (0, 0), (-1, -1), "TOP")]))

@@ -73,9 +73,10 @@ def audit_report(cat: Catalog, org: OrgPosture) -> str:
     ]
     for t in cov.by_status(CoverageStatus.PAPER_ONLY):
         dead = sorted(d for d in cov.dead_detections if t in cat.detections[d].techniques)
-        why = ("rules deployed but missing log source: " + ", ".join(
-            f"{d} (needs {', '.join(sorted(cat.detections[d].requires - org.ingested_log_sources))})"
-            for d in dead)) if dead else "no detection deployed"
+        needs = sorted({ls for d in dead for ls in cat.detections[d].requires - org.ingested_log_sources})
+        shown = ", ".join(dead[:3]) + (f" (+{len(dead) - 3} more)" if len(dead) > 3 else "")
+        why = (f"{len(dead)} rule(s) deployed but dead ({shown}); missing log source: "
+               f"{', '.join(needs)}") if dead else "no detection deployed"
         out.append(f"| {t} | {cat.techniques[t].name} | {', '.join(sorted(cov.claimed[t]))} | {why} |")
     out += ["", "## Heatmap", "", "```", heatmap(cat, cov), "```", "", "## Single points of failure", ""]
     for i in rank_spofs(cat, org, top=5):
