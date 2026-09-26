@@ -1,0 +1,37 @@
+# Synthetic posture over the REAL catalog (ATT&CK v19.2 + official CIS v8 mapping + SigmaHQ).
+# "Acme Corp" claims every CIS IG1+IG2 safeguard and has deployed the whole stable/test Sigma
+# ruleset in its SIEM, but only ships classic Windows event logs, cloud audit logs and proxy
+# logs - no Sysmon/EDR process telemetry. Run: python -m vantage demo --catalog real
+name: Acme Corp (synthetic, real catalog)
+claimed_controls:
+  - "@ig2"
+ingested_log_sources:
+  - windows/security
+  - windows/system
+  - windows/application
+  - windows/windefend
+  - azure/*
+  - aws/cloudtrail
+  - m365/*
+  - okta/okta
+  - proxy
+  - webserver
+deployed_detections:
+  - "@status:stable|test"
+zero_trust:
+  segments:
+    - {name: finance, criticality: 3}
+    - {name: hr, criticality: 2}
+    - {name: general, criticality: 1}
+    - {name: servers, criticality: 3}
+    - {name: guest, criticality: 1}
+  open_flows:
+    - [finance, general]
+    - [hr, general]
+    - [servers, general]
+  mfa_coverage: 0.6
+  privileged_accounts: 20
+  pam_vaulted: 5
+  device_posture_checks: false
+  stale_accounts: 40
+  total_accounts: 400
