@@ -1,0 +1,123 @@
+{
+  "generated": "2026-09-26",
+  "python": "3.14.3",
+  "platform": "Windows-11",
+  "start_detectable": 153,
+  "candidates": 99,
+  "budgets": [
+    {
+      "budget": 1,
+      "greedy": 8,
+      "optimal": 8,
+      "greedy/optimal": 1.0,
+      "most-rules": 8,
+      "cheapest": 0,
+      "random(mean)": 1.1,
+      "greedy_ms": 441,
+      "ilp_ms": 100
+    },
+    {
+      "budget": 2,
+      "greedy": 51,
+      "optimal": 51,
+      "greedy/optimal": 1.0,
+      "most-rules": 51,
+      "cheapest": 6,
+      "random(mean)": 4.6,
+      "greedy_ms": 732,
+      "ilp_ms": 88
+    },
+    {
+      "budget": 3,
+      "greedy": 64,
+      "optimal": 64,
+      "greedy/optimal": 1.0,
+      "most-rules": 33,
+      "cheapest": 7,
+      "random(mean)": 3.8,
+      "greedy_ms": 1157,
+      "ilp_ms": 220
+    },
+    {
+      "budget": 5,
+      "greedy": 85,
+      "optimal": 85,
+      "greedy/optimal": 1.0,
+      "most-rules": 61,
+      "cheapest": 8,
+      "random(mean)": 11.0,
+      "greedy_ms": 1762,
+      "ilp_ms": 284
+    },
+    {
+      "budget": 8,
+      "greedy": 152,
+      "optimal": 152,
+      "greedy/optimal": 1.0,
+      "most-rules": 152,
+      "cheapest": 9,
+      "random(mean)": 19.5,
+      "greedy_ms": 1250,
+      "ilp_ms": 58
+    },
+    {
+      "budget": 12,
+      "greedy": 175,
+      "optimal": 175,
+      "greedy/optimal": 1.0,
+      "most-rules": 155,
+      "cheapest": 10,
+      "random(mean)": 25.7,
+      "greedy_ms": 2376,
+      "ilp_ms": 46
+    },
+    {
+      "budget": 20,
+      "greedy": 201,
+      "optimal": 201,
+      "greedy/optimal": 1.0,
+      "most-rules": 185,
+      "cheapest": 13,
+      "random(mean)": 51.4,
+      "greedy_ms": 4427,
+      "ilp_ms": 61
+    }
+  ],
+  "greedy_plan": [
+    {
+      "step": 1,
+      "onboard": "windows/ps_script",
+      "cost": 1.15,
+      "new_techniques": 51,
+      "rules_unlocked": 134
+    },
+    {
+      "step": 2,
+      "onboard": "windows/process_creation",
+      "cost": 6.7,
+      "new_techniques": 101,
+      "rules_unlocked": 1147
+    },
+    {
+      "step": 3,
+      "onboard": "cisco/aaa",
+      "cost": 1.05,
+      "new_techniques": 7,
+      "rules_unlocked": 10
+    },
+    {
+      "step": 4,
+      "onboard": "linux/process_creation",
+      "cost": 2.6,
+      "new_techniques": 16,
+      "rules_unlocked": 96
+    },
+    {
+      "step": 5,
+      "onboard": "bitbucket/audit",
+      "cost": 1.0,
+      "new_techniques": 4,
+      "rules_unlocked": 12
+    }
+  ]
+}
