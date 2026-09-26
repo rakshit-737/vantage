@@ -1,0 +1,64 @@
+name: Acme Corp (synthetic)
+claimed_controls:
+- CIS-10.1
+- CIS-11.1
+- CIS-12.2
+- CIS-13.3
+- CIS-4.1
+- CIS-5.4
+- CIS-6.3
+- CIS-8.2
+- CIS-8.8
+- CIS-9.2
+- CIS-9.7
+ingested_log_sources:
+- dns
+- edr
+- email_gw
+- proxy
+- vpn
+deployed_detections:
+- sig_bruteforce
+- sig_dns_tunnel
+- sig_edr_cred
+- sig_edr_inject
+- sig_edr_lateral
+- sig_edr_ps
+- sig_edr_ransom
+- sig_edr_shadow
+- sig_edr_tamper
+- sig_group_add
+- sig_kerberoast
+- sig_localacct
+- sig_logclear
+- sig_phish_attach
+- sig_proxy_c2
+- sig_pth
+- sig_schtask
+- sig_svc_new
+- sig_vpn_anomaly
+zero_trust:
+  segments:
+  - name: finance
+    criticality: 3
+  - name: hr
+    criticality: 2
+  - name: general
+    criticality: 1
+  - name: servers
+    criticality: 3
+  - name: guest
+    criticality: 1
+  open_flows:
+  - - finance
+    - general
+  - - general
+    - hr
+  - - general
+    - servers
+  mfa_coverage: 0.6
+  privileged_accounts: 20
+  pam_vaulted: 5
+  device_posture_checks: false
+  stale_accounts: 40
+  total_accounts: 400
