@@ -43,5 +43,5 @@ def score_zero_trust(zt: ZeroTrustFacts, cat: Catalog | None = None) -> ZTScore:
     if cat is not None:
         crit = {s.name: s.criticality for s in zt.segments}
         if any(max(crit[n] for n in f) >= 3 for f in zt.open_flows):
-            exposed = tuple(sorted(t.id for t in cat.techniques.values() if t.tactic in LATERAL_TACTICS))
+            exposed = tuple(sorted(t.id for t in cat.techniques.values() if LATERAL_TACTICS & set(t.all_tactics)))
     return ZTScore(round(score, 1), {k: round(v, 3) for k, v in comps.items()}, exposed)

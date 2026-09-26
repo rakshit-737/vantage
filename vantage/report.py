@@ -13,7 +13,28 @@ GLYPH = {CoverageStatus.DEFENDED: "[D]", CoverageStatus.PAPER_ONLY: "[P]",
          CoverageStatus.DETECTED_ONLY: "[d]", CoverageStatus.BLIND: "[ ]"}
 
 
-def heatmap(cat: Catalog, cov: CoverageResult) -> str:
+def tactic_table(cat: Catalog, cov: CoverageResult) -> list[dict]:
+    """Per-tactic counts (a technique counts under every tactic it belongs to)."""
+    order = cat.meta.get("tactic_order") or sorted({x for t in cat.techniques.values()
+                                                    for x in t.all_tactics})
+    rows = {tac: {"tactic": tac, **{s.value: 0 for s in CoverageStatus}, "total": 0} for tac in order}
+    for t in cat.techniques.values():
+        for tac in t.all_tactics:
+            r = rows.setdefault(tac, {"tactic": tac, **{s.value: 0 for s in CoverageStatus}, "total": 0})
+            r[cov.status[t.id].value] += 1
+            r["total"] += 1
+    return [r for r in rows.values() if r["total"]]
+
+
+def heatmap(cat: Catalog, cov: CoverageResult, max_cells: int = 150) -> str:
+    if len(cat.techniques) > max_cells:  # full ATT&CK: per-tactic bar chart instead of cells
+        lines = ["tactic                  defended  paper  det-only  blind  total  true%"]
+        for r in tactic_table(cat, cov):
+            pct = 100.0 * r["defended"] / r["total"]
+            bar = "#" * round(pct / 5)
+            lines.append(f"{r['tactic']:<22} {r['defended']:>9} {r['paper_only']:>6} "
+                         f"{r['detected_only']:>9} {r['blind']:>6} {r['total']:>6} {pct:6.1f} {bar}")
+        return "\n".join(lines)
     by_tactic: dict[str, list[str]] = defaultdict(list)
     for t in cat.techniques.values():
         by_tactic[t.tactic].append(t.id)
