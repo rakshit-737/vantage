@@ -18,18 +18,18 @@
 | T1018 | Remote System Discovery | CIS-12.2 | no detection deployed |
 | T1021.001 | Remote Desktop Protocol | CIS-12.2 | no detection deployed |
 | T1046 | Network Service Discovery | CIS-12.2 | no detection deployed |
-| T1053.005 | Scheduled Task | CIS-4.1, CIS-8.2 | rules deployed but missing log source: sig_schtask (needs win_security) |
+| T1053.005 | Scheduled Task | CIS-4.1, CIS-8.2 | 1 rule(s) deployed but dead (sig_schtask); missing log source: win_security |
 | T1059.003 | Windows Command Shell | CIS-8.8 | no detection deployed |
-| T1070.001 | Clear Windows Event Logs | CIS-8.2 | rules deployed but missing log source: sig_logclear (needs win_security) |
+| T1070.001 | Clear Windows Event Logs | CIS-8.2 | 1 rule(s) deployed but dead (sig_logclear); missing log source: win_security |
 | T1087.002 | Domain Account | CIS-8.8 | no detection deployed |
-| T1098 | Account Manipulation | CIS-5.4, CIS-8.2 | rules deployed but missing log source: sig_group_add (needs win_security) |
-| T1110 | Brute Force | CIS-6.3, CIS-8.2 | rules deployed but missing log source: sig_bruteforce (needs win_security) |
-| T1136.001 | Create Local Account | CIS-8.2 | rules deployed but missing log source: sig_localacct (needs win_security) |
+| T1098 | Account Manipulation | CIS-5.4, CIS-8.2 | 1 rule(s) deployed but dead (sig_group_add); missing log source: win_security |
+| T1110 | Brute Force | CIS-6.3, CIS-8.2 | 1 rule(s) deployed but dead (sig_bruteforce); missing log source: win_security |
+| T1136.001 | Create Local Account | CIS-8.2 | 1 rule(s) deployed but dead (sig_localacct); missing log source: win_security |
 | T1218.011 | Rundll32 | CIS-8.8 | no detection deployed |
-| T1543.003 | Windows Service | CIS-8.2 | rules deployed but missing log source: sig_svc_new (needs win_security) |
+| T1543.003 | Windows Service | CIS-8.2 | 1 rule(s) deployed but dead (sig_svc_new); missing log source: win_security |
 | T1547.001 | Registry Run Keys / Startup Folder | CIS-4.1 | no detection deployed |
-| T1550.002 | Pass the Hash | CIS-5.4 | rules deployed but missing log source: sig_pth (needs win_security) |
-| T1558.003 | Kerberoasting | CIS-5.4 | rules deployed but missing log source: sig_kerberoast (needs win_security) |
+| T1550.002 | Pass the Hash | CIS-5.4 | 1 rule(s) deployed but dead (sig_pth); missing log source: win_security |
+| T1558.003 | Kerberoasting | CIS-5.4 | 1 rule(s) deployed but dead (sig_kerberoast); missing log source: win_security |
 | T1567.002 | Exfiltration to Cloud Storage | CIS-13.3 | no detection deployed |
 
 ## Heatmap
