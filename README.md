@@ -72,25 +72,25 @@ A technique is **defended** only if (a claimed control mitigates it) AND (a depl
 
 ```mermaid
 flowchart LR
-  subgraph Public data - downloaded, sha256-pinned, never committed
-    A[ATT&CK STIX v19.2 + v8.2]
-    C[CIS v8 -> ATT&CK v8.2 master mapping xlsx]
-    S[SigmaHQ rules r2026-07-01]
+  subgraph DATA["Public data (downloaded, sha256-pinned, never committed)"]
+    A["ATT&CK STIX v19.2 + v8.2"]
+    C["CIS v8 to ATT&CK v8.2 master mapping (xlsx)"]
+    S["SigmaHQ rules r2026-07-01"]
   end
-  A --> I[ingest: STIX parser<br/>revoked-by resolver]
-  C --> I2[ingest: CIS parser]
-  S --> I3[ingest: Sigma parser<br/>tags + logsource]
-  I & I2 & I3 --> B[build: catalog.json]
-  O[Org posture YAML<br/>selectors: @ig2, windows/*, @status:stable] --> E
-  B --> E[Typed catalog + graph]
-  E --> CE[Coverage engine]
-  CE --> FP[Failure propagation]
-  CE --> RC[Set-cover recommender]
-  E --> ZT[Zero-Trust scorer]
-  E --> AM[Auto-mapper<br/>TF-IDF / embeddings / mitigation bridge]
-  CE & FP & RC & ZT & AM --> API[FastAPI]
-  API --> UI[ATT&CK heatmap UI]
-  CE & FP & RC & ZT --> R[CLI · Markdown/PDF report · Navigator layer · Cypher]
+  A --> I["ingest: STIX parser<br/>revoked-by resolver"]
+  C --> I2["ingest: CIS parser"]
+  S --> I3["ingest: Sigma parser<br/>tags + logsource"]
+  I & I2 & I3 --> B["build: catalog.json"]
+  O["Org posture YAML<br/>selectors: ig2, windows/*, status:stable"] --> E
+  B --> E["Typed catalog + graph"]
+  E --> CE["Coverage engine"]
+  CE --> FP["Failure propagation"]
+  CE --> RC["Set-cover recommender"]
+  E --> ZT["Zero-Trust scorer"]
+  E --> AM["Auto-mapper<br/>TF-IDF / embeddings / mitigation bridge"]
+  CE & FP & RC & ZT & AM --> API["FastAPI"]
+  API --> UI["ATT&CK heatmap UI"]
+  CE & FP & RC & ZT --> R["CLI, Markdown/PDF report, Navigator layer, Cypher"]
 ```
 
 Code layout (`vantage/`): `ingest/` (`attack.py`, `cis.py`, `sigma.py`, `build.py`), `catalog.py`, `models.py`, `selectors.py`, `coverage.py`, `failure.py`, `recommend.py`, `zerotrust.py`, `automap.py`, `graph.py`, `navigator.py`, `report.py`, `pdf.py`, `api.py`, `web/`, `cli.py`. Offline toy data lives in `seed.py` and `synth.py`.
