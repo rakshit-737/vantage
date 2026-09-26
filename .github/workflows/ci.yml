@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: docker build -t vantage .
       - run: |
-          docker run -d --name v -p 127.0.0.1:8000:8000 vantage
+          docker run -d --name vantage-ci -p 127.0.0.1:8000:8000 vantage
           for i in $(seq 1 20); do curl -fs http://127.0.0.1:8000/healthz && break; sleep 1; done
           curl -fs http://127.0.0.1:8000/api/meta
 
