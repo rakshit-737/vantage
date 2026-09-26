@@ -7,3 +7,7 @@ build/
 dist/
 report.md
 graph.cypher
+data/
+*.part
+report.pdf
+.env
