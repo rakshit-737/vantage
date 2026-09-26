@@ -1,0 +1,69 @@
+name: synthetic-org-7
+claimed_controls:
+- CIS-11.1
+- CIS-12.2
+- CIS-13.3
+- CIS-3.3
+- CIS-4.1
+- CIS-5.4
+- CIS-6.3
+- CIS-8.2
+- CIS-9.2
+- CIS-9.7
+ingested_log_sources:
+- cloudtrail
+- dns
+- email_gw
+- firewall
+- proxy
+- sysmon
+- vpn
+- win_security
+deployed_detections:
+- sig_bruteforce
+- sig_cloud_bucket
+- sig_cmd_susp
+- sig_dns_tunnel
+- sig_edr_cred
+- sig_edr_inject
+- sig_edr_lateral
+- sig_edr_ransom
+- sig_edr_shadow
+- sig_group_add
+- sig_localacct
+- sig_logclear
+- sig_lsass_access
+- sig_phish_attach
+- sig_proxy_c2
+- sig_proxy_dl
+- sig_proxy_upload
+- sig_ps_encoded
+- sig_pth
+- sig_rdp_internal
+- sig_rundll32
+- sig_runkey
+- sig_svc_new
+- sig_vpn_anomaly
+zero_trust:
+  segments:
+  - name: finance
+    criticality: 3
+  - name: hr
+    criticality: 2
+  - name: general
+    criticality: 1
+  - name: servers
+    criticality: 3
+  - name: guest
+    criticality: 1
+  open_flows:
+  - - finance
+    - servers
+  - - hr
+    - servers
+  mfa_coverage: 0.64
+  privileged_accounts: 23
+  pam_vaulted: 13
+  device_posture_checks: true
+  stale_accounts: 107
+  total_accounts: 1347
