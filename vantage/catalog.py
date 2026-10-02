@@ -44,6 +44,6 @@ def load_catalog(which: str | None = None) -> Catalog:
         return load_seed_catalog()
     path = {"real": paths.catalog_path(), "nist": paths.nist_catalog_path()}.get(which) or Path(which)
     if not path.exists():
-        raise ValidationError(f"catalog {path} not found: run scripts/download_data.py and "
-                              "python -m vantage.ingest.build")
+        raise ValidationError(f"catalog {path} not found: run `python -m vantage.download` and "
+                              "`python -m vantage.ingest.build` (or set VANTAGE_DATA_DIR)")
     return _load_json(str(path))

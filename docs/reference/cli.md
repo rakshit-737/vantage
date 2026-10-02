@@ -6,7 +6,7 @@ python -m vantage <command> [--catalog seed|real|nist|PATH] [--org POSTURE.yaml]
 
 `--catalog` defaults to the offline `seed` toy catalog. `real` and `nist` need
 `python -m vantage.ingest.build` first. Without `--org`, the real catalogs use
-`examples/real/acme-real.yaml` (CIS) or `examples/real/acme-nist.yaml` (NIST).
+`vantage/postures/acme-real.yaml` (CIS) or `vantage/postures/acme-nist.yaml` (NIST).
 
 | Command | What it does |
 |---|---|

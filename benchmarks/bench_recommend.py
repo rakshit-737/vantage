@@ -2,7 +2,7 @@
 
     python benchmarks/bench_recommend.py
 
-Start state: the synthetic Acme posture (examples/real/acme-real.yaml). Action set: onboard one
+Start state: the synthetic Acme posture (vantage/postures/acme-real.yaml). Action set: onboard one
 Sigma log source (and deploy every rule it unlocks). Objective: number of ATT&CK techniques that
 gain a live detection, under a cost budget.
 

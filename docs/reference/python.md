@@ -9,7 +9,7 @@ from vantage.io import load_org
 from vantage.selectors import expand_org
 
 cat = load_catalog("real")          # or "seed", "nist", or a catalog JSON path
-org = expand_org(cat, load_org("examples/real/acme-real.yaml"))
+org = expand_org(cat, load_org("vantage/postures/acme-real.yaml"))
 cov = compute_coverage(cat, org)
 print(cov.summary())
 ```

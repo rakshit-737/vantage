@@ -10,7 +10,7 @@ All notable changes are documented here. The format follows
 - NIST SP 800-53 rev5 as a second control framework, from the CTID Mappings Explorer
   (ATT&CK v16.1, Apache-2.0, sha256-pinned). `python -m vantage.ingest.build` now also writes
   `catalog-nist.json` (`--catalog nist`): 109 controls, 5,236 technique pairs on ATT&CK v19.2.
-  New `@family:AC|IA` selector and `examples/real/acme-nist.yaml` (ADR 0008).
+  New `@family:AC|IA` selector and `vantage/postures/acme-nist.yaml` (ADR 0008).
 - Rule-quality weighting: `weighted_true_pct` scores each defended technique by a noisy-OR of its
   live rules' Sigma level x status (ADR 0007). Reported by `coverage`, the audit report and the
   coverage benchmark.

@@ -1,4 +1,4 @@
-"""Where real datasets live. Datasets are never committed; see scripts/download_data.py."""
+"""Where real datasets live. Datasets are never committed; see vantage/download.py."""
 from __future__ import annotations
 
 import os
@@ -35,8 +35,16 @@ OSCAL_BASELINES = {b: f"NIST_SP-800-53_rev5_{b}-baseline_profile.json"
 
 
 def data_dir() -> Path:
-    """Raw downloads. Override with VANTAGE_DATA_DIR (e.g. a folder outside the repo)."""
-    return Path(os.environ.get("VANTAGE_DATA_DIR") or REPO_ROOT / "data")
+    """Raw downloads. Override with VANTAGE_DATA_DIR (e.g. a folder outside the repo).
+
+    Default: ``<checkout>/data`` when running from a source checkout, else ``~/.vantage/data``
+    (an installed wheel has no repo root to write into)."""
+    env = os.environ.get("VANTAGE_DATA_DIR")
+    if env:
+        return Path(env)
+    if (REPO_ROOT / "pyproject.toml").exists():
+        return REPO_ROOT / "data"
+    return Path.home() / ".vantage" / "data"
 
 
 def processed_dir() -> Path:

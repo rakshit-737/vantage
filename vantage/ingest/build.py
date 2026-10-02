@@ -124,7 +124,7 @@ def main(argv: list[str] | None = None) -> int:
     need = [paths.ATTACK_FILE, paths.CIS_FILE, paths.SIGMA_FILE]
     missing = [n for n in need if not (d / n).exists()]
     if missing:
-        print(f"missing in {d}: {missing}; run scripts/download_data.py first", file=sys.stderr)
+        print(f"missing in {d}: {missing}; run python -m vantage.download first", file=sys.stderr)
         return 1
     attack = load_attack(d / paths.ATTACK_FILE, paths.ATTACK_VERSION)
     cat = build_catalog(attack, load_cis(d / paths.CIS_FILE), load_rules(d / paths.SIGMA_FILE),

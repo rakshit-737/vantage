@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """Download the real public datasets VANTAGE uses (resumable, sha256-verified).
 
-    python scripts/download_data.py                 # into $VANTAGE_DATA_DIR or ./data
-    python scripts/download_data.py --dest D:/datasets/vantage
-    python scripts/download_data.py --skip-verify   # accept upstream changes (prints new hashes)
+    python -m vantage.download                 # into $VANTAGE_DATA_DIR or ./data
+    python -m vantage.download --dest D:/datasets/vantage
+    python -m vantage.download --skip-verify   # accept upstream changes (prints new hashes)
 
 Datasets (none are committed to git):
   * MITRE ATT&CK Enterprise STIX 2.1, v19.2 (current) and v8.2 (the release the CIS mapping
@@ -29,8 +29,7 @@ import time
 import urllib.request
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from vantage import paths  # noqa: E402
+from vantage import paths
 
 # Upstream git commits the raw URLs are pinned to (the files at these commits match SHA256 below).
 ATTACK_SHA = "6cda5ad8462c79e14fbb872f4e09059b18e0cfc4"   # mitre-attack/attack-stix-data
@@ -130,9 +129,10 @@ def fetch(url: str, dest: Path, retries: int = 30) -> None:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--dest", default=os.environ.get("VANTAGE_DATA_DIR") or str(paths.data_dir()))
-    ap.add_argument("--skip-verify", action="store_true")
+    ap = argparse.ArgumentParser(description="Download and sha256-verify the pinned public datasets.")
+    ap.add_argument("--dest", default=os.environ.get("VANTAGE_DATA_DIR") or str(paths.data_dir()),
+                    help="data folder (default: $VANTAGE_DATA_DIR or the default data dir)")
+    ap.add_argument("--skip-verify", action="store_true", help="do not fail on a sha256 mismatch")
     a = ap.parse_args()
     dest = Path(a.dest)
     dest.mkdir(parents=True, exist_ok=True)

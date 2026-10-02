@@ -20,7 +20,7 @@ python -m vantage.ingest.build          # -> processed/catalog.json and catalog-
 
 python -m vantage demo      --catalog real      # CIS v8 claims
 python -m vantage demo      --catalog nist      # NIST SP 800-53 rev5 claims
-python -m vantage coverage  --catalog real --org examples/real/acme-real.yaml
+python -m vantage coverage  --catalog real --org vantage/postures/acme-real.yaml
 python -m vantage failure   --catalog real --top 10
 python -m vantage recommend --catalog real --log-sources-only --steps 5
 python -m vantage report    --catalog real --out report.md --pdf report.pdf
