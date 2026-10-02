@@ -55,7 +55,7 @@ jobs:
           start=$(date +%s); /tmp/venv/bin/vantage demo; echo "demo took $(( $(date +%s) - start )) s"
           # real-catalog code path against a tiny catalog built from the test fixtures
           /tmp/venv/bin/pip install openpyxl
-          PYTHONPATH=$GITHUB_WORKSPACE python $GITHUB_WORKSPACE/scripts/fixture_catalog.py /tmp/vd/processed/catalog.json
+          /tmp/venv/bin/python $GITHUB_WORKSPACE/scripts/fixture_catalog.py /tmp/vd/processed/catalog.json
           VANTAGE_DATA_DIR=/tmp/vd /tmp/venv/bin/vantage coverage --catalog real --org $GITHUB_WORKSPACE/tests/fixtures/mini-org.yaml
           VANTAGE_DATA_DIR=/tmp/vd /tmp/venv/bin/vantage coverage --catalog real || test $? -eq 2
           out=$(/tmp/venv/bin/vantage serve 2>&1 || true); echo "$out"

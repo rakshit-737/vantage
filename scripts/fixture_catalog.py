@@ -11,11 +11,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
-from tests.conftest import CIS_ROWS, FIX  # noqa: E402
+from tests.cis_rows import CIS_ROWS  # noqa: E402
 from vantage.ingest.attack import load_attack  # noqa: E402
 from vantage.ingest.build import build_catalog  # noqa: E402
 from vantage.ingest.cis import parse_rows  # noqa: E402
 from vantage.ingest.sigma import load_rules  # noqa: E402
+
+FIX = ROOT / "tests" / "fixtures"
 
 if __name__ == "__main__":
     out = Path(sys.argv[1])

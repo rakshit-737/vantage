@@ -109,13 +109,15 @@ def sha256(p: Path) -> str:
 
 def fetch(url: str, dest: Path, retries: int = 30) -> None:
     part = dest.with_suffix(dest.suffix + ".part")
+    if not url.startswith("https://"):
+        raise ValueError(f"refusing non-https URL {url}")
     for attempt in range(1, retries + 1):
         have = part.stat().st_size if part.exists() else 0
         req = urllib.request.Request(url, headers={"User-Agent": "vantage-downloader/1.0"})
         if have:
             req.add_header("Range", f"bytes={have}-")
         try:
-            with urllib.request.urlopen(req, timeout=60) as r:  # noqa: S310 (fixed https URLs)
+            with urllib.request.urlopen(req, timeout=60) as r:  # nosec B310 - https enforced above
                 mode = "ab" if have and r.status == 206 else "wb"
                 with open(part, mode) as fh:
                     while chunk := r.read(1 << 16):
