@@ -16,7 +16,8 @@ def catalog_from_dict(d: dict) -> Catalog:
         techniques={k: Technique(v["id"], v["name"], v["tactic"], v.get("description", ""),
                                  tuple(v.get("tactics", ()))) for k, v in d["techniques"].items()},
         controls={k: Control(v["id"], v.get("framework", ""), v["title"], frozenset(v["mitigates"]),
-                             v.get("text", ""), v.get("ig"), v.get("function", ""))
+                             v.get("text", ""), v.get("ig"), v.get("function", ""),
+                             frozenset(v.get("baselines", ())))
                   for k, v in d["controls"].items()},
         log_sources={k: LogSource(v["id"], v.get("name", k), float(v.get("cost", 1.0)))
                      for k, v in d["log_sources"].items()},

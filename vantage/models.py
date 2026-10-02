@@ -45,6 +45,7 @@ class Control:
     text: str = ""
     ig: int | None = None             # CIS Implementation Group that first includes the safeguard
     function: str = ""                # CIS security function (Identify/Protect/Detect/Respond/Recover)
+    baselines: frozenset[str] = frozenset()  # NIST SP 800-53B baselines (LOW/MODERATE/HIGH/PRIVACY)
 
 
 @dataclass(frozen=True)

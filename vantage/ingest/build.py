@@ -89,8 +89,10 @@ def build_catalog(attack: AttackData, safeguards: dict[str, Safeguard], rules: l
     }
 
 
-def nist_controls(controls: dict[str, NistControl], attack: AttackData) -> tuple[dict, dict]:
-    """NIST 800-53 rev5 controls as catalog controls, ids carried from ATT&CK v16.1 to current."""
+def nist_controls(controls: dict[str, NistControl], attack: AttackData,
+                  baselines: dict[str, set[str]] | None = None) -> tuple[dict, dict]:
+    """NIST 800-53 rev5 controls as catalog controls, ids carried from ATT&CK v16.1 to current.
+    ``baselines``: control id (``AC-02``) -> SP 800-53B baselines it belongs to (from OSCAL)."""
     stats = Counter()
     out = {}
     for cid, c in sorted(controls.items()):
@@ -104,12 +106,13 @@ def nist_controls(controls: dict[str, NistControl], attack: AttackData) -> tuple
                 ids.add(new)
         out[cid] = {"id": cid, "framework": "NIST SP 800-53 rev5", "title": f"{c.control} {c.title}",
                     "text": f"{c.family_name}: {c.title}", "mitigates": sorted(ids), "ig": None,
-                    "function": c.family}
+                    "function": c.family, "baselines": sorted((baselines or {}).get(c.control, ()))}
     return out, dict(stats)
 
 
-def with_nist(cat: dict, controls: dict[str, NistControl], meta: dict, attack: AttackData) -> dict:
-    ctrls, stats = nist_controls(controls, attack)
+def with_nist(cat: dict, controls: dict[str, NistControl], meta: dict, attack: AttackData,
+              baselines: dict[str, set[str]] | None = None) -> dict:
+    ctrls, stats = nist_controls(controls, attack, baselines)
     out = dict(cat)
     out["meta"] = dict(cat["meta"]) | {"nist": {**meta, "controls": len(ctrls),
                                                 "mapped_controls": sum(1 for c in ctrls.values() if c["mitigates"]),
@@ -138,7 +141,14 @@ def main(argv: list[str] | None = None) -> int:
     print(f"wrote {out} ({Path(out).stat().st_size / 1e6:.1f} MB)")
     if (d / paths.NIST_FILE).exists():
         nist, meta = load_nist(d / paths.NIST_FILE)
-        ncat = with_nist(cat, nist, meta, attack)
+        oscal_cat = d / paths.CTID_DIR / paths.OSCAL_CATALOG
+        base = None
+        if oscal_cat.exists():  # SP 800-53B baseline membership (optional download)
+            from .oscal import load_catalog_with_baselines
+            oc = load_catalog_with_baselines(oscal_cat, {b: d / paths.CTID_DIR / f
+                                                         for b, f in paths.OSCAL_BASELINES.items()})
+            base = {cid: o.baselines for cid, o in oc.items()}
+        ncat = with_nist(cat, nist, meta, attack, base)
         ncat["meta"]["sources"] = dict(ncat["meta"]["sources"]) | {"nist": paths.NIST_FILE}
         paths.nist_catalog_path().write_text(json.dumps(ncat), encoding="utf-8")
         print(json.dumps(ncat["meta"]["nist"], indent=2))
