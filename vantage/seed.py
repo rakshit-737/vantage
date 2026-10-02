@@ -3,7 +3,7 @@
 Technique ids/names are real MITRE ATT&CK Enterprise identifiers. The control->technique
 and detection->technique mappings are ILLUSTRATIVE (hand-written for this demo, loosely
 inspired by public CIS v8 -> ATT&CK work); they are NOT an authoritative mapping.
-Curating production-grade mappings is a Grade-D (human judgment) TODO.
+The real catalog (``--catalog real``/``nist``) uses the official public mappings instead.
 """
 from __future__ import annotations
 

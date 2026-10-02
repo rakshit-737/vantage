@@ -131,7 +131,7 @@ def figure(rows, path):
     ig2 = [r for r in rows if r["claims"] == "IG2"]
     labels = [r["tier"].split(" ", 1)[0] for r in ig2]
     x = range(len(ig2))
-    fig, ax = plt.subplots(figsize=(8, 3.6))
+    fig, ax = plt.subplots(figsize=(8, 4.0))
     ax.bar([i - 0.27 for i in x], [r["claimed_pct"] for r in ig2], 0.27, label="claimed (CIS IG2 on paper)",
            color="#e0782a")
     ax.bar(list(x), [r["detectable_pct"] for r in ig2], 0.27, label="detectable (live Sigma rule)", color="#3b82c4")
@@ -141,7 +141,7 @@ def figure(rows, path):
     ax.set_ylabel("% of 697 ATT&CK v19.2 techniques")
     ax.set_title("Paper vs real coverage by telemetry tier (CIS IG2 claimed, stable+test Sigma rules)",
                  fontsize=10)
-    ax.legend(fontsize=8)
+    ax.legend(fontsize=8, loc='upper center', bbox_to_anchor=(0.5, -0.16), ncol=3, frameon=False)
     ax.grid(axis="y", alpha=0.3)
     fig.tight_layout()
     fig.savefig(path, dpi=110)

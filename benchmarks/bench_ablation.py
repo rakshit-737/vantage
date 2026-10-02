@@ -129,14 +129,14 @@ def figure(rows, path) -> None:
         ax.barh(list(y), [r["_l1"] for r in rs], color="#9bb8d9", label="L1 + a Sigma rule is tagged")
         ax.barh(list(y), [r["_l2"] for r in rs], color="#2f9e5b", label="L2 + its log sources ingested")
         ax.set_yticks(list(y), fws, fontsize=8)
-        ax.invert_yaxis()
         ax.set_xlim(0, 75)
         ax.set_xlabel("% of ATT&CK v19.2 techniques")
         ax.set_title({"T0": "T0: classic Windows event logs", "T5": "T5: every Sigma log source"}.get(tier, tier),
                      fontsize=9)
-    axes[0].legend(fontsize=7, loc="lower right")
+    axes[0].invert_yaxis()  # shared y axis: invert once
+    fig.legend(*axes[0].get_legend_handles_labels(), loc="lower center", ncol=3, fontsize=8, frameon=False)
     fig.suptitle("Paper coverage vs defended coverage, 12 framework profiles", fontsize=10)
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0.06, 1, 1))
     fig.savefig(path, dpi=100)
 
 

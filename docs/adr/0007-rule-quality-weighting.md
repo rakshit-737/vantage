@@ -20,8 +20,9 @@ Keep the binary `true_pct` as the headline, and add `weighted_true_pct` next to 
 It is computed lazily, so plain coverage passes (and the SPOF ranking) cost nothing extra.
 
 ## Consequences
-- `weighted_true_pct <= true_pct` always. On the real catalog it sits 2.5-4 pp below the binary
-  score (for example CIS IG2 with every log source: 37.4% binary, 33.5% weighted).
+- `weighted_true_pct <= true_pct` always. On the real catalog it sits 1.8-4.0 pp below the binary score for CIS
+  and 2.0-4.4 pp for NIST, across the telemetry tiers. Example: the binary
+  score for CIS IG2 with every log source is 37.4% and the weighted one 33.5%.
 - The weights are assumptions, not measured precision/recall. Sigma `falsepositives` notes are
   free text and are not used. Treat the number as a sensitivity check, not a detection-quality
   measurement.
