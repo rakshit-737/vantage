@@ -18,6 +18,7 @@ CIS v8 -> ATT&CK mapping).
 from __future__ import annotations
 
 import math
+import os
 import random
 import re
 from collections import Counter
@@ -88,8 +89,18 @@ class TfidfMapper:
         return _top(self.ids, self.scores(text), k)
 
 
+# Hugging Face commits the published results were produced with (weights are fetched on first use;
+# set HF_HUB_OFFLINE=1 with a populated cache to forbid network access).
+MODEL_REVISIONS = {
+    "sentence-transformers/all-MiniLM-L6-v2": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "BAAI/bge-small-en-v1.5": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+}
+
+
 class _Encoder:
-    """Thin wrapper over sentence-transformers with an in-process model cache."""
+    """Thin wrapper over sentence-transformers with an in-process model cache.
+
+    ``model`` may also be a local folder; ``VANTAGE_EMBED_MODEL`` overrides the default model."""
     _cache: dict = {}
 
     def __init__(self, model: str):
@@ -98,14 +109,14 @@ class _Encoder:
         except ImportError as e:  # pragma: no cover - optional
             raise RuntimeError("pip install 'vantage[ml]' for the embedding mapper") from e
         if model not in self._cache:
-            self._cache[model] = SentenceTransformer(model)
+            self._cache[model] = SentenceTransformer(model, revision=MODEL_REVISIONS.get(model))
         self.m = self._cache[model]
 
     def encode(self, texts: list[str]):
         return self.m.encode(texts, normalize_embeddings=True, batch_size=64, show_progress_bar=False)
 
 
-DEFAULT_EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+DEFAULT_EMBED_MODEL = os.environ.get("VANTAGE_EMBED_MODEL") or "sentence-transformers/all-MiniLM-L6-v2"
 
 
 class EmbeddingMapper:
