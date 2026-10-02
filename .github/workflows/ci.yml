@@ -9,42 +9,138 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ matrix.python-version }}
       - run: pip install -e ".[dev]"
       - run: ruff check vantage tests scripts benchmarks
-      # realdata tests skip automatically: datasets are never committed
-      - run: pytest -q
+      # realdata tests skip automatically: datasets are never committed (see realdata.yml)
+      - run: pytest -q --cov=vantage --cov-report=term
       - run: python -m vantage demo
       - run: python -m vantage report --pdf /tmp/report.pdf
+      - name: Committed example report is current
+        if: matrix.python-version == '3.12'
+        run: |
+          python -m vantage report --out /tmp/acme-report.md
+          diff -u examples/acme-report.md /tmp/acme-report.md
+
+  package:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - run: pip install build twine
+      - run: python -m build
+      - run: twine check --strict dist/*
+      - name: Wheel works in a fresh venv (no checkout on the path)
+        run: |
+          python -m venv /tmp/venv
+          /tmp/venv/bin/pip install dist/*.whl
+          cd /tmp
+          /tmp/venv/bin/vantage --version
+          /tmp/venv/bin/vantage --help
+          start=$(date +%s); /tmp/venv/bin/vantage demo; echo "demo took $(( $(date +%s) - start )) s"
+          # real-catalog code path against a tiny catalog built from the test fixtures
+          /tmp/venv/bin/pip install openpyxl
+          PYTHONPATH=$GITHUB_WORKSPACE python $GITHUB_WORKSPACE/scripts/fixture_catalog.py /tmp/vd/processed/catalog.json
+          VANTAGE_DATA_DIR=/tmp/vd /tmp/venv/bin/vantage coverage --catalog real --org $GITHUB_WORKSPACE/tests/fixtures/mini-org.yaml
+          VANTAGE_DATA_DIR=/tmp/vd /tmp/venv/bin/vantage coverage --catalog real || test $? -eq 2
+          out=$(/tmp/venv/bin/vantage serve 2>&1 || true); echo "$out"
+          echo "$out" | grep -q "pip install 'vantage\[api\]'"
+      - name: Tests run from the unpacked sdist
+        run: |
+          mkdir /tmp/sdist && tar -xzf dist/*.tar.gz -C /tmp/sdist
+          cd /tmp/sdist/vantage-*
+          python -m venv /tmp/sv && /tmp/sv/bin/pip install ".[dev]"
+          /tmp/sv/bin/pytest -q
+      - name: Quickstart leaves no untracked files
+        run: |
+          pip install -e .
+          python -m vantage demo > /dev/null
+          python -m vantage navigator --out layer.json
+          test -z "$(git status --porcelain)"
+
+  docs:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[docs]"
+      - run: mkdocs build --strict
+      - name: Static demo is not shadowed by a page
+        run: grep -q '<title>VANTAGE coverage</title>' site/demo/index.html
 
   docker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - run: docker build -t vantage .
       - run: |
-          docker run -d --name vantage-ci -p 127.0.0.1:8000:8000 vantage
+          docker run -d --name vantage-ci -e VANTAGE_API_TOKEN=ci-token -p 127.0.0.1:8000:8000 vantage
           for i in $(seq 1 20); do curl -fs http://127.0.0.1:8000/healthz && break; sleep 1; done
-          curl -fs http://127.0.0.1:8000/api/meta
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/api/meta)" = 401
+          curl -fs -H "Authorization: Bearer ci-token" http://127.0.0.1:8000/api/meta
+          test "$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: evil.example' http://127.0.0.1:8000/healthz)" = 400
+
+  neo4j:
+    # Loads the Cypher export into a throwaway Neo4j inside the runner (localhost only) and checks
+    # that a Cypher query for defended techniques agrees with compute_coverage.
+    runs-on: ubuntu-24.04
+    services:
+      neo4j:
+        image: neo4j:5.26
+        env:
+          NEO4J_AUTH: neo4j/ci-only-password-1234
+        ports:
+          - 127.0.0.1:7687:7687
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - run: pip install -e . "neo4j>=5.20"
+      - run: python scripts/neo4j_check.py --uri bolt://127.0.0.1:7687 --password ci-only-password-1234 --out neo4j-check.json
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: neo4j-check
+          path: neo4j-check.json
 
   security:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
       - run: pip install bandit pip-audit
       - name: SAST (bandit)
-        run: bandit -r vantage -q
-      - name: Dependency audit
+        run: bandit -r vantage scripts benchmarks -q -s B101,B311,B404,B603
+      - name: Dependency audit (runtime + every extra, resolved)
+        run: |
+          pip install -e ".[data,api,report,bench,docs,dev]"
+          pip-audit --skip-editable
+      - name: Dependency audit (declared minimum versions)
         run: pip-audit -r requirements.txt

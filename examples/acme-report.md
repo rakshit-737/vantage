@@ -6,7 +6,7 @@
 
 - Techniques in scope: 33
 - Claimed (paper) coverage: **93.9%**
-- True (defended) coverage: **45.5%**
+- True (defended) coverage: **45.5%** (rule-quality weighted: 25.5%, see ADR 0007)
 - Paper-only techniques: 16  |  Blind: 2  |  Detected without control: 0
 - Deployed-but-dead detections (log source not ingested): 8
 - Zero-Trust posture score: **53.2/100**

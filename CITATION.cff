@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use VANTAGE, please cite it as below."
+title: "VANTAGE: claimed-vs-defended ATT&CK coverage from official control mappings and SigmaHQ"
+type: software
+authors:
+  - given-names: Rakshit
+    affiliation: "VIT Chennai"
+version: 1.0.0
+license: MIT
+repository-code: "https://github.com/rakshit-737/vantage"
+url: "https://rakshit-737.github.io/vantage/"
+keywords: [mitre-attack, cis-controls, nist-800-53, sigma, detection-engineering, coverage]

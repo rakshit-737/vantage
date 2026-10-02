@@ -1,0 +1,72 @@
+name: realdata
+
+# Downloads the pinned public datasets (about 180 MB, sha256-verified), builds the catalogs, runs
+# the realdata tests, the Quickstart and the benchmarks. Weekly, so upstream drift is noticed.
+on:
+  workflow_dispatch:
+    inputs:
+      embed:
+        description: "also run the MiniLM embedding encoder in bench_crossframework (slow)"
+        type: boolean
+        default: true
+  schedule:
+    - cron: "17 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  realdata:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    env:
+      VANTAGE_DATA_DIR: ${{ github.workspace }}/vdata
+      HF_HUB_DISABLE_TELEMETRY: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: vdata
+          key: vantage-data-${{ hashFiles('vantage/download.py', 'vantage/paths.py') }}
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/huggingface
+          key: hf-minilm-v1
+      - run: pip install -e ".[dev,data,bench]"
+      - name: Download (fails on any sha256 MISMATCH)
+        run: python -m vantage.download | tee download.log
+      - name: Build catalogs
+        run: /usr/bin/time -v python -m vantage.ingest.build 2>&1 | tee build.log
+      - run: pytest -q -m realdata
+      - name: Quickstart commands
+        run: |
+          mkdir -p out
+          python -m vantage demo --catalog real
+          python -m vantage coverage --catalog nist
+          python -m vantage failure --catalog real --kind control --top 5
+          python -m vantage report --catalog real --out out/report.md
+          python -m vantage navigator --catalog real --out out/layer.json
+      - name: Cross-framework benchmark
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.embed }}" = "true" ]; then
+            pip install -e ".[ml]"
+            (cd benchmarks && python bench_crossframework.py) 2>&1 | tee bench.log
+          else
+            (cd benchmarks && python bench_crossframework.py --no-embed) 2>&1 | tee bench.log
+          fi
+      - name: Coverage-gap ablation benchmark
+        run: (cd benchmarks && python bench_ablation.py) 2>&1 | tee ablation.log
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: realdata-results
+          path: |
+            *.log
+            out/
+            results/
+            docs/figures/
