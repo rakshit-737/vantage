@@ -66,9 +66,9 @@ Run from `benchmarks/`. Measured wall times are from the published run.
 | `python bench_coverage.py` | `results/coverage.*`, `figures/coverage_gap.png` | about 3-5 min, dominated by the brute-force SPOF check (63-283 s depending on load) |
 | `python bench_automap.py` | `results/automap.*`, `figures/automap.png` | about 14 min with embeddings (sum of the `seconds` column: 815 s); `--no-embed` takes a few minutes |
 | `python bench_recommend.py` | `results/recommend.*`, `figures/recommend.png` | under 1 min (needs scipy) |
-| `python bench_crossframework.py --no-embed` | `results/crossframework.*`, `figures/crossframework.png` | 453 s (recorded in the JSON as `seconds`) |
+| `python bench_crossframework.py --no-embed` | `results/crossframework.*`, `figures/crossframework.png` | 453 s on the laptop |
 | `python bench_crossframework.py` | adds the MiniLM encoder (published tables come from this run) | 356 s for both encoders on the GitHub ubuntu runner |
-| `python bench_ablation.py` | `results/ablation.*`, `figures/ablation.png` | 439 s |
+| `python bench_ablation.py` | `results/ablation.*`, `figures/ablation.png` | 439 s on the laptop, 77 s on the runner (identical output) |
 | `python bench_published.py` | `results/published.md` (reads crossframework.json) | under 1 s |
 
 Expected headline lines:
