@@ -8,7 +8,7 @@ install:
 	$(PY) -m pip install -e ".[dev,bench]"
 
 data:            ## download ATT&CK STIX, CIS v8 mapping, SigmaHQ (sha256-verified)
-	$(PY) scripts/download_data.py
+	$(PY) -m vantage.download
 
 catalog: data    ## parse + join into $(VANTAGE_DATA_DIR)/processed/catalog.json
 	$(PY) -m vantage.ingest.build

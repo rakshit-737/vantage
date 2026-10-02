@@ -1,7 +1,7 @@
 # Architecture
 
 ```mermaid
-flowchart LR
+flowchart TB
   subgraph DATA["Public data (downloaded, sha256-pinned, never committed)"]
     A["ATT&CK STIX v19.2 + v8.2"]
     C["CIS v8 to ATT&CK v8.2 master mapping (xlsx)"]

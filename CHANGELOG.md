@@ -4,13 +4,55 @@ All notable changes are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- Round 3, cross-framework: CTID Mappings Explorer CRI Profile v2.1, CSA CCM 4.1 and the AWS, Azure,
+  GCP and M365 security-stack mappings; the NIST OSCAL rev5 catalog (control statements) and the
+  SP 800-53B LOW/MODERATE/HIGH/PRIVACY baselines. Parsers `vantage.ingest.ctid` and
+  `vantage.ingest.oscal`, registry `vantage.frameworks` (ADR 0009).
+- `@baseline:LOW|MODERATE|HIGH` selector, with `acme-nist-low.yaml` and `acme-nist-moderate.yaml`
+  postures.
+- `TransferMapper`: trained on one framework, tested on another, with nested leave-one-out, a
+  pre-specified pooled source, per-release candidate sets and paired bootstrap CIs
+  (`benchmarks/bench_crossframework.py`, `results/crossframework.md`).
+- 12-framework ablation of the paper-vs-defended gap (`bench_ablation.py`, `results/ablation.md`),
+  and a published-work comparison stating that no directly comparable benchmark exists
+  (`results/published.md`).
+- Control-failure SPOFs (`vantage failure --kind control`, `POST /api/failure?kind=control`).
+- `vantage --version`, help text on every option, and one-line errors (exit 2) for missing extras
+  or data.
+- Docs: How it works, Evaluation methodology, Reproduce, a landing-page hero; CITATION.cff,
+  issue/PR templates, CODEOWNERS, Dependabot.
+- CI: Python 3.10-3.14, wheel and sdist smoke tests, a Neo4j round-trip check, docs build on PRs
+  with a demo-shadowing guard, a post-deploy Playwright check of `/demo/`, and a weekly
+  `realdata` workflow.
+
+### Changed
+- The API requires a bearer token by default (generated and printed if `VANTAGE_API_TOKEN` is
+  unset), rejects foreign `Host` headers (DNS rebinding), caps bodies at 64 KiB and ids at 200
+  characters, sends CSP and related headers, and turns OpenAPI docs off unless `VANTAGE_API_DOCS=1`.
+- The posture files ship inside the wheel (`vantage/postures/`). The downloader is
+  `python -m vantage.download`; the default data dir outside a checkout is `~/.vantage/data`.
+- Dataset URLs are pinned to upstream commits; a mismatching fresh download is quarantined.
+- Cypher export uses typed literals, uniqueness constraints and labelled edge matches.
+- Release workflow: gated on tests, tag/version check, fixed CHANGELOG extraction, `latest`
+  pushed once. Actions are pinned by SHA (Node 24 majors); the Docker base image is pinned by digest.
+
+### Fixed
+- The docs page `demo.md` overwrote the static demo at `/demo/` (renamed to `live-demo.md`).
+- In the static demo, the what-if checkboxes and auto-map controls are now disabled.
+- `export_demo.py` refuses to delete a folder that is not a previous export.
+- README: DeTT&CT credited to Rabobank CDC; random-baseline row is the 10-seed mean; the CIS
+  ceiling is split into new-since-v8.2 and never-mapped techniques; runtimes match the records.
+
 ## [1.0.0] - 2026-09-26
 
 ### Added
 - NIST SP 800-53 rev5 as a second control framework, from the CTID Mappings Explorer
   (ATT&CK v16.1, Apache-2.0, sha256-pinned). `python -m vantage.ingest.build` now also writes
   `catalog-nist.json` (`--catalog nist`): 109 controls, 5,236 technique pairs on ATT&CK v19.2.
-  New `@family:AC|IA` selector and `vantage/postures/acme-nist.yaml` (ADR 0008).
+  New `@family:AC|IA` selector and `examples/real/acme-nist.yaml` (ADR 0008).
 - Rule-quality weighting: `weighted_true_pct` scores each defended technique by a noisy-OR of its
   live rules' Sigma level x status (ADR 0007). Reported by `coverage`, the audit report and the
   coverage benchmark.

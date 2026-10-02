@@ -14,6 +14,10 @@ cov = compute_coverage(cat, org)
 print(cov.summary())
 ```
 
+::: vantage.catalog
+
+::: vantage.io
+
 ::: vantage.models
 
 ::: vantage.coverage
@@ -28,6 +32,14 @@ print(cov.summary())
 
 ::: vantage.automap
     options:
-      members: [TfidfMapper, EmbeddingMapper, MitigationBridgeMapper, RandomBaseline, PopularityBaseline, evaluate_mapper, per_control_scores, bootstrap_ci]
+      members: [TfidfMapper, EmbeddingMapper, MitigationBridgeMapper, RandomBaseline, PopularityBaseline, evaluate_mapper, per_control_scores, bootstrap_ci, paired_bootstrap_ci]
 
 ::: vantage.ingest.nist
+
+::: vantage.frameworks
+
+::: vantage.transfer
+
+::: vantage.ingest.ctid
+
+::: vantage.ingest.oscal

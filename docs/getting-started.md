@@ -15,7 +15,7 @@ Python 3.10+ is required. Optional extras: `api`, `report`, `data`, `ml`
 
 ```bash
 export VANTAGE_DATA_DIR=$PWD/data       # any folder outside the repo is fine
-python scripts/download_data.py         # ~82 MB, resumable, sha256-verified
+python -m vantage.download              # ~190 MB, resumable, sha256-verified
 python -m vantage.ingest.build          # -> processed/catalog.json and catalog-nist.json
 
 python -m vantage demo      --catalog real      # CIS v8 claims
@@ -33,7 +33,7 @@ python -m vantage serve     --catalog real      # http://127.0.0.1:8000
 
 ```yaml
 name: Acme Corp
-claimed_controls: ["@ig2"]          # CIS: @ig1/@ig2/@ig3; NIST: "@family:AC|IA"; globs: CIS-8.*, NIST-AC-*
+claimed_controls: ["@ig2"]          # CIS: @ig1/@ig2/@ig3; NIST: "@family:AC|IA", "@baseline:MODERATE"; globs: CIS-8.*, NIST-AC-*
 ingested_log_sources: [windows/security, "azure/*", proxy]
 deployed_detections: ["@status:stable|test&@min-level:medium"]
 zero_trust: {segments: [...], open_flows: [[finance, general]], mfa_coverage: 0.6}

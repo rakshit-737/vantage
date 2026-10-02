@@ -11,7 +11,7 @@ python -m vantage <command> [--catalog seed|real|nist|PATH] [--org POSTURE.yaml]
 | Command | What it does |
 |---|---|
 | `coverage` | Summary (claimed %, true %, rule-quality weighted %, status counts) plus a per-tactic table |
-| `failure [--top N] [--kind log_source\|detection --node ID]` | SPOF ranking, or one what-if failure |
+| `failure [--top N] [--kind log_source\|detection\|control] [--node ID]` | SPOF ranking (control: techniques left with no claimed control), or one what-if failure |
 | `recommend [--steps N] [--log-sources-only]` | Greedy set-cover plan |
 | `zt` | Zero-Trust score with the component breakdown and exposed techniques |
 | `report --out report.md [--pdf report.pdf]` | "Compliant but undetectable" audit report |
@@ -34,6 +34,6 @@ python -m vantage <command> [--catalog seed|real|nist|PATH] [--org POSTURE.yaml]
 
 | Script | Purpose |
 |---|---|
-| `scripts/download_data.py [--dest DIR]` | Download and sha256-verify the datasets |
+| `python -m vantage.download [--dest DIR]` | Download and sha256-verify the datasets |
 | `python -m vantage.ingest.build` | Build `catalog.json` and `catalog-nist.json` |
 | `scripts/export_demo.py [--catalog real] [--out docs/demo]` | Pre-render the UI as a static site |
