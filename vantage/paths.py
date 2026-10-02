@@ -17,6 +17,22 @@ CIS_FILE = "cis_v8_attack_v82_master_mapping.xlsx"
 NIST_ATTACK_VERSION = "16.1"     # ATT&CK release the CTID NIST 800-53 rev5 mapping targets
 NIST_FILE = f"nist_800_53-rev5_attack-{NIST_ATTACK_VERSION}-enterprise.json"
 
+# Round 3: extra CTID Mappings Explorer frameworks + NIST OSCAL catalog/baselines (in <data>/ctid/)
+CTID_DIR = "ctid"
+CTID_FRAMEWORKS = {  # short name -> (file, ATT&CK version the mapping targets)
+    "AWS": ("aws-12.12.2024_attack-16.1-enterprise.json", "16.1"),
+    "Azure": ("azure-04.26.2025_attack-16.1-enterprise.json", "16.1"),
+    "GCP": ("gcp-03.06.2025_attack-16.1-enterprise.json", "16.1"),
+    "M365": ("m365-07.18.2025_attack-16.1-enterprise.json", "16.1"),
+    "CRI-2.1": ("cri_profile-v2.1_attack-16.1-enterprise.json", "16.1"),
+    "CSA-CCM-4.1": ("csa_ccm-4.1_attack-17.1-enterprise.json", "17.1"),
+}
+# ATT&CK releases the CTID mappings were authored against (for the per-framework technique universe)
+ATTACK_RELEASE_FILES = {v: f"enterprise-attack-{v}.json" for v in ("16.1", "17.1")}
+OSCAL_CATALOG = "NIST_SP-800-53_rev5_catalog.json"
+OSCAL_BASELINES = {b: f"NIST_SP-800-53_rev5_{b}-baseline_profile.json"
+                   for b in ("LOW", "MODERATE", "HIGH", "PRIVACY")}
+
 
 def data_dir() -> Path:
     """Raw downloads. Override with VANTAGE_DATA_DIR (e.g. a folder outside the repo)."""
