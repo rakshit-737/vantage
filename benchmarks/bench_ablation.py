@@ -100,7 +100,8 @@ def main() -> None:
     md = ["### Ablation: what each evidence requirement removes from paper coverage", "",
           f"Percent of the 697 ATT&CK v19.2 techniques; {len(rules)} stable+test SigmaHQ rules deployed. Brackets: "
           "one-sided sensitivity range (2.5-97.5 percentile) when a random 10% of those rules is removed, 500 draws; "
-          "removing rules can only lower coverage, so the range sits at or below the point estimate. It is not a confidence interval. Telemetry tiers "
+          "removing rules can only lower coverage, so the range sits at or below the point estimate. "
+          "It is not a confidence interval. Telemetry tiers "
           "as in section A of the coverage results.", "",
           f"Across 12 framework profiles the paper-vs-defended overstatement is {lo0:.1f}-{hi0:.1f} pp with "
           f"classic Windows logs only (T0) and still {lo5:.1f}-{hi5:.1f} pp with every Sigma log source (T5).", "",
