@@ -1,0 +1,17 @@
+{"metadata": {"attack_version": "16.1", "mapping_framework": "mini", "mapping_framework_version": "1",
+  "last_update": "2026-01-01", "capability_groups": {"ac": "Access Control"}},
+ "mapping_objects": [
+  {"capability_id": "AC-02", "capability_description": "Account Management", "capability_group": "ac",
+   "attack_object_id": "T1003.001", "mapping_type": "mitigates", "comments": "LEAK lsass memory dump"},
+  {"capability_id": "AC-02", "capability_description": "Account Management", "capability_group": "ac",
+   "attack_object_id": "t1086", "mapping_type": "mitigates"},
+  {"capability_id": "AC-03", "capability_description": "Access Enforcement", "capability_group": "ac",
+   "attack_object_id": "T1021.002", "mapping_type": "mitigates"},
+  {"capability_id": "AC-03", "capability_description": "Access Enforcement", "capability_group": "ac",
+   "attack_object_id": "T1064", "mapping_type": "mitigates"},
+  {"capability_id": "AC-04", "capability_description": "Info Flow", "capability_group": "ac",
+   "attack_object_id": "T1059", "mapping_type": "non_mappable", "status": "non_mappable"},
+  {"capability_id": "EDR", "capability_description": "Endpoint Sensor", "capability_group": "edr",
+   "attack_object_id": "T1059.001", "mapping_type": "technique_scores", "score_category": "detect",
+   "score_value": "significant"}
+ ]}
