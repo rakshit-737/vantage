@@ -1,6 +1,6 @@
 ### Ablation: what each evidence requirement removes from paper coverage
 
-Percent of the 697 ATT&CK v19.2 techniques; 2614 stable+test SigmaHQ rules deployed. Brackets: range (2.5-97.5 percentile) when a random 10% of those rules is removed, 500 draws. Telemetry tiers as in section A of the coverage results.
+Percent of the 697 ATT&CK v19.2 techniques; 2614 stable+test SigmaHQ rules deployed. Brackets: one-sided sensitivity range (2.5-97.5 percentile) when a random 10% of those rules is removed, 500 draws; removing rules can only lower coverage, so the range sits at or below the point estimate. It is not a confidence interval. Telemetry tiers as in section A of the coverage results.
 
 Across 12 framework profiles the paper-vs-defended overstatement is 24.1-55.7 pp with classic Windows logs only (T0) and still 10.9-26.5 pp with every Sigma log source (T5).
 

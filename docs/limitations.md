@@ -26,6 +26,13 @@
 - **The static demo** cannot run what-ifs or auto-mapping; those need the local API.
 - **Spec deviations:** the UI is vanilla JS rather than React (ADR 0006); there is no LLM
   re-ranker (VANTAGE stays offline with no API key); the asset/identity layer is segment-level.
+- **Rule-dropout ranges are not CIs.** The brackets in `results/ablation.md` are a one-sided
+  sensitivity range (10% of rules removed) and sit at or below the point estimate.
+- **Secondary citations** (Lee et al. 2025, Rahman and Williams, Orbinato et al.) are cited by
+  DOI/arXiv id but are not link-checked in CI and lack full author lists.
+- **The asset/identity layer is not implemented** (no `EMITS` edges or per-segment defended
+  coverage); synthetic segments would be possible but are deferred.
+- **The Evaluation page is served at `/benchmarks/`,** not `/evaluation/`.
 - **Timings are load-sensitive.** The brute-force SPOF check took 63 s in the v0.2.0 run and
   283 s in the v1.0.0 re-run on the same laptop while other jobs were running. The one-pass
   ranking stays around 10 ms and its output is identical.

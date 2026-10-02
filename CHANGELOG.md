@@ -6,6 +6,8 @@ All notable changes are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-02
+
 ### Added
 - Round 3, cross-framework: CTID Mappings Explorer CRI Profile v2.1, CSA CCM 4.1 and the AWS, Azure,
   GCP and M365 security-stack mappings; the NIST OSCAL rev5 catalog (control statements) and the
@@ -35,6 +37,8 @@ All notable changes are documented here. The format follows
 - The posture files ship inside the wheel (`vantage/postures/`). The downloader is
   `python -m vantage.download`; the default data dir outside a checkout is `~/.vantage/data`.
 - Dataset URLs are pinned to upstream commits; a mismatching fresh download is quarantined.
+- Hugging Face embedding models are pinned to a revision; `VANTAGE_EMBED_MODEL` selects a local model.
+- The ablation table labels its brackets as a one-sided rule-dropout sensitivity range, not a CI.
 - Cypher export uses typed literals, uniqueness constraints and labelled edge matches.
 - Release workflow: gated on tests, tag/version check, fixed CHANGELOG extraction, `latest`
   pushed once. Actions are pinned by SHA (Node 24 majors); the Docker base image is pinned by digest.
