@@ -5,9 +5,12 @@
 | system | ground truth | metric | value |
 |---|---|---|---|
 | Lee et al. 2026, SBERT + ATT&CK mitigations ensemble (published) | CTID NIST 800-53 mapping as 'silver standard', K-RMF control text | Recall@restricted (paper's own calibrated metric) | 0.74 (as reported) |
-| VANTAGE direct text match (tfidf) | CTID NIST 800-53 rev5, 109 controls | R@10 / R@50 / MAP@200 | 0.057 / 0.173 / 0.091 |
-| VANTAGE mitigation bridge, zero-shot (tfidf) | same | R@10 / R@50 / MAP@200 | 0.105 / 0.316 / 0.214 |
-| VANTAGE TransferMapper, trained on the 7 other frameworks (tfidf) | same | R@10 / R@50 / MAP@200 | 0.155 / 0.384 / 0.258 |
+| VANTAGE direct text match (TF-IDF) | CTID NIST 800-53 rev5, 109 controls | R@10 / R@50 / MAP@200 | 0.057 / 0.173 / 0.091 |
+| VANTAGE mitigation bridge, zero-shot (TF-IDF) | CTID NIST 800-53 rev5, 109 controls | R@10 / R@50 / MAP@200 | 0.105 / 0.316 / 0.214 |
+| VANTAGE TransferMapper, trained on the 7 other frameworks (TF-IDF) | CTID NIST 800-53 rev5, 109 controls | R@10 / R@50 / MAP@200 | 0.155 / 0.384 / 0.258 |
+| VANTAGE direct text match (MiniLM-L6-v2) | CTID NIST 800-53 rev5, 109 controls | R@10 / R@50 / MAP@200 | 0.085 / 0.238 / 0.105 |
+| VANTAGE mitigation bridge, zero-shot (MiniLM-L6-v2) | CTID NIST 800-53 rev5, 109 controls | R@10 / R@50 / MAP@200 | 0.109 / 0.254 / 0.191 |
+| VANTAGE TransferMapper, trained on the 7 other frameworks (MiniLM-L6-v2) | CTID NIST 800-53 rev5, 109 controls | R@10 / R@50 / MAP@200 | 0.118 / 0.324 / 0.219 |
 | TRAM (CTID), CTI sentence classifier (published) | TRAM-labelled CTI report sentences, about 50 techniques | micro-F1 on sentences | different task: not comparable |
 
 Setup differences:

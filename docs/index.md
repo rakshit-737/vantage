@@ -42,7 +42,7 @@ ruleset (2,877 ATT&CK-tagged rules).
 | Same claims, every Sigma log source ingested | 53.9% vs 37.4% (rule-quality weighted 33.5%) |
 | All NIST 800-53 rev5 mapped controls claimed, every log source | 66.9% vs 40.3% (26.6 pp gap) |
 | Mitigation-bridge auto-mapper (MiniLM) vs official CIS mapping | MAP@200 0.417 [0.357, 0.478] (bge-small 0.412, indistinguishable; prior 0.161) |
-| Labels from the 7 other frameworks minus zero-shot (paired, TF-IDF) | +0.028 to +0.102 MAP; interval above 0 on 6 of 8 frameworks |
+| Labels from the 7 other frameworks minus zero-shot (paired) | TF-IDF +0.028 to +0.102 MAP, interval above 0 on 6 of 8 frameworks; MiniLM 4 of 8 |
 | NIST SP 800-53B LOW / MODERATE paper coverage | 66.0% / 66.9% of ATT&CK v19.2 |
 | Greedy log-source recommender vs exact ILP | equal at all 7 budgets tested |
 

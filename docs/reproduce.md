@@ -67,7 +67,7 @@ Run from `benchmarks/`. Measured wall times are from the published run.
 | `python bench_automap.py` | `results/automap.*`, `figures/automap.png` | about 14 min with embeddings (sum of the `seconds` column: 815 s); `--no-embed` takes a few minutes |
 | `python bench_recommend.py` | `results/recommend.*`, `figures/recommend.png` | under 1 min (needs scipy) |
 | `python bench_crossframework.py --no-embed` | `results/crossframework.*`, `figures/crossframework.png` | 453 s (recorded in the JSON as `seconds`) |
-| `python bench_crossframework.py` | adds the MiniLM encoder | run in the `realdata` workflow |
+| `python bench_crossframework.py` | adds the MiniLM encoder (published tables come from this run) | 356 s for both encoders on the GitHub ubuntu runner |
 | `python bench_ablation.py` | `results/ablation.*`, `figures/ablation.png` | 439 s |
 | `python bench_published.py` | `results/published.md` (reads crossframework.json) | under 1 s |
 

@@ -34,7 +34,7 @@ auto-mapper trained on one framework and tested on another. Three hazards came u
   on every fold. It is lower for the four security-stack mappings (AWS 0.231 -> 0.195, Azure
   0.200 -> 0.167, GCP 0.182 -> 0.167, M365 0.457 -> 0.452, TF-IDF). For Azure the nested value falls
   below the zero-shot bridge (0.186), and for AWS it falls below pooled transfer (0.204).
-- Pooled transfer beats zero-shot on 6 of 8 frameworks with a paired interval above 0 (all except
-  CIS and Azure). Most single sources hurt on the text-rich frameworks (5-7 of 7 below zero-shot).
+- With TF-IDF, pooled transfer beats zero-shot on 6 of 8 frameworks with a paired interval above 0
+  (all except CIS and Azure). With MiniLM it does so on only 4 of 8 (AWS, GCP, M365, CSA CCM). Most single sources hurt on the text-rich frameworks (5-7 of 7 below zero-shot).
 - The TF-IDF IDF of the training texts still includes the held-out control on the diagonal: a
   small transductive effect, documented in `vantage/transfer.py`.

@@ -14,29 +14,22 @@ from common import RESULTS, md_table
 
 def main() -> None:
     cf = json.loads((RESULTS / "crossframework.json").read_text(encoding="utf-8"))
-    enc = "embed" if "embed" in cf["automap"] else "tfidf"
-    a = cf["automap"][enc]
     n = "NIST 800-53"
-
-    def r(block, key="R@50"):
-        return f"{a[block][n][key]:.3f}"
-    rows = [
-        {"system": "Lee et al. 2026, SBERT + ATT&CK mitigations ensemble (published)",
-         "ground truth": "CTID NIST 800-53 mapping as 'silver standard', K-RMF control text",
-         "metric": "Recall@restricted (paper's own calibrated metric)", "value": "0.74 (as reported)"},
-        {"system": f"VANTAGE direct text match ({enc})", "ground truth": "CTID NIST 800-53 rev5, 109 controls",
-         "metric": "R@10 / R@50 / MAP@200", "value": f"{r('direct', 'R@10')} / {r('direct')} / "
-                                                    f"{r('direct', 'MAP@200')}"},
-        {"system": f"VANTAGE mitigation bridge, zero-shot ({enc})", "ground truth": "same",
-         "metric": "R@10 / R@50 / MAP@200", "value": f"{r('zero_shot', 'R@10')} / {r('zero_shot')} / "
-                                                    f"{r('zero_shot', 'MAP@200')}"},
-        {"system": f"VANTAGE TransferMapper, trained on the 7 other frameworks ({enc})", "ground truth": "same",
-         "metric": "R@10 / R@50 / MAP@200", "value": f"{r('pooled', 'R@10')} / {r('pooled')} / "
-                                                    f"{r('pooled', 'MAP@200')}"},
-        {"system": "TRAM (CTID), CTI sentence classifier (published)",
-         "ground truth": "TRAM-labelled CTI report sentences, about 50 techniques",
-         "metric": "micro-F1 on sentences", "value": "different task: not comparable"},
-    ]
+    rows = [{"system": "Lee et al. 2026, SBERT + ATT&CK mitigations ensemble (published)",
+             "ground truth": "CTID NIST 800-53 mapping as 'silver standard', K-RMF control text",
+             "metric": "Recall@restricted (paper's own calibrated metric)", "value": "0.74 (as reported)"}]
+    names = {"tfidf": "TF-IDF", "embed": "MiniLM-L6-v2"}
+    for enc, a in cf["automap"].items():
+        for block, label in (("direct", "direct text match"), ("zero_shot", "mitigation bridge, zero-shot"),
+                             ("pooled", "TransferMapper, trained on the 7 other frameworks")):
+            r = a[block][n]
+            rows.append({"system": f"VANTAGE {label} ({names.get(enc, enc)})",
+                         "ground truth": "CTID NIST 800-53 rev5, 109 controls",
+                         "metric": "R@10 / R@50 / MAP@200",
+                         "value": f"{r['R@10']:.3f} / {r['R@50']:.3f} / {r['MAP@200']:.3f}"})
+    rows.append({"system": "TRAM (CTID), CTI sentence classifier (published)",
+                 "ground truth": "TRAM-labelled CTI report sentences, about 50 techniques",
+                 "metric": "micro-F1 on sentences", "value": "different task: not comparable"})
     diffs = [
         "Lee et al. 2026 (Electronics 15(6):1248, doi:10.3390/electronics15061248) is the closest published "
         "setup and the prior art for routing through ATT&CK mitigations. Its headline metric, Recall@restricted, "
