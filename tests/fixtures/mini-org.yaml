@@ -1,0 +1,4 @@
+name: mini (fixture)
+claimed_controls: ['@all']
+ingested_log_sources: ['windows/*']
+deployed_detections: ['@all']

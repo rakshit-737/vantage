@@ -46,7 +46,12 @@ def to_json(g: nx.DiGraph) -> str:
 
 
 def _q(s: object) -> str:
-    return json.dumps(str(s))  # safe string literal for Cypher
+    """Cypher literal: booleans and numbers stay typed, everything else is a JSON-escaped string."""
+    if isinstance(s, bool):
+        return "true" if s else "false"
+    if isinstance(s, (int, float)):
+        return json.dumps(s)
+    return json.dumps(str(s))
 
 
 _LABEL = {"technique": "Technique", "control": "Control", "log_source": "LogSource",
@@ -54,10 +59,13 @@ _LABEL = {"technique": "Technique", "control": "Control", "log_source": "LogSour
 
 
 def to_cypher(g: nx.DiGraph) -> str:
-    lines = []
+    """Idempotent Cypher script: uniqueness constraints, MERGE per node, labelled MATCH per edge."""
+    lines = [f"CREATE CONSTRAINT {lab.lower()}_id IF NOT EXISTS FOR (n:{lab}) REQUIRE n.id IS UNIQUE;"
+             for lab in _LABEL.values()]
     for n, a in g.nodes(data=True):
         props = ", ".join(f"n.{k} = {_q(v)}" for k, v in a.items() if k != "kind" and v is not None)
         lines.append(f"MERGE (n:{_LABEL[a['kind']]} {{id: {_q(n)}}})" + (f" SET {props};" if props else ";"))
     for u, v, a in g.edges(data=True):
-        lines.append(f"MATCH (a {{id: {_q(u)}}}), (b {{id: {_q(v)}}}) MERGE (a)-[:{a['rel']}]->(b);")
+        lu, lv = _LABEL[g.nodes[u]["kind"]], _LABEL[g.nodes[v]["kind"]]
+        lines.append(f"MATCH (a:{lu} {{id: {_q(u)}}}), (b:{lv} {{id: {_q(v)}}}) MERGE (a)-[:{a['rel']}]->(b);")
     return "\n".join(lines) + "\n"
