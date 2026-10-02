@@ -146,8 +146,15 @@ class MitigationBridgeMapper:
             self.direct = EmbeddingMapper(cat, model)
             enc, mmat = self.direct.enc, self.direct.enc.encode(mdocs)
             self._msims = lambda text: list(mmat @ enc.encode([text])[0])
+        self._memo: dict[str, list[float]] = {}
 
     def scores(self, text: str) -> list[float]:
+        """Bridge score per technique (aligned with ``self.ids``); memoised per text."""
+        hit = self._memo.get(text)
+        if hit is not None:
+            return hit
+        if len(self._memo) > 4096:
+            self._memo.clear()
         best = [0.0] * len(self.ids)
         for m, s in zip(self.mits, self._msims(text), strict=False):
             for t in m.techniques:
@@ -155,7 +162,9 @@ class MitigationBridgeMapper:
                 if i is not None and s > best[i]:
                     best[i] = float(s)
         direct = self.direct.scores(text)
-        return [b + self.alpha * float(d) for b, d in zip(best, direct, strict=False)]
+        out = [b + self.alpha * float(d) for b, d in zip(best, direct, strict=False)]
+        self._memo[text] = out
+        return out
 
     def rank(self, text: str, k: int = 5) -> list[tuple[str, float]]:
         return _top(self.ids, self.scores(text), k)
@@ -196,7 +205,7 @@ def control_text(c: Control) -> str:
 
 
 def _ranked(mapper, c: Control, depth: int) -> list[str]:
-    if isinstance(mapper, PopularityBaseline):
+    if hasattr(mapper, "rank_for"):  # label-using mappers exclude the query control (leave-one-out)
         return [t for t, _ in mapper.rank_for(c, depth)]
     return [t for t, _ in mapper.rank(control_text(c), depth)]
 
@@ -232,6 +241,16 @@ def bootstrap_ci(values: list[float], n: int = 1000, seed: int = 0, alpha: float
     m = len(values)
     means = sorted(sum(rng.choices(values, k=m)) / m for _ in range(n))
     return (means[int(alpha / 2 * n)], means[min(n - 1, int((1 - alpha / 2) * n))])
+
+
+def paired_bootstrap_ci(a: list[float], b: list[float], n: int = 2000, seed: int = 0,
+                        alpha: float = 0.05) -> tuple[float, float, float]:
+    """Mean of a-b and its percentile bootstrap CI, resampling the *same* controls for both."""
+    if len(a) != len(b) or not a:
+        raise ValueError("paired lists must be non-empty and aligned")
+    d = [x - y for x, y in zip(a, b, strict=True)]
+    lo, hi = bootstrap_ci(d, n, seed, alpha)
+    return sum(d) / len(d), lo, hi
 
 
 def evaluate_mapper(mapper, cat: Catalog, ks: tuple[int, ...] = (5, 10, 20, 50),
