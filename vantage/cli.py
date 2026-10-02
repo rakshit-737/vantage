@@ -7,20 +7,20 @@ import json
 import sys
 from pathlib import Path
 
-from . import automap
+from . import __version__, automap
 from .catalog import load_catalog
 from .coverage import compute_coverage
-from .failure import rank_spofs, simulate_failure
+from .failure import rank_control_spofs, rank_spofs, simulate_failure
 from .graph import build_graph, to_cypher, to_json
 from .io import load_org, save_org
-from .models import CoverageStatus
+from .models import CoverageStatus, ValidationError
 from .recommend import recommend
 from .report import audit_report, heatmap
 from .selectors import expand_org
 from .synth import demo_org, random_org
 from .zerotrust import score_zero_trust
 
-REAL_DEMO_ORG = Path(__file__).resolve().parent.parent / "examples" / "real" / "acme-real.yaml"
+REAL_DEMO_ORG = Path(__file__).resolve().parent / "postures" / "acme-real.yaml"  # shipped in the wheel
 NIST_DEMO_ORG = REAL_DEMO_ORG.with_name("acme-nist.yaml")
 
 
@@ -57,7 +57,12 @@ def cmd_coverage(a):
 
 def cmd_failure(a):
     cat, org = _org(a)
-    impacts = [simulate_failure(cat, org, a.kind, a.node)] if a.node else rank_spofs(cat, org, a.top)
+    if a.node:
+        impacts = [simulate_failure(cat, org, a.kind, a.node)]
+    elif a.kind == "control":
+        impacts = rank_control_spofs(cat, org, a.top)
+    else:
+        impacts = rank_spofs(cat, org, a.top)
     for i in impacts:
         shown = ", ".join(i.techniques_gone_dark[:12]) + (" ..." if len(i.techniques_gone_dark) > 12 else "")
         print(f"{i.kind:<11} {i.node:<28} dark={len(i.techniques_gone_dark):>3} "
@@ -131,13 +136,17 @@ def cmd_navigator(a):
 
 
 def cmd_serve(a):  # pragma: no cover - interactive
+    import os
+
     import uvicorn
 
-    from .api import create_app
+    from .api import create_app, resolve_token
     if a.host not in ("127.0.0.1", "localhost", "::1"):
-        print("WARNING: binding beyond localhost exposes a map of your blind spots; "
-              "set VANTAGE_API_TOKEN.", file=sys.stderr)
-    uvicorn.run(create_app(a.catalog, a.org), host=a.host, port=a.port)
+        print("WARNING: binding beyond localhost exposes a map of your blind spots; add the name you "
+              "browse to in VANTAGE_ALLOWED_HOSTS and keep the token secret.", file=sys.stderr)
+    os.environ.setdefault("VANTAGE_PORT", str(a.port))
+    app = create_app(a.catalog, a.org, token=resolve_token() or "")
+    uvicorn.run(app, host=a.host, port=a.port, server_header=False)
 
 
 def cmd_synth(a):
@@ -184,6 +193,7 @@ def cmd_demo(a):
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="vantage", description=__doc__)
+    p.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True)
     cat_help = ("catalog: 'seed' (offline toy, default), 'real' (ATT&CK + CIS + Sigma built by "
                 "`python -m vantage.ingest.build`), 'nist' (same, NIST 800-53 rev5 controls) or a JSON path")
@@ -198,41 +208,62 @@ def build_parser() -> argparse.ArgumentParser:
 
     add("coverage", cmd_coverage, "coverage summary + heatmap")
     f = add("failure", cmd_failure, "failure propagation / SPOF ranking")
-    f.add_argument("--kind", choices=["log_source", "detection"], default="log_source")
-    f.add_argument("--node")
-    f.add_argument("--top", type=int, default=10)
+    f.add_argument("--kind", choices=["log_source", "detection", "control"], default="log_source",
+                   help="node type to fail; 'control' = a claimed control lapses (techniques lose their claim). "
+                        "Without --node, log_source/detection rank both detection-side kinds together")
+    f.add_argument("--node", help="fail this one node id instead of ranking all single points of failure")
+    f.add_argument("--top", type=int, default=10, help="how many SPOFs to list (default 10)")
     r = add("recommend", cmd_recommend, "greedy set-cover recommendations")
-    r.add_argument("--budget", type=float)
-    r.add_argument("--steps", type=int, default=5)
+    r.add_argument("--budget", type=float, help="total onboarding cost budget (default: no limit)")
+    r.add_argument("--steps", type=int, default=5, help="maximum number of recommended actions (default 5)")
     r.add_argument("--log-sources-only", action="store_true", help="only 'onboard log source' actions")
     add("zt", cmd_zt, "Zero-Trust posture score")
     rp = add("report", cmd_report, "compliant-but-undetectable audit report (markdown / PDF)")
-    rp.add_argument("--out")
-    rp.add_argument("--pdf", help="also render a PDF (needs reportlab)")
+    rp.add_argument("--out", help="write the markdown report here (default: stdout)")
+    rp.add_argument("--pdf", help="also render a PDF (needs the 'report' extra: reportlab)")
     g = add("graph", cmd_graph, "export graph (json or cypher for optional Neo4j)")
-    g.add_argument("--format", choices=["json", "cypher"], default="json")
+    g.add_argument("--format", choices=["json", "cypher"], default="json", help="output format (default json)")
     nv = add("navigator", cmd_navigator, "export an ATT&CK Navigator layer JSON")
-    nv.add_argument("--out")
+    nv.add_argument("--out", help="write the layer here (default: stdout)")
     sv = add("serve", cmd_serve, "FastAPI + ATT&CK heatmap UI (localhost only by default)")
-    sv.add_argument("--host", default="127.0.0.1")
-    sv.add_argument("--port", type=int, default=8000)
+    sv.add_argument("--host", default="127.0.0.1", help="bind address (default 127.0.0.1; keep it local)")
+    sv.add_argument("--port", type=int, default=8000, help="port (default 8000)")
     add("demo", cmd_demo, "run the five demo scenarios")
     am = add("automap", cmd_automap, "map free-text control to ATT&CK", org=False)
-    am.add_argument("text", nargs="?", default="")
-    am.add_argument("-k", type=int, default=5)
-    am.add_argument("--eval", action="store_true")
-    am.add_argument("--method", choices=["tfidf", "embed", "bridge", "bridge-embed"], default="tfidf")
+    am.add_argument("text", nargs="?", default="", help="control text to map (required unless --eval)")
+    am.add_argument("-k", type=int, default=5, help="number of techniques to return (default 5)")
+    am.add_argument("--eval", action="store_true", help="evaluate the mapper against the catalog's own labels")
+    am.add_argument("--method", choices=["tfidf", "embed", "bridge", "bridge-embed"], default="tfidf",
+                    help="tfidf/embed: match technique text; bridge*: route through ATT&CK mitigations "
+                         "(real catalog only); embed variants need the 'ml' extra")
     sy = add("synth", cmd_synth, "write a synthetic org YAML", org=False)
-    sy.add_argument("--out", required=True)
-    sy.add_argument("--seed", type=int, default=0)
-    sy.add_argument("--maturity", type=float, default=0.5)
-    sy.add_argument("--demo", action="store_true")
+    sy.add_argument("--out", required=True, help="output YAML path")
+    sy.add_argument("--seed", type=int, default=0, help="random seed (default 0)")
+    sy.add_argument("--maturity", type=float, default=0.5, help="0..1: share of controls/log sources/rules adopted")
+    sy.add_argument("--demo", action="store_true", help="write the built-in Acme demo org instead")
     return p
 
 
+_EXTRA = {"uvicorn": "api", "fastapi": "api", "starlette": "api", "reportlab": "report", "openpyxl": "data",
+          "sentence_transformers": "ml"}
+
+
 def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
-    args.fn(args)
+    """Entry point. Expected user errors exit 2 with a one-line hint instead of a traceback."""
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    if args.cmd == "automap" and not args.eval and not args.text.strip():
+        parser.error("automap: give the control text to map, or --eval")
+    try:
+        args.fn(args)
+    except ModuleNotFoundError as e:
+        extra = _EXTRA.get((e.name or "").split(".")[0])
+        hint = f"pip install 'vantage[{extra}]'" if extra else "check your installation"
+        print(f"vantage: missing optional dependency {e.name!r}: {hint}", file=sys.stderr)
+        return 2
+    except (ValidationError, FileNotFoundError, RuntimeError, ValueError) as e:
+        print(f"vantage: error: {e}", file=sys.stderr)
+        return 2
     return 0
 
 

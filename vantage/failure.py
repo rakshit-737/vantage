@@ -1,4 +1,13 @@
-"""Failure propagation: knock out one node, recompute, rank single points of failure."""
+"""Failure propagation: knock out one node, recompute, rank single points of failure.
+
+Three node kinds:
+
+* ``log_source`` / ``detection`` - the technique loses *detection* (defended -> paper-only,
+  detected-only -> blind). ``techniques_gone_dark`` lists those techniques.
+* ``control`` - the claimed control fails (lapses, is mis-configured, or the claim is false): the
+  technique loses its *claimed* mitigation (defended -> detected-only, paper-only -> blind).
+  ``techniques_gone_dark`` then lists the techniques left with no claimed control.
+"""
 from __future__ import annotations
 
 from collections import defaultdict
@@ -10,13 +19,19 @@ from .models import Catalog, OrgPosture
 
 @dataclass(frozen=True)
 class FailureImpact:
-    kind: str                  # "log_source" | "detection"
+    kind: str                  # "log_source" | "detection" | "control"
     node: str
     techniques_gone_dark: tuple[str, ...]
     pct_of_matrix: float
 
 
 def simulate_failure(cat: Catalog, org: OrgPosture, kind: str, node: str) -> FailureImpact:
+    """Recompute coverage with one node removed (reference implementation for the rankers)."""
+    if kind == "control":
+        before = compute_coverage(cat, org)
+        after_c = compute_coverage(cat, org, controls=org.claimed_controls - {node})
+        lost = tuple(sorted(t for t in cat.techniques if before.claimed[t] and not after_c.claimed[t]))
+        return FailureImpact(kind, node, lost, round(100.0 * len(lost) / len(cat.techniques), 1))
     base = compute_coverage(cat, org).detected_set()
     if kind == "log_source":
         after = compute_coverage(cat, org, ingested=org.ingested_log_sources - {node})
@@ -51,4 +66,24 @@ def rank_spofs(cat: Catalog, org: OrgPosture, top: int | None = None) -> list[Fa
     impacts = [FailureImpact(k, node, tuple(sorted(ts)), round(100.0 * len(ts) / n, 1))
                for (k, node), ts in dark.items()]
     impacts.sort(key=lambda i: (-len(i.techniques_gone_dark), i.kind, i.node))
+    return impacts[:top] if top else impacts
+
+
+def rank_control_spofs(cat: Catalog, org: OrgPosture, top: int | None = None) -> list[FailureImpact]:
+    """Claimed controls whose failure leaves techniques with *no* claimed mitigation, in one pass.
+
+    A technique loses its claim when control X fails iff X is the only claimed control mapped to it.
+    Equivalent to ``simulate_failure(kind="control")`` for every claimed control (tested)."""
+    by_tech: dict[str, list[str]] = defaultdict(list)
+    for cid in org.claimed_controls:
+        for t in cat.controls[cid].mitigates:
+            by_tech[t].append(cid)
+    lost: dict[str, set[str]] = defaultdict(set)
+    for t, cids in by_tech.items():
+        if len(cids) == 1:
+            lost[cids[0]].add(t)
+    n = len(cat.techniques)
+    impacts = [FailureImpact("control", c, tuple(sorted(ts)), round(100.0 * len(ts) / n, 1))
+               for c, ts in lost.items()]
+    impacts.sort(key=lambda i: (-len(i.techniques_gone_dark), i.node))
     return impacts[:top] if top else impacts
