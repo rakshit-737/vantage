@@ -29,15 +29,18 @@ def dump(path: Path, obj) -> None:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--catalog", default="real")
-    ap.add_argument("--out", default=str(ROOT / "docs" / "demo"))
+    ap = argparse.ArgumentParser(description="Pre-render the web UI as a static demo.")
+    ap.add_argument("--catalog", default="real", help="catalog name (seed|real|nist)")
+    ap.add_argument("--out", default=str(ROOT / "docs" / "demo"), help="output folder (a previous export)")
     a = ap.parse_args()
-    out = Path(a.out)
+    out = Path(a.out).resolve()
     if out.exists():
+        # only ever wipe a previous export: refuse anything that does not look like one
+        if not ((out / "app.js").exists() and (out / "data" / "meta.json").exists()):
+            raise SystemExit(f"refusing to delete {out}: not a previous demo export")
         shutil.rmtree(out)
     data = out / "data"
-    c = TestClient(create_app(a.catalog))
+    c = TestClient(create_app(a.catalog), base_url="http://127.0.0.1")
     meta = c.get("/api/meta").json()
     meta["controls"] = [{k: x[k] for k in ("id", "claimed", "ig", "techniques")} for x in meta["controls"]]
     dump(data / "meta.json", meta)

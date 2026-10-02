@@ -1,5 +1,6 @@
 # Everything binds to 127.0.0.1 only: the coverage map is a list of your blind spots.
-#   VANTAGE_DATA=/path/to/datasets/vantage VANTAGE_CATALOG=real docker compose up --build
+#   VANTAGE_API_TOKEN=$(python -c "import secrets;print(secrets.token_urlsafe(32))") \n#   VANTAGE_DATA=/path/to/datasets/vantage VANTAGE_CATALOG=real docker compose up --build
+# then open http://127.0.0.1:8000/#token=<that token>
 services:
   vantage:
     build: .
@@ -7,7 +8,7 @@ services:
       - "127.0.0.1:8000:8000"
     environment:
       VANTAGE_CATALOG: ${VANTAGE_CATALOG:-seed}
-      VANTAGE_API_TOKEN: ${VANTAGE_API_TOKEN:-}
+      VANTAGE_API_TOKEN: ${VANTAGE_API_TOKEN:?set VANTAGE_API_TOKEN to a long random value}
     volumes:
       - ${VANTAGE_DATA:-./data}:/data:ro
     read_only: true
@@ -15,10 +16,10 @@ services:
 
   # OPTIONAL: explore `python -m vantage graph --format cypher` output in Neo4j.
   neo4j:
-    image: neo4j:5
+    image: neo4j:5.26
     profiles: [neo4j]
     ports:
       - "127.0.0.1:7474:7474"
       - "127.0.0.1:7687:7687"
     environment:
-      NEO4J_AUTH: neo4j/change-me-please
+      NEO4J_AUTH: ${NEO4J_AUTH:?set NEO4J_AUTH=neo4j/<long random password>}

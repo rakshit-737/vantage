@@ -1,0 +1,15 @@
+.git
+.github
+data/
+site/
+docs/
+tests/
+results/
+benchmarks/
+scripts/
+examples/
+**/__pycache__
+.pytest_cache
+.ruff_cache
+*.pdf
+.env*

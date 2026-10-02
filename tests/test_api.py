@@ -11,7 +11,7 @@ from vantage.api import create_app  # noqa: E402
 
 @pytest.fixture(scope="module")
 def client():
-    return TestClient(create_app("seed"))
+    return TestClient(create_app("seed"), base_url="http://127.0.0.1")
 
 
 def test_index_and_static(client):
@@ -66,7 +66,7 @@ def test_automap_report_navigator(client):
 
 def test_token_auth(monkeypatch):
     monkeypatch.setenv("VANTAGE_API_TOKEN", "s3cret")
-    c = TestClient(create_app("seed"))
+    c = TestClient(create_app("seed"), base_url="http://127.0.0.1")
     assert c.get("/api/meta").status_code == 401
     assert c.get("/api/meta", headers={"Authorization": "Bearer wrong"}).status_code == 401
     assert c.get("/api/meta", headers={"Authorization": "Bearer s3cret"}).status_code == 200
@@ -79,7 +79,7 @@ def test_app_on_mini_real_catalog(tmp_path, mini_dict):
     org = tmp_path / "org.yaml"
     org.write_text("name: mini\nclaimed_controls: ['@all']\ningested_log_sources: ['windows/*']\n"
                    "deployed_detections: ['@all']\n")
-    c = TestClient(create_app(str(p), str(org)))
+    c = TestClient(create_app(str(p), str(org)), base_url="http://127.0.0.1")
     cov = c.get("/api/coverage").json()
     cols = {col["tactic"]: col for col in cov["matrix"]}
     assert list(cols) == ["execution", "persistence", "credential-access", "lateral-movement"]
@@ -88,3 +88,41 @@ def test_app_on_mini_real_catalog(tmp_path, mini_dict):
     r = c.get("/api/automap", params={"text": "segment the network to stop SMB lateral movement",
                                       "method": "bridge", "k": 2}).json()
     assert r[0]["id"] == "T1021.002"
+
+
+def test_rejects_foreign_host_dns_rebinding(client):
+    c = TestClient(create_app("seed"), base_url="http://attacker.example:8000")
+    assert c.get("/api/coverage").status_code == 400
+    assert client.get("/api/meta").status_code == 200
+
+
+def test_body_and_item_size_limits(client):
+    big = {"disable_log_sources": ["A" * 70_000]}
+    assert client.post("/api/coverage", json=big).status_code == 413
+    assert client.post("/api/coverage", json={"disable_log_sources": ["A" * 201]}).status_code == 422
+    assert client.post("/api/coverage", json={"disable_log_sources": ["x"] * 501}).status_code == 422
+    assert client.post("/api/coverage", json={"disable_log_sources": ["A" * 200]}).status_code == 200
+
+
+def test_security_headers_and_docs_off(client):
+    r = client.get("/")
+    assert "frame-ancestors 'none'" in r.headers["content-security-policy"]
+    assert r.headers["x-content-type-options"] == "nosniff"
+    assert client.get("/api/docs").status_code == 404 and client.get("/api/openapi.json").status_code == 404
+
+
+def test_served_app_requires_token_by_default(monkeypatch, capsys):
+    from vantage.api import app_from_env, resolve_token
+    monkeypatch.delenv("VANTAGE_API_TOKEN", raising=False)
+    monkeypatch.delenv("VANTAGE_ALLOW_NO_AUTH", raising=False)
+    c = TestClient(app_from_env(), base_url="http://127.0.0.1")
+    assert c.get("/api/meta").status_code == 401
+    tok = capsys.readouterr().err.split("#token=")[1].split()[0]
+    assert c.get("/api/meta", headers={"Authorization": f"Bearer {tok}"}).status_code == 200
+    monkeypatch.setenv("VANTAGE_ALLOW_NO_AUTH", "1")
+    assert resolve_token() is None
+
+
+def test_control_spof_endpoint(client):
+    r = client.post("/api/failure", params={"kind": "control", "top": 3}).json()
+    assert r and all(x["kind"] == "control" for x in r)

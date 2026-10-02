@@ -88,6 +88,8 @@ function renderSources() {
     const on = (l.ingested && !state.disabled.has(l.id)) || state.enabled.has(l.id);
     const cb = el("input", { type: "checkbox", id: "ls-" + l.id });
     cb.checked = on;
+    cb.disabled = !!STATIC;
+    if (STATIC) cb.title = "what-if needs the local API (python -m vantage serve)";
     cb.addEventListener("change", () => {
       if (l.ingested) cb.checked ? state.disabled.delete(l.id) : state.disabled.add(l.id);
       else cb.checked ? state.enabled.add(l.id) : state.enabled.delete(l.id);
@@ -168,8 +170,22 @@ async function init() {
     renderMatrix();
   });
   document.getElementById("amgo").addEventListener("click", automap);
+  // report / layer links: fetched with the bearer token, saved as a Blob (plain links cannot send it)
+  document.querySelectorAll("a[data-download]").forEach(a => a.addEventListener("click", async e => {
+    if (STATIC) return;
+    e.preventDefault();
+    const headers = token ? { Authorization: "Bearer " + token } : {};
+    const r = await fetch(a.getAttribute("href"), { headers });
+    if (!r.ok) { alert(a.getAttribute("href") + " -> " + r.status); return; }
+    const url = URL.createObjectURL(await r.blob());
+    const tmp = el("a", { href: url, download: a.dataset.download });
+    document.body.append(tmp); tmp.click(); tmp.remove(); URL.revokeObjectURL(url);
+  }));
   if (STATIC) {
-    document.querySelectorAll(".side input, .side button").forEach(x => { x.disabled = true; });
+    document.querySelectorAll(".side input, .side button, #amtext, #ammethod, #amgo").forEach(x => {
+      x.disabled = true; x.title = "needs the local API: python -m vantage serve";
+    });
+    document.getElementById("lslist").classList.add("static");
     document.getElementById("lsfilter").disabled = false;
     document.querySelector(".side p").textContent =
       "Static snapshot: what-if toggles and auto-map need the local API (python -m vantage serve).";

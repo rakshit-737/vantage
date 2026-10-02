@@ -2,26 +2,36 @@
 
     python -m vantage serve --catalog real          # http://127.0.0.1:8000
 
-Security: read-only, binds to localhost by default, and if ``VANTAGE_API_TOKEN`` is set every
-/api route requires ``Authorization: Bearer <token>``. The coverage map is sensitive (it is a
-list of blind spots), so never expose this on a public interface.
+Security (the coverage map is a list of blind spots, so treat it as sensitive):
+
+* binds to localhost by default; ``Host`` headers other than localhost (plus
+  ``VANTAGE_ALLOWED_HOSTS``) are rejected, which defeats DNS rebinding from a web page;
+* ``vantage serve`` and the Docker entrypoint require a bearer token on every /api route: the
+  value of ``VANTAGE_API_TOKEN``, or a random one generated at start-up and printed as a
+  ``http://127.0.0.1:8000/#token=...`` link (opt out only with ``VANTAGE_ALLOW_NO_AUTH=1``);
+* request bodies are capped at 64 KiB and every what-if id at 200 characters;
+* OpenAPI docs are off unless ``VANTAGE_API_DOCS=1``; responses carry a strict CSP.
 """
 from __future__ import annotations
 
 import copy
 import hmac
 import os
+import secrets
+import sys
 from pathlib import Path
+from typing import Annotated
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, StringConstraints
 
 from . import __version__
 from .catalog import load_catalog
 from .coverage import compute_coverage
-from .failure import rank_spofs
+from .failure import rank_control_spofs, rank_spofs
 from .io import load_org
 from .models import CoverageStatus, OrgPosture
 from .navigator import to_layer
@@ -32,40 +42,126 @@ from .synth import demo_org
 from .zerotrust import score_zero_trust
 
 WEB = Path(__file__).resolve().parent / "web"
-REAL_DEMO_ORG = Path(__file__).resolve().parent.parent / "examples" / "real" / "acme-real.yaml"
+REAL_DEMO_ORG = Path(__file__).resolve().parent / "postures" / "acme-real.yaml"  # shipped in the wheel
 _RANK = {CoverageStatus.DEFENDED: 3, CoverageStatus.DETECTED_ONLY: 2, CoverageStatus.PAPER_ONLY: 1,
          CoverageStatus.BLIND: 0}
 
 
+MAX_BODY = 64 * 1024
+LOCAL_HOSTS = ["127.0.0.1", "localhost", "::1", "[::1]"]
+NodeId = Annotated[str, StringConstraints(max_length=200)]
+
+
 class WhatIf(BaseModel):
     """Hypothetical changes applied on top of the declared posture (never persisted)."""
-    disable_log_sources: list[str] = Field(default_factory=list, max_length=500)
-    enable_log_sources: list[str] = Field(default_factory=list, max_length=500)
-    disable_controls: list[str] = Field(default_factory=list, max_length=500)
+    disable_log_sources: list[NodeId] = Field(default_factory=list, max_length=500)
+    enable_log_sources: list[NodeId] = Field(default_factory=list, max_length=500)
+    disable_controls: list[NodeId] = Field(default_factory=list, max_length=500)
     deploy_all_rules: bool = False
 
 
-def _auth(authorization: str | None = Header(default=None)) -> None:
-    token = os.environ.get("VANTAGE_API_TOKEN")
-    if not token:
-        return
-    given = (authorization or "").removeprefix("Bearer ").strip()
-    if not hmac.compare_digest(given.encode(), token.encode()):
-        raise HTTPException(401, "missing or invalid token")
+def resolve_token() -> str | None:
+    """Token for a served instance: $VANTAGE_API_TOKEN, else a fresh random one (printed), unless
+    VANTAGE_ALLOW_NO_AUTH=1 explicitly turns authentication off."""
+    tok = os.environ.get("VANTAGE_API_TOKEN")
+    if tok:
+        return tok
+    if os.environ.get("VANTAGE_ALLOW_NO_AUTH") == "1":
+        print("WARNING: VANTAGE_ALLOW_NO_AUTH=1, the API is unauthenticated", file=sys.stderr)
+        return None
+    tok = secrets.token_urlsafe(32)
+    port = os.environ.get("VANTAGE_PORT", "8000")
+    print(f"VANTAGE API token generated. Open http://127.0.0.1:{port}/#token={tok}", file=sys.stderr, flush=True)
+    return tok
 
 
-def create_app(catalog: str | None = "seed", org_path: str | None = None) -> FastAPI:
+class _BodyLimit:
+    """Pure-ASGI guard: 413 for bodies over MAX_BODY (declared or streamed)."""
+
+    def __init__(self, app, limit: int = MAX_BODY):
+        self.app, self.limit = app, limit
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+        for k, v in scope.get("headers", []):
+            if k == b"content-length" and v.isdigit() and int(v) > self.limit:
+                return await _reject(send)
+        seen = 0
+
+        async def capped():
+            nonlocal seen
+            msg = await receive()
+            if msg["type"] == "http.request":
+                seen += len(msg.get("body", b""))
+                if seen > self.limit:
+                    raise _TooLarge
+            return msg
+        try:
+            return await self.app(scope, capped, send)
+        except _TooLarge:
+            return await _reject(send)
+
+
+class _TooLarge(Exception):
+    pass
+
+
+async def _reject(send) -> None:
+    await send({"type": "http.response.start", "status": 413,
+                "headers": [(b"content-type", b"text/plain"), (b"connection", b"close")]})
+    await send({"type": "http.response.body", "body": b"request body too large"})
+
+
+_HEADERS = [(b"content-security-policy", b"default-src 'self'; frame-ancestors 'none'; base-uri 'none'"),
+            (b"x-content-type-options", b"nosniff"), (b"referrer-policy", b"no-referrer"),
+            (b"x-frame-options", b"DENY")]
+
+
+class _SecurityHeaders:
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+
+        async def send_h(msg):
+            if msg["type"] == "http.response.start":
+                msg["headers"] = list(msg.get("headers", [])) + _HEADERS
+            await send(msg)
+        return await self.app(scope, receive, send_h)
+
+
+def create_app(catalog: str | None = "seed", org_path: str | None = None, token: str | None = None,
+               allowed_hosts: list[str] | None = None) -> FastAPI:
+    """Build the app. ``token``: bearer token required on /api (default: $VANTAGE_API_TOKEN, none if
+    unset - the CLI and Docker entrypoints always pass one via ``resolve_token``)."""
+    token = token if token is not None else os.environ.get("VANTAGE_API_TOKEN") or None
     cat = load_catalog(catalog)
     if org_path:
         org = load_org(org_path)
-    elif catalog not in (None, "", "seed") and REAL_DEMO_ORG.exists():
+    elif catalog not in (None, "", "seed"):
         org = load_org(REAL_DEMO_ORG.with_name("acme-nist.yaml") if catalog == "nist" else REAL_DEMO_ORG)
     else:
         org = demo_org()
     expand_org(cat, org)
     cat.validate_org(org)
 
-    app = FastAPI(title="VANTAGE", version=__version__, docs_url="/api/docs", openapi_url="/api/openapi.json")
+    docs = os.environ.get("VANTAGE_API_DOCS") == "1"
+    app = FastAPI(title="VANTAGE", version=__version__, docs_url="/api/docs" if docs else None,
+                  redoc_url=None, openapi_url="/api/openapi.json" if docs else None)
+    hosts = allowed_hosts or [*LOCAL_HOSTS, *filter(None, os.environ.get("VANTAGE_ALLOWED_HOSTS", "").split(","))]
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=hosts)
+    app.add_middleware(_BodyLimit)
+    app.add_middleware(_SecurityHeaders)
+
+    def _auth(authorization: str | None = Header(default=None)) -> None:
+        if not token:
+            return
+        given = (authorization or "").removeprefix("Bearer ").strip()
+        if not hmac.compare_digest(given.encode(), token.encode()):
+            raise HTTPException(401, "missing or invalid token")
     api = [Depends(_auth)]
 
     def apply(w: WhatIf | None) -> OrgPosture:
@@ -159,10 +255,12 @@ def create_app(catalog: str | None = "seed", org_path: str | None = None) -> Fas
         }
 
     @app.post("/api/failure", dependencies=api)
-    def failure(w: WhatIf | None = None, top: int = Query(10, ge=1, le=100)):
+    def failure(w: WhatIf | None = None, top: int = Query(10, ge=1, le=100),
+                kind: str = Query("detection", pattern="^(detection|control)$")):
+        rank = rank_control_spofs if kind == "control" else rank_spofs
         return [{"kind": i.kind, "node": i.node, "dark": len(i.techniques_gone_dark),
                  "pct": i.pct_of_matrix, "techniques": list(i.techniques_gone_dark[:40])}
-                for i in rank_spofs(cat, apply(w), top)]
+                for i in rank(cat, apply(w), top)]
 
     @app.post("/api/recommend", dependencies=api)
     def recs(w: WhatIf | None = None, steps: int = Query(5, ge=1, le=25),
@@ -215,4 +313,6 @@ def create_app(catalog: str | None = "seed", org_path: str | None = None) -> Fas
 
 
 def app_from_env() -> FastAPI:  # for `uvicorn vantage.api:app_from_env --factory`
-    return create_app(os.environ.get("VANTAGE_CATALOG", "seed"), os.environ.get("VANTAGE_ORG"))
+    """Docker entrypoint: always authenticated (see ``resolve_token``)."""
+    return create_app(os.environ.get("VANTAGE_CATALOG", "seed"), os.environ.get("VANTAGE_ORG"),
+                      token=resolve_token() or "")

@@ -69,3 +69,4 @@ textarea { width: 100%; resize: vertical; }
   .layout { grid-template-columns: 1fr; }
   .side { position: static; max-height: 300px; }
 }
+.lslist.static li { opacity: .6; }
