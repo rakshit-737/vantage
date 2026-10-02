@@ -48,7 +48,7 @@ nav:
   - Architecture: architecture.md
   - Datasets: datasets.md
   - Benchmarks & results: benchmarks.md
-  - Live demo (static): demo.md
+  - Live demo (static): live-demo.md
   - Reference:
       - CLI: reference/cli.md
       - HTTP API: reference/api.md
