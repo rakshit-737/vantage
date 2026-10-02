@@ -29,7 +29,7 @@ ruleset (2,877 ATT&CK-tagged rules).
 | Greedy log-source recommender vs exact ILP | equal at all 7 budgets tested |
 
 Details, confidence intervals and figures: [Benchmarks & results](benchmarks.md).
-Try the UI: [static demo](demo.md).
+Try the UI: [static demo](live-demo.md).
 
 ## Where to go next
 

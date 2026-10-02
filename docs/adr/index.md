@@ -8,5 +8,6 @@
 - [ADR 0006 - FastAPI with a vanilla JS UI, localhost-only](0006-api-and-ui.md)
 - [ADR 0007 - Rule-quality weighting of the defended score](0007-rule-quality-weighting.md)
 - [ADR 0008 - NIST SP 800-53 rev5 as a second control framework](0008-nist-800-53.md)
+- [ADR 0009 - Cross-framework comparison and transfer evaluation](0009-cross-framework-transfer.md)
 
 Figures in `docs/figures/` are produced by `benchmarks/*.py` (see the main README).
