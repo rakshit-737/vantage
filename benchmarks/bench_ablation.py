@@ -79,14 +79,14 @@ def control_layer(cat, ingested: set[str], rules: list[str]) -> dict:
     n = len(cat.techniques)
     org = OrgPosture("x", set(), set(ingested), set(rules))
     live = compute_coverage(cat, org, controls=set()).detected_set()
-    out = {"detectable_pct": round(100 * len(live) / n, 2)}
+    out = {"detectable_pct": round(100 * len(live) / n, 4)}
     for ig in (1, 2, 3):
         ctrls = [c for c in cat.controls.values() if c.ig and c.ig <= ig]
         claimed = {t for c in ctrls for t in c.mitigates}
         by_detect = {t for c in ctrls if c.function == "Detect" for t in c.mitigates}
         paper = claimed - live
         out[f"IG{ig}"] = {"claimed": len(claimed), "defended": len(claimed & live),
-                          "defended_pct": round(100 * len(claimed & live) / n, 2),
+                          "defended_pct": round(100 * len(claimed & live) / n, 4),
                           "detectable_unclaimed": len(live - claimed), "paper_only": len(paper),
                           "paper_only_with_detect_safeguard": len(paper & by_detect),
                           "paper_only_non_detect_only": len(paper - by_detect),
