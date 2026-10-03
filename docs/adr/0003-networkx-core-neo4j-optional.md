@@ -12,9 +12,11 @@ Keep all engines in-process on Python sets and NetworkX. Neo4j stays an optional
 target: `python -m vantage graph --format cypher` emits an idempotent, injection-safe MERGE
 script, and `docker compose --profile neo4j up` starts a localhost-only Neo4j.
 
-Measured on the real catalog (`results/coverage.md`, part C): a full coverage computation takes
-about 4 ms; ranking every single point of failure takes about 0.01 s with the one-pass algorithm,
-versus 63-283 s (depending on machine load) by brute-force recomputation, with identical results (checked in the benchmark and by a property test).
+Measured on the real catalog (`results/coverage.md`, part C, realdata run 37092934843 on the
+GitHub ubuntu runner): a full coverage computation takes 2.9 ms; ranking every single point of
+failure takes 2 ms with the one-pass algorithm, versus 7.7 s by brute-force recomputation, with
+identical results (checked in the benchmark and by a property test). On a loaded laptop the
+brute-force check took minutes; the one-pass ranking stays in milliseconds.
 
 ## Consequences
 - Zero infrastructure for users and CI; what-if queries are interactive in the web UI.

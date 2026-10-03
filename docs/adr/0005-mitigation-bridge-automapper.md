@@ -23,11 +23,13 @@ safeguards, macro-averaged P@k, R@k and MAP@200):
 
 Result on ATT&CK v8.2 (`results/automap.md`): direct matching is no better than the popularity
 prior (MAP 0.12-0.14 vs 0.16). The bridge reaches MAP 0.34 with TF-IDF and 0.42 with MiniLM
-embeddings, and R@50 0.62.
+embeddings (R@50 0.62); the MiniLM bridge minus the prior is +0.256 [+0.192, +0.317] (paired).
 
 ## Consequences
 - A 2.6x MAP improvement over the prior with no training and no CIS labels.
 - Caveat: CIS built its mapping via ATT&CK mitigations, so the bridge exploits the same structure
   the annotators used. That is legitimate (only public ATT&CK data is used at inference) but
   results on frameworks mapped differently (for example ISO 27001) may be lower.
-- Still far from expert level: precision@10 is 0.39. The tool presents suggestions, not mappings.
+- Still far from expert level: precision@10 is 0.38 with MiniLM (0.39 with bge-small; the two bridges
+  differ by +0.005 [-0.044, +0.054] MAP@200, not significant) against an oracle ceiling of 0.75. The
+  tool presents suggestions, not mappings.

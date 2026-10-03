@@ -4,10 +4,14 @@ Every number on this site comes from a script in `benchmarks/` and is written to
 and `results/*.md`. This page lists the exact commands, what they should print, and how long they
 took.
 
-**Environment of the published run:** Windows 11 laptop (16 GB RAM, CPU only), Python 3.14. The
-laptop was shared with other jobs, so wall times are upper bounds. The `realdata` GitHub Actions
-workflow (ubuntu-24.04, Python 3.12) re-runs the same pipeline weekly and uploads its logs and
-results as an artefact.
+**Environment of the published run:** every committed result file comes from the `realdata`
+GitHub Actions run [37092934843](https://github.com/rakshit-737/vantage/actions/runs/37092934843)
+at commit `6ff466d`: ubuntu-24.04 runner (4 vCPU, 16 GB), Python 3.12.14, CPU-only torch 2.11.0.
+Each `results/*.json` names that run and commit in its `provenance` block, and each
+`results/*.md` ends with a source line. Before v1.1.0 some files came from a Windows 11 laptop;
+the regenerated numbers are identical apart from the coverage gaps, which are now rounded once
+(42.7 -> 42.8 pp, 26.6 -> 26.5 pp). The workflow re-runs everything weekly and uploads logs,
+results and figures as an artefact.
 
 ## 1. Install
 
@@ -40,7 +44,7 @@ ok           0.6 MB  21d88ec6...068004  ctid/aws-12.12.2024_attack-16.1-enterpri
 
 The full digests are in `vantage/download.py`. URLs are pinned to upstream git commits.
 
-## 3. Build the catalogs (about 1-2 min)
+## 3. Build the catalogs (5 s on the runner, about 1-2 min on a laptop)
 
 ```bash
 python -m vantage.ingest.build
@@ -59,32 +63,48 @@ wrote .../processed/catalog-nist.json
 
 ## 4. Benchmarks
 
-Run from `benchmarks/`. Measured wall times are from the published run.
+Run from `benchmarks/` (`pip install -e ".[dev,data,bench,ml]"`). Wall time and peak memory are
+from run 37092934843 (`/usr/bin/time`, in the artefact's `bench_*.log`).
 
-| command | regenerates | wall time |
-|---|---|---|
-| `python bench_coverage.py` | `results/coverage.*`, `figures/coverage_gap.png` | about 3-5 min, dominated by the brute-force SPOF check (63-283 s depending on load) |
-| `python bench_automap.py` | `results/automap.*`, `figures/automap.png` | about 14 min with embeddings (sum of the `seconds` column: 815 s); `--no-embed` takes a few minutes |
-| `python bench_recommend.py` | `results/recommend.*`, `figures/recommend.png` | under 1 min (needs scipy) |
-| `python bench_crossframework.py --no-embed` | `results/crossframework.*`, `figures/crossframework.png` | 453 s on the laptop |
-| `python bench_crossframework.py` | adds the MiniLM encoder (published tables come from this run) | 356 s for both encoders on the GitHub ubuntu runner |
-| `python bench_ablation.py` | `results/ablation.*`, `figures/ablation.png` | 439 s on the laptop, 77 s on the runner (identical output) |
-| `python bench_published.py` | `results/published.md` (reads crossframework.json) | under 1 s |
+| command | regenerates | wall time | peak RSS |
+|---|---|---:|---:|
+| `python bench_coverage.py` | `results/coverage.*`, `figures/coverage_gap.png` | 11 s (7.7 s of it the brute-force SPOF check) | 0.3 GB |
+| `python bench_recommend.py` | `results/recommend.*`, `figures/recommend.png` (needs scipy) | 3 s | 0.1 GB |
+| `python bench_ablation.py` | `results/ablation.*`, `figures/ablation.png`, `figures/ablation_shares.png` | 48 s | 0.3 GB |
+| `python bench_walkthrough.py` | `results/walkthrough.*` (the How-it-works numbers) | under 1 s | 0.05 GB |
+| `python bench_automap.py` | `results/automap.*`, `results/automap_per_control.csv.gz`, `figures/automap.png` | 287 s with MiniLM and bge-small (model download included) | 1.5 GB |
+| `python bench_crossframework.py` | `results/crossframework.*`, `results/crossframework_per_control.csv.gz`, `figures/crossframework.png` (TF-IDF), `figures/crossframework-minilm.png` | 234 s for both encoders | 1.1 GB |
+| `python bench_published.py` | `results/published.md` (reads crossframework.json) | under 1 s | - |
+
+`--no-embed` (automap, crossframework) skips the sentence-transformers encoders: it rewrites the
+files with the TF-IDF rows and sections only, so the MiniLM/bge numbers disappear until the
+benchmark is re-run with the `ml` extra installed.
 
 Expected headline lines:
 
 - `results/ablation.md`: "the paper-vs-defended overstatement is 24.1-55.7 pp ... (T0) and
-  still 10.9-26.5 pp ... (T5)".
-- `results/coverage.md` A: `T0 classic Windows event logs | IG2 | 3 | 53.9 | 13.2 | 11.2`.
-- `results/crossframework.md`: `NIST SP 800-53B ... LOW | 149 | 51 | 460 | 66.0`.
+  still 10.9-26.5 pp ... (T5)" and "the telemetry share (L1-L2) is larger than the rule-tag share
+  (L0-L1) in 11/12 at T0, 4/12 at T1, 0/12 at T2 ...".
+- `results/coverage.md` A: `T0 classic Windows event logs | IG2 | 3 | 53.9 | 13.2 | 11.2 | 9.2 | 42.8`.
+- `results/crossframework.md`: `NIST SP 800-53B ... LOW | 149 | 51 | 460 | 66.0`, and
+  "pooled - zero-shot: ... Holm p < 0.05 (m = 16): 4 of 8 positive (AWS, GCP, M365, CSA-CCM-4.1)".
+- `results/automap.md`: `mitigation-bridge[all-MiniLM-L6-v2] | 0.384 [0.317, 0.457] | ... | 0.417 [0.357, 0.478]`.
 
 ## 5. Tests and determinism
 
 ```bash
+cd ..                                     # back to the repo root
 python -m pytest -q                       # realdata tests run when the catalog exists
 python -m pytest -q -m realdata
-git diff --exit-code -- results/*.md      # only wall-time / seconds fields may differ
+python scripts/check_results.py           # compare regenerated results/ with git HEAD
 ```
 
-Everything is seeded: synthetic orgs (seeds 0-24), random baselines (10 seeds), bootstraps
-(seed 0) and rule dropout (seed 0). Only timings change between runs.
+`scripts/check_results.py` compares every `results/*.json` with the committed version, ignoring
+only timing keys (`seconds`, `*_ms`, `spof_*_s`, `speedup`) and provenance (`generated`,
+`python`, `platform`, `provenance`), and compares the per-control `.csv.gz` files after
+decompression. The Markdown tables carry timing columns and the source line, so they are not
+diffed directly. The check needs the `ml` extra: without it the embedding rows are missing and
+it reports the difference. The `realdata` workflow runs it after every weekly run.
+
+Everything is seeded: synthetic orgs (seeds 0-24), random baselines (10 seeds), bootstraps and
+sign-flip tests (seed 0) and rule dropout (seed 0). Only timings change between runs.
