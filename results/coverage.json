@@ -1,7 +1,16 @@
 {
-  "generated": "2026-09-26",
-  "python": "3.14.3",
-  "platform": "Windows-11",
+  "generated": "2026-10-03",
+  "python": "3.12.14",
+  "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+  "provenance": {
+    "commit": "6ff466dd621526507cd859c89d765eb209dcf879",
+    "run_id": "37092934843",
+    "run_url": "https://github.com/rakshit-737/vantage/actions/runs/37092934843",
+    "workflow": "realdata",
+    "runner": "ubuntu24",
+    "python": "3.12.14",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39"
+  },
   "catalog": {
     "attack_version": "19.2",
     "tactic_order": [
@@ -80,7 +89,7 @@
       "claimed_pct": 53.9,
       "true_pct": 11.2,
       "weighted_true_pct": 9.2,
-      "gap_pp": 42.7,
+      "gap_pp": 42.8,
       "detectable_pct": 13.2,
       "paper_only": 298,
       "detected_only": 14,
@@ -336,10 +345,10 @@
   "performance": {
     "deployed_rules": 2877,
     "ingested_log_sources": 46,
-    "coverage_ms": 3.9,
-    "spof_fast_s": 0.011,
-    "spof_bruteforce_s": 282.84,
-    "speedup": 25746.8,
+    "coverage_ms": 2.9,
+    "spof_fast_s": 0.002,
+    "spof_bruteforce_s": 7.66,
+    "speedup": 4902.8,
     "identical_results": true
   },
   "nist_tiers": [
@@ -360,7 +369,7 @@
       "detectable_pct": 22.0,
       "true_pct": 16.6,
       "weighted_true_pct": 13.6,
-      "gap_pp": 50.3,
+      "gap_pp": 50.2,
       "paper_only": 350
     },
     {
@@ -370,7 +379,7 @@
       "detectable_pct": 41.3,
       "true_pct": 31.4,
       "weighted_true_pct": 28.2,
-      "gap_pp": 35.5,
+      "gap_pp": 35.4,
       "paper_only": 247
     },
     {
@@ -400,8 +409,27 @@
       "detectable_pct": 52.1,
       "true_pct": 40.3,
       "weighted_true_pct": 35.9,
-      "gap_pp": 26.6,
+      "gap_pp": 26.5,
       "paper_only": 185
     }
-  ]
+  ],
+  "ceilings": {
+    "techniques_v19.2": 697,
+    "cis_mapped_v19.2": 378,
+    "cis_mapped_pct": 54.2,
+    "not_claimable_by_cis": 319,
+    "not_claimable_pp": 45.8,
+    "added_after_v8.2": 172,
+    "added_after_v8.2_pp": 24.7,
+    "v8.2_era_never_mapped": 147,
+    "v8.2_era_never_mapped_pp": 21.1,
+    "techniques_v8.2": 530,
+    "cis_mapped_v8.2": 383,
+    "cis_coverage_v8.2_pct": 72.3,
+    "detectable_T5_stable_test": 363,
+    "detectable_T5_stable_test_pct": 52.1,
+    "detectable_T5_all_rules": 378,
+    "detectable_T5_all_rules_pct": 54.2,
+    "rules_all": 2877
+  }
 }

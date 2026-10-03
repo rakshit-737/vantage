@@ -1,7 +1,16 @@
 {
-  "generated": "2026-10-02",
-  "python": "3.14.3",
-  "platform": "Windows-11",
+  "generated": "2026-10-03",
+  "python": "3.12.14",
+  "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+  "provenance": {
+    "commit": "6ff466dd621526507cd859c89d765eb209dcf879",
+    "run_id": "37092934843",
+    "run_url": "https://github.com/rakshit-737/vantage/actions/runs/37092934843",
+    "workflow": "realdata",
+    "runner": "ubuntu24",
+    "python": "3.12.14",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39"
+  },
   "rows": [
     {
       "tier": "T0",
@@ -10,7 +19,8 @@
       "L1 + rule tag": "33.4 [31.9, 33.1]",
       "L2 + telemetry (defended)": "10.5 [9.5, 10.5]",
       "overstatement L0-L2 (pp)": "36.4",
-      "tag-only overstatement L1-L2 (pp)": "23.0",
+      "rule-tag share L0-L1 (pp)": "13.5",
+      "telemetry share L1-L2 (pp)": "23.0",
       "L0": 46.92,
       "L1": 33.43,
       "L2": 10.47
@@ -22,7 +32,8 @@
       "L1 + rule tag": "37.4 [35.7, 37.2]",
       "L2 + telemetry (defended)": "11.2 [10.0, 11.2]",
       "overstatement L0-L2 (pp)": "42.8",
-      "tag-only overstatement L1-L2 (pp)": "26.3",
+      "rule-tag share L0-L1 (pp)": "16.5",
+      "telemetry share L1-L2 (pp)": "26.3",
       "L0": 53.95,
       "L1": 37.45,
       "L2": 11.19
@@ -34,7 +45,8 @@
       "L1 + rule tag": "37.7 [36.0, 37.4]",
       "L2 + telemetry (defended)": "11.2 [10.0, 11.2]",
       "overstatement L0-L2 (pp)": "43.0",
-      "tag-only overstatement L1-L2 (pp)": "26.5",
+      "rule-tag share L0-L1 (pp)": "16.5",
+      "telemetry share L1-L2 (pp)": "26.5",
       "L0": 54.23,
       "L1": 37.73,
       "L2": 11.19
@@ -46,7 +58,8 @@
       "L1 + rule tag": "40.3 [38.6, 39.9]",
       "L2 + telemetry (defended)": "11.2 [10.0, 11.2]",
       "overstatement L0-L2 (pp)": "54.8",
-      "tag-only overstatement L1-L2 (pp)": "29.1",
+      "rule-tag share L0-L1 (pp)": "25.7",
+      "telemetry share L1-L2 (pp)": "29.1",
       "L0": 66.0,
       "L1": 40.32,
       "L2": 11.19
@@ -58,7 +71,8 @@
       "L1 + rule tag": "40.3 [38.6, 39.9]",
       "L2 + telemetry (defended)": "11.2 [10.0, 11.2]",
       "overstatement L0-L2 (pp)": "55.7",
-      "tag-only overstatement L1-L2 (pp)": "29.1",
+      "rule-tag share L0-L1 (pp)": "26.5",
+      "telemetry share L1-L2 (pp)": "29.1",
       "L0": 66.86,
       "L1": 40.32,
       "L2": 11.19
@@ -70,7 +84,8 @@
       "L1 + rule tag": "40.3 [38.6, 39.9]",
       "L2 + telemetry (defended)": "11.2 [10.0, 11.2]",
       "overstatement L0-L2 (pp)": "55.7",
-      "tag-only overstatement L1-L2 (pp)": "29.1",
+      "rule-tag share L0-L1 (pp)": "26.5",
+      "telemetry share L1-L2 (pp)": "29.1",
       "L0": 66.86,
       "L1": 40.32,
       "L2": 11.19
@@ -82,7 +97,8 @@
       "L1 + rule tag": "37.9 [36.2, 37.6]",
       "L2 + telemetry (defended)": "11.5 [10.2, 11.3]",
       "overstatement L0-L2 (pp)": "49.8",
-      "tag-only overstatement L1-L2 (pp)": "26.4",
+      "rule-tag share L0-L1 (pp)": "23.4",
+      "telemetry share L1-L2 (pp)": "26.4",
       "L0": 61.26,
       "L1": 37.88,
       "L2": 11.48
@@ -94,7 +110,8 @@
       "L1 + rule tag": "19.1 [18.1, 19.1]",
       "L2 + telemetry (defended)": "5.6 [4.9, 5.6]",
       "overstatement L0-L2 (pp)": "24.8",
-      "tag-only overstatement L1-L2 (pp)": "13.5",
+      "rule-tag share L0-L1 (pp)": "11.3",
+      "telemetry share L1-L2 (pp)": "13.5",
       "L0": 30.42,
       "L1": 19.08,
       "L2": 5.6
@@ -106,7 +123,8 @@
       "L1 + rule tag": "19.7 [18.7, 19.7]",
       "L2 + telemetry (defended)": "5.9 [5.0, 5.9]",
       "overstatement L0-L2 (pp)": "24.7",
-      "tag-only overstatement L1-L2 (pp)": "13.8",
+      "rule-tag share L0-L1 (pp)": "10.9",
+      "telemetry share L1-L2 (pp)": "13.8",
       "L0": 30.56,
       "L1": 19.66,
       "L2": 5.88
@@ -118,7 +136,8 @@
       "L1 + rule tag": "39.5 [37.6, 39.2]",
       "L2 + telemetry (defended)": "11.0 [9.8, 10.9]",
       "overstatement L0-L2 (pp)": "47.6",
-      "tag-only overstatement L1-L2 (pp)": "28.4",
+      "rule-tag share L0-L1 (pp)": "19.2",
+      "telemetry share L1-L2 (pp)": "28.4",
       "L0": 58.68,
       "L1": 39.45,
       "L2": 11.05
@@ -130,7 +149,8 @@
       "L1 + rule tag": "25.1 [24.1, 25.1]",
       "L2 + telemetry (defended)": "7.7 [6.9, 7.7]",
       "overstatement L0-L2 (pp)": "33.7",
-      "tag-only overstatement L1-L2 (pp)": "17.4",
+      "rule-tag share L0-L1 (pp)": "16.4",
+      "telemetry share L1-L2 (pp)": "17.4",
       "L0": 41.46,
       "L1": 25.11,
       "L2": 7.75
@@ -142,7 +162,8 @@
       "L1 + rule tag": "18.7 [17.8, 18.7]",
       "L2 + telemetry (defended)": "7.2 [6.3, 7.2]",
       "overstatement L0-L2 (pp)": "24.1",
-      "tag-only overstatement L1-L2 (pp)": "11.5",
+      "rule-tag share L0-L1 (pp)": "12.6",
+      "telemetry share L1-L2 (pp)": "11.5",
       "L0": 31.28,
       "L1": 18.65,
       "L2": 7.17
@@ -154,7 +175,8 @@
       "L1 + rule tag": "33.4 [31.9, 33.1]",
       "L2 + telemetry (defended)": "14.9 [13.6, 14.8]",
       "overstatement L0-L2 (pp)": "32.0",
-      "tag-only overstatement L1-L2 (pp)": "18.5",
+      "rule-tag share L0-L1 (pp)": "13.5",
+      "telemetry share L1-L2 (pp)": "18.5",
       "L0": 46.92,
       "L1": 33.43,
       "L2": 14.92
@@ -166,7 +188,8 @@
       "L1 + rule tag": "37.4 [35.7, 37.2]",
       "L2 + telemetry (defended)": "16.5 [14.9, 16.4]",
       "overstatement L0-L2 (pp)": "37.4",
-      "tag-only overstatement L1-L2 (pp)": "20.9",
+      "rule-tag share L0-L1 (pp)": "16.5",
+      "telemetry share L1-L2 (pp)": "20.9",
       "L0": 53.95,
       "L1": 37.45,
       "L2": 16.5
@@ -178,7 +201,8 @@
       "L1 + rule tag": "37.7 [36.0, 37.4]",
       "L2 + telemetry (defended)": "16.5 [14.9, 16.4]",
       "overstatement L0-L2 (pp)": "37.7",
-      "tag-only overstatement L1-L2 (pp)": "21.2",
+      "rule-tag share L0-L1 (pp)": "16.5",
+      "telemetry share L1-L2 (pp)": "21.2",
       "L0": 54.23,
       "L1": 37.73,
       "L2": 16.5
@@ -190,7 +214,8 @@
       "L1 + rule tag": "40.3 [38.6, 39.9]",
       "L2 + telemetry (defended)": "16.6 [15.1, 16.4]",
       "overstatement L0-L2 (pp)": "49.4",
-      "tag-only overstatement L1-L2 (pp)": "23.7",
+      "rule-tag share L0-L1 (pp)": "25.7",
+      "telemetry share L1-L2 (pp)": "23.7",
       "L0": 66.0,
       "L1": 40.32,
       "L2": 16.64
@@ -202,7 +227,8 @@
       "L1 + rule tag": "40.3 [38.6, 39.9]",
       "L2 + telemetry (defended)": "16.6 [15.1, 16.4]",
       "overstatement L0-L2 (pp)": "50.2",
-      "tag-only overstatement L1-L2 (pp)": "23.7",
+      "rule-tag share L0-L1 (pp)": "26.5",
+      "telemetry share L1-L2 (pp)": "23.7",
       "L0": 66.86,
       "L1": 40.32,
       "L2": 16.64
@@ -214,7 +240,8 @@
       "L1 + rule tag": "40.3 [38.6, 39.9]",
       "L2 + telemetry (defended)": "16.6 [15.1, 16.4]",
       "overstatement L0-L2 (pp)": "50.2",
-      "tag-only overstatement L1-L2 (pp)": "23.7",
+      "rule-tag share L0-L1 (pp)": "26.5",
+      "telemetry share L1-L2 (pp)": "23.7",
       "L0": 66.86,
       "L1": 40.32,
       "L2": 16.64
@@ -226,7 +253,8 @@
       "L1 + rule tag": "37.9 [36.2, 37.6]",
       "L2 + telemetry (defended)": "16.4 [14.8, 16.1]",
       "overstatement L0-L2 (pp)": "44.9",
-      "tag-only overstatement L1-L2 (pp)": "21.5",
+      "rule-tag share L0-L1 (pp)": "23.4",
+      "telemetry share L1-L2 (pp)": "21.5",
       "L0": 61.26,
       "L1": 37.88,
       "L2": 16.36
@@ -238,7 +266,8 @@
       "L1 + rule tag": "19.1 [18.1, 19.1]",
       "L2 + telemetry (defended)": "8.6 [7.6, 8.6]",
       "overstatement L0-L2 (pp)": "21.8",
-      "tag-only overstatement L1-L2 (pp)": "10.5",
+      "rule-tag share L0-L1 (pp)": "11.3",
+      "telemetry share L1-L2 (pp)": "10.5",
       "L0": 30.42,
       "L1": 19.08,
       "L2": 8.61
@@ -250,7 +279,8 @@
       "L1 + rule tag": "19.7 [18.7, 19.7]",
       "L2 + telemetry (defended)": "9.5 [8.3, 9.5]",
       "overstatement L0-L2 (pp)": "21.1",
-      "tag-only overstatement L1-L2 (pp)": "10.2",
+      "rule-tag share L0-L1 (pp)": "10.9",
+      "telemetry share L1-L2 (pp)": "10.2",
       "L0": 30.56,
       "L1": 19.66,
       "L2": 9.47
@@ -262,7 +292,8 @@
       "L1 + rule tag": "39.5 [37.6, 39.2]",
       "L2 + telemetry (defended)": "17.9 [16.2, 17.6]",
       "overstatement L0-L2 (pp)": "40.7",
-      "tag-only overstatement L1-L2 (pp)": "21.5",
+      "rule-tag share L0-L1 (pp)": "19.2",
+      "telemetry share L1-L2 (pp)": "21.5",
       "L0": 58.68,
       "L1": 39.45,
       "L2": 17.93
@@ -274,7 +305,8 @@
       "L1 + rule tag": "25.1 [24.1, 25.1]",
       "L2 + telemetry (defended)": "11.5 [10.2, 11.5]",
       "overstatement L0-L2 (pp)": "30.0",
-      "tag-only overstatement L1-L2 (pp)": "13.6",
+      "rule-tag share L0-L1 (pp)": "16.4",
+      "telemetry share L1-L2 (pp)": "13.6",
       "L0": 41.46,
       "L1": 25.11,
       "L2": 11.48
@@ -286,7 +318,8 @@
       "L1 + rule tag": "18.7 [17.8, 18.7]",
       "L2 + telemetry (defended)": "9.8 [8.9, 9.8]",
       "overstatement L0-L2 (pp)": "21.5",
-      "tag-only overstatement L1-L2 (pp)": "8.9",
+      "rule-tag share L0-L1 (pp)": "12.6",
+      "telemetry share L1-L2 (pp)": "8.9",
       "L0": 31.28,
       "L1": 18.65,
       "L2": 9.76
@@ -298,7 +331,8 @@
       "L1 + rule tag": "33.4 [31.9, 33.1]",
       "L2 + telemetry (defended)": "26.1 [24.8, 26.0]",
       "overstatement L0-L2 (pp)": "20.8",
-      "tag-only overstatement L1-L2 (pp)": "7.3",
+      "rule-tag share L0-L1 (pp)": "13.5",
+      "telemetry share L1-L2 (pp)": "7.3",
       "L0": 46.92,
       "L1": 33.43,
       "L2": 26.11
@@ -310,7 +344,8 @@
       "L1 + rule tag": "37.4 [35.7, 37.2]",
       "L2 + telemetry (defended)": "29.4 [28.0, 29.3]",
       "overstatement L0-L2 (pp)": "24.5",
-      "tag-only overstatement L1-L2 (pp)": "8.0",
+      "rule-tag share L0-L1 (pp)": "16.5",
+      "telemetry share L1-L2 (pp)": "8.0",
       "L0": 53.95,
       "L1": 37.45,
       "L2": 29.41
@@ -322,7 +357,8 @@
       "L1 + rule tag": "37.7 [36.0, 37.4]",
       "L2 + telemetry (defended)": "29.7 [28.3, 29.6]",
       "overstatement L0-L2 (pp)": "24.5",
-      "tag-only overstatement L1-L2 (pp)": "8.0",
+      "rule-tag share L0-L1 (pp)": "16.5",
+      "telemetry share L1-L2 (pp)": "8.0",
       "L0": 54.23,
       "L1": 37.73,
       "L2": 29.7
@@ -334,7 +370,8 @@
       "L1 + rule tag": "40.3 [38.6, 39.9]",
       "L2 + telemetry (defended)": "31.4 [30.0, 31.1]",
       "overstatement L0-L2 (pp)": "34.6",
-      "tag-only overstatement L1-L2 (pp)": "8.9",
+      "rule-tag share L0-L1 (pp)": "25.7",
+      "telemetry share L1-L2 (pp)": "8.9",
       "L0": 66.0,
       "L1": 40.32,
       "L2": 31.42
@@ -346,7 +383,8 @@
       "L1 + rule tag": "40.3 [38.6, 39.9]",
       "L2 + telemetry (defended)": "31.4 [30.0, 31.1]",
       "overstatement L0-L2 (pp)": "35.4",
-      "tag-only overstatement L1-L2 (pp)": "8.9",
+      "rule-tag share L0-L1 (pp)": "26.5",
+      "telemetry share L1-L2 (pp)": "8.9",
       "L0": 66.86,
       "L1": 40.32,
       "L2": 31.42
@@ -358,7 +396,8 @@
       "L1 + rule tag": "40.3 [38.6, 39.9]",
       "L2 + telemetry (defended)": "31.4 [30.0, 31.1]",
       "overstatement L0-L2 (pp)": "35.4",
-      "tag-only overstatement L1-L2 (pp)": "8.9",
+      "rule-tag share L0-L1 (pp)": "26.5",
+      "telemetry share L1-L2 (pp)": "8.9",
       "L0": 66.86,
       "L1": 40.32,
       "L2": 31.42
@@ -370,7 +409,8 @@
       "L1 + rule tag": "37.9 [36.2, 37.6]",
       "L2 + telemetry (defended)": "29.3 [27.8, 29.1]",
       "overstatement L0-L2 (pp)": "32.0",
-      "tag-only overstatement L1-L2 (pp)": "8.6",
+      "rule-tag share L0-L1 (pp)": "23.4",
+      "telemetry share L1-L2 (pp)": "8.6",
       "L0": 61.26,
       "L1": 37.88,
       "L2": 29.27
@@ -382,7 +422,8 @@
       "L1 + rule tag": "19.1 [18.1, 19.1]",
       "L2 + telemetry (defended)": "13.6 [12.9, 13.6]",
       "overstatement L0-L2 (pp)": "16.8",
-      "tag-only overstatement L1-L2 (pp)": "5.5",
+      "rule-tag share L0-L1 (pp)": "11.3",
+      "telemetry share L1-L2 (pp)": "5.5",
       "L0": 30.42,
       "L1": 19.08,
       "L2": 13.63
@@ -394,7 +435,8 @@
       "L1 + rule tag": "19.7 [18.7, 19.7]",
       "L2 + telemetry (defended)": "14.1 [13.2, 14.1]",
       "overstatement L0-L2 (pp)": "16.5",
-      "tag-only overstatement L1-L2 (pp)": "5.6",
+      "rule-tag share L0-L1 (pp)": "10.9",
+      "telemetry share L1-L2 (pp)": "5.6",
       "L0": 30.56,
       "L1": 19.66,
       "L2": 14.06
@@ -406,7 +448,8 @@
       "L1 + rule tag": "39.5 [37.6, 39.2]",
       "L2 + telemetry (defended)": "32.0 [30.3, 31.7]",
       "overstatement L0-L2 (pp)": "26.7",
-      "tag-only overstatement L1-L2 (pp)": "7.5",
+      "rule-tag share L0-L1 (pp)": "19.2",
+      "telemetry share L1-L2 (pp)": "7.5",
       "L0": 58.68,
       "L1": 39.45,
       "L2": 31.99
@@ -418,7 +461,8 @@
       "L1 + rule tag": "25.1 [24.1, 25.1]",
       "L2 + telemetry (defended)": "19.2 [18.4, 19.2]",
       "overstatement L0-L2 (pp)": "22.2",
-      "tag-only overstatement L1-L2 (pp)": "5.9",
+      "rule-tag share L0-L1 (pp)": "16.4",
+      "telemetry share L1-L2 (pp)": "5.9",
       "L0": 41.46,
       "L1": 25.11,
       "L2": 19.23
@@ -430,7 +474,8 @@
       "L1 + rule tag": "18.7 [17.8, 18.7]",
       "L2 + telemetry (defended)": "13.6 [13.1, 13.6]",
       "overstatement L0-L2 (pp)": "17.6",
-      "tag-only overstatement L1-L2 (pp)": "5.0",
+      "rule-tag share L0-L1 (pp)": "12.6",
+      "telemetry share L1-L2 (pp)": "5.0",
       "L0": 31.28,
       "L1": 18.65,
       "L2": 13.63
@@ -442,7 +487,8 @@
       "L1 + rule tag": "33.4 [31.9, 33.1]",
       "L2 + telemetry (defended)": "29.1 [27.7, 28.8]",
       "overstatement L0-L2 (pp)": "17.8",
-      "tag-only overstatement L1-L2 (pp)": "4.3",
+      "rule-tag share L0-L1 (pp)": "13.5",
+      "telemetry share L1-L2 (pp)": "4.3",
       "L0": 46.92,
       "L1": 33.43,
       "L2": 29.12
@@ -454,7 +500,8 @@
       "L1 + rule tag": "37.4 [35.7, 37.2]",
       "L2 + telemetry (defended)": "32.7 [31.1, 32.4]",
       "overstatement L0-L2 (pp)": "21.2",
-      "tag-only overstatement L1-L2 (pp)": "4.7",
+      "rule-tag share L0-L1 (pp)": "16.5",
+      "telemetry share L1-L2 (pp)": "4.7",
       "L0": 53.95,
       "L1": 37.45,
       "L2": 32.71
@@ -466,7 +513,8 @@
       "L1 + rule tag": "37.7 [36.0, 37.4]",
       "L2 + telemetry (defended)": "33.0 [31.3, 32.7]",
       "overstatement L0-L2 (pp)": "21.2",
-      "tag-only overstatement L1-L2 (pp)": "4.7",
+      "rule-tag share L0-L1 (pp)": "16.5",
+      "telemetry share L1-L2 (pp)": "4.7",
       "L0": 54.23,
       "L1": 37.73,
       "L2": 33.0
@@ -478,7 +526,8 @@
       "L1 + rule tag": "40.3 [38.6, 39.9]",
       "L2 + telemetry (defended)": "35.6 [33.7, 35.3]",
       "overstatement L0-L2 (pp)": "30.4",
-      "tag-only overstatement L1-L2 (pp)": "4.7",
+      "rule-tag share L0-L1 (pp)": "25.7",
+      "telemetry share L1-L2 (pp)": "4.7",
       "L0": 66.0,
       "L1": 40.32,
       "L2": 35.58
@@ -490,7 +539,8 @@
       "L1 + rule tag": "40.3 [38.6, 39.9]",
       "L2 + telemetry (defended)": "35.6 [33.7, 35.3]",
       "overstatement L0-L2 (pp)": "31.3",
-      "tag-only overstatement L1-L2 (pp)": "4.7",
+      "rule-tag share L0-L1 (pp)": "26.5",
+      "telemetry share L1-L2 (pp)": "4.7",
       "L0": 66.86,
       "L1": 40.32,
       "L2": 35.58
@@ -502,7 +552,8 @@
       "L1 + rule tag": "40.3 [38.6, 39.9]",
       "L2 + telemetry (defended)": "35.6 [33.7, 35.3]",
       "overstatement L0-L2 (pp)": "31.3",
-      "tag-only overstatement L1-L2 (pp)": "4.7",
+      "rule-tag share L0-L1 (pp)": "26.5",
+      "telemetry share L1-L2 (pp)": "4.7",
       "L0": 66.86,
       "L1": 40.32,
       "L2": 35.58
@@ -514,7 +565,8 @@
       "L1 + rule tag": "37.9 [36.2, 37.6]",
       "L2 + telemetry (defended)": "33.6 [32.0, 33.3]",
       "overstatement L0-L2 (pp)": "27.7",
-      "tag-only overstatement L1-L2 (pp)": "4.3",
+      "rule-tag share L0-L1 (pp)": "23.4",
+      "telemetry share L1-L2 (pp)": "4.3",
       "L0": 61.26,
       "L1": 37.88,
       "L2": 33.57
@@ -526,7 +578,8 @@
       "L1 + rule tag": "19.1 [18.1, 19.1]",
       "L2 + telemetry (defended)": "17.5 [16.5, 17.4]",
       "overstatement L0-L2 (pp)": "12.9",
-      "tag-only overstatement L1-L2 (pp)": "1.6",
+      "rule-tag share L0-L1 (pp)": "11.3",
+      "telemetry share L1-L2 (pp)": "1.6",
       "L0": 30.42,
       "L1": 19.08,
       "L2": 17.5
@@ -538,7 +591,8 @@
       "L1 + rule tag": "19.7 [18.7, 19.7]",
       "L2 + telemetry (defended)": "17.1 [16.1, 17.1]",
       "overstatement L0-L2 (pp)": "13.5",
-      "tag-only overstatement L1-L2 (pp)": "2.6",
+      "rule-tag share L0-L1 (pp)": "10.9",
+      "telemetry share L1-L2 (pp)": "2.6",
       "L0": 30.56,
       "L1": 19.66,
       "L2": 17.07
@@ -550,7 +604,8 @@
       "L1 + rule tag": "39.5 [37.6, 39.2]",
       "L2 + telemetry (defended)": "35.9 [33.9, 35.4]",
       "overstatement L0-L2 (pp)": "22.8",
-      "tag-only overstatement L1-L2 (pp)": "3.6",
+      "rule-tag share L0-L1 (pp)": "19.2",
+      "telemetry share L1-L2 (pp)": "3.6",
       "L0": 58.68,
       "L1": 39.45,
       "L2": 35.87
@@ -562,7 +617,8 @@
       "L1 + rule tag": "25.1 [24.1, 25.1]",
       "L2 + telemetry (defended)": "23.0 [21.8, 22.8]",
       "overstatement L0-L2 (pp)": "18.5",
-      "tag-only overstatement L1-L2 (pp)": "2.2",
+      "rule-tag share L0-L1 (pp)": "16.4",
+      "telemetry share L1-L2 (pp)": "2.2",
       "L0": 41.46,
       "L1": 25.11,
       "L2": 22.96
@@ -574,7 +630,8 @@
       "L1 + rule tag": "18.7 [17.8, 18.7]",
       "L2 + telemetry (defended)": "17.5 [16.6, 17.5]",
       "overstatement L0-L2 (pp)": "13.8",
-      "tag-only overstatement L1-L2 (pp)": "1.1",
+      "rule-tag share L0-L1 (pp)": "12.6",
+      "telemetry share L1-L2 (pp)": "1.1",
       "L0": 31.28,
       "L1": 18.65,
       "L2": 17.5
@@ -586,7 +643,8 @@
       "L1 + rule tag": "33.4 [31.9, 33.1]",
       "L2 + telemetry (defended)": "32.6 [31.0, 32.3]",
       "overstatement L0-L2 (pp)": "14.3",
-      "tag-only overstatement L1-L2 (pp)": "0.9",
+      "rule-tag share L0-L1 (pp)": "13.5",
+      "telemetry share L1-L2 (pp)": "0.9",
       "L0": 46.92,
       "L1": 33.43,
       "L2": 32.57
@@ -598,7 +656,8 @@
       "L1 + rule tag": "37.4 [35.7, 37.2]",
       "L2 + telemetry (defended)": "36.4 [34.7, 36.2]",
       "overstatement L0-L2 (pp)": "17.5",
-      "tag-only overstatement L1-L2 (pp)": "1.0",
+      "rule-tag share L0-L1 (pp)": "16.5",
+      "telemetry share L1-L2 (pp)": "1.0",
       "L0": 53.95,
       "L1": 37.45,
       "L2": 36.44
@@ -610,7 +669,8 @@
       "L1 + rule tag": "37.7 [36.0, 37.4]",
       "L2 + telemetry (defended)": "36.7 [35.0, 36.4]",
       "overstatement L0-L2 (pp)": "17.5",
-      "tag-only overstatement L1-L2 (pp)": "1.0",
+      "rule-tag share L0-L1 (pp)": "16.5",
+      "telemetry share L1-L2 (pp)": "1.0",
       "L0": 54.23,
       "L1": 37.73,
       "L2": 36.73
@@ -622,7 +682,8 @@
       "L1 + rule tag": "40.3 [38.6, 39.9]",
       "L2 + telemetry (defended)": "39.2 [37.3, 38.7]",
       "overstatement L0-L2 (pp)": "26.8",
-      "tag-only overstatement L1-L2 (pp)": "1.1",
+      "rule-tag share L0-L1 (pp)": "25.7",
+      "telemetry share L1-L2 (pp)": "1.1",
       "L0": 66.0,
       "L1": 40.32,
       "L2": 39.17
@@ -634,7 +695,8 @@
       "L1 + rule tag": "40.3 [38.6, 39.9]",
       "L2 + telemetry (defended)": "39.2 [37.3, 38.7]",
       "overstatement L0-L2 (pp)": "27.7",
-      "tag-only overstatement L1-L2 (pp)": "1.1",
+      "rule-tag share L0-L1 (pp)": "26.5",
+      "telemetry share L1-L2 (pp)": "1.1",
       "L0": 66.86,
       "L1": 40.32,
       "L2": 39.17
@@ -646,7 +708,8 @@
       "L1 + rule tag": "40.3 [38.6, 39.9]",
       "L2 + telemetry (defended)": "39.2 [37.3, 38.7]",
       "overstatement L0-L2 (pp)": "27.7",
-      "tag-only overstatement L1-L2 (pp)": "1.1",
+      "rule-tag share L0-L1 (pp)": "26.5",
+      "telemetry share L1-L2 (pp)": "1.1",
       "L0": 66.86,
       "L1": 40.32,
       "L2": 39.17
@@ -658,7 +721,8 @@
       "L1 + rule tag": "37.9 [36.2, 37.6]",
       "L2 + telemetry (defended)": "36.7 [35.0, 36.4]",
       "overstatement L0-L2 (pp)": "24.5",
-      "tag-only overstatement L1-L2 (pp)": "1.1",
+      "rule-tag share L0-L1 (pp)": "23.4",
+      "telemetry share L1-L2 (pp)": "1.1",
       "L0": 61.26,
       "L1": 37.88,
       "L2": 36.73
@@ -670,7 +734,8 @@
       "L1 + rule tag": "19.1 [18.1, 19.1]",
       "L2 + telemetry (defended)": "18.1 [17.1, 18.1]",
       "overstatement L0-L2 (pp)": "12.3",
-      "tag-only overstatement L1-L2 (pp)": "1.0",
+      "rule-tag share L0-L1 (pp)": "11.3",
+      "telemetry share L1-L2 (pp)": "1.0",
       "L0": 30.42,
       "L1": 19.08,
       "L2": 18.08
@@ -682,7 +747,8 @@
       "L1 + rule tag": "19.7 [18.7, 19.7]",
       "L2 + telemetry (defended)": "18.8 [17.8, 18.8]",
       "overstatement L0-L2 (pp)": "11.8",
-      "tag-only overstatement L1-L2 (pp)": "0.9",
+      "rule-tag share L0-L1 (pp)": "10.9",
+      "telemetry share L1-L2 (pp)": "0.9",
       "L0": 30.56,
       "L1": 19.66,
       "L2": 18.79
@@ -694,7 +760,8 @@
       "L1 + rule tag": "39.5 [37.6, 39.2]",
       "L2 + telemetry (defended)": "38.5 [36.6, 38.2]",
       "overstatement L0-L2 (pp)": "20.2",
-      "tag-only overstatement L1-L2 (pp)": "1.0",
+      "rule-tag share L0-L1 (pp)": "19.2",
+      "telemetry share L1-L2 (pp)": "1.0",
       "L0": 58.68,
       "L1": 39.45,
       "L2": 38.45
@@ -706,7 +773,8 @@
       "L1 + rule tag": "25.1 [24.1, 25.1]",
       "L2 + telemetry (defended)": "24.4 [23.4, 24.4]",
       "overstatement L0-L2 (pp)": "17.1",
-      "tag-only overstatement L1-L2 (pp)": "0.7",
+      "rule-tag share L0-L1 (pp)": "16.4",
+      "telemetry share L1-L2 (pp)": "0.7",
       "L0": 41.46,
       "L1": 25.11,
       "L2": 24.39
@@ -718,7 +786,8 @@
       "L1 + rule tag": "18.7 [17.8, 18.7]",
       "L2 + telemetry (defended)": "18.4 [17.5, 18.4]",
       "overstatement L0-L2 (pp)": "12.9",
-      "tag-only overstatement L1-L2 (pp)": "0.3",
+      "rule-tag share L0-L1 (pp)": "12.6",
+      "telemetry share L1-L2 (pp)": "0.3",
       "L0": 31.28,
       "L1": 18.65,
       "L2": 18.36
@@ -730,7 +799,8 @@
       "L1 + rule tag": "33.4 [31.9, 33.1]",
       "L2 + telemetry (defended)": "33.4 [31.9, 33.1]",
       "overstatement L0-L2 (pp)": "13.5",
-      "tag-only overstatement L1-L2 (pp)": "0.0",
+      "rule-tag share L0-L1 (pp)": "13.5",
+      "telemetry share L1-L2 (pp)": "0.0",
       "L0": 46.92,
       "L1": 33.43,
       "L2": 33.43
@@ -742,7 +812,8 @@
       "L1 + rule tag": "37.4 [35.7, 37.2]",
       "L2 + telemetry (defended)": "37.4 [35.7, 37.2]",
       "overstatement L0-L2 (pp)": "16.5",
-      "tag-only overstatement L1-L2 (pp)": "0.0",
+      "rule-tag share L0-L1 (pp)": "16.5",
+      "telemetry share L1-L2 (pp)": "0.0",
       "L0": 53.95,
       "L1": 37.45,
       "L2": 37.45
@@ -754,7 +825,8 @@
       "L1 + rule tag": "37.7 [36.0, 37.4]",
       "L2 + telemetry (defended)": "37.7 [36.0, 37.4]",
       "overstatement L0-L2 (pp)": "16.5",
-      "tag-only overstatement L1-L2 (pp)": "0.0",
+      "rule-tag share L0-L1 (pp)": "16.5",
+      "telemetry share L1-L2 (pp)": "0.0",
       "L0": 54.23,
       "L1": 37.73,
       "L2": 37.73
@@ -766,7 +838,8 @@
       "L1 + rule tag": "40.3 [38.6, 39.9]",
       "L2 + telemetry (defended)": "40.3 [38.6, 39.9]",
       "overstatement L0-L2 (pp)": "25.7",
-      "tag-only overstatement L1-L2 (pp)": "0.0",
+      "rule-tag share L0-L1 (pp)": "25.7",
+      "telemetry share L1-L2 (pp)": "0.0",
       "L0": 66.0,
       "L1": 40.32,
       "L2": 40.32
@@ -778,7 +851,8 @@
       "L1 + rule tag": "40.3 [38.6, 39.9]",
       "L2 + telemetry (defended)": "40.3 [38.6, 39.9]",
       "overstatement L0-L2 (pp)": "26.5",
-      "tag-only overstatement L1-L2 (pp)": "0.0",
+      "rule-tag share L0-L1 (pp)": "26.5",
+      "telemetry share L1-L2 (pp)": "0.0",
       "L0": 66.86,
       "L1": 40.32,
       "L2": 40.32
@@ -790,7 +864,8 @@
       "L1 + rule tag": "40.3 [38.6, 39.9]",
       "L2 + telemetry (defended)": "40.3 [38.6, 39.9]",
       "overstatement L0-L2 (pp)": "26.5",
-      "tag-only overstatement L1-L2 (pp)": "0.0",
+      "rule-tag share L0-L1 (pp)": "26.5",
+      "telemetry share L1-L2 (pp)": "0.0",
       "L0": 66.86,
       "L1": 40.32,
       "L2": 40.32
@@ -802,7 +877,8 @@
       "L1 + rule tag": "37.9 [36.2, 37.6]",
       "L2 + telemetry (defended)": "37.9 [36.2, 37.6]",
       "overstatement L0-L2 (pp)": "23.4",
-      "tag-only overstatement L1-L2 (pp)": "0.0",
+      "rule-tag share L0-L1 (pp)": "23.4",
+      "telemetry share L1-L2 (pp)": "0.0",
       "L0": 61.26,
       "L1": 37.88,
       "L2": 37.88
@@ -814,7 +890,8 @@
       "L1 + rule tag": "19.1 [18.1, 19.1]",
       "L2 + telemetry (defended)": "19.1 [18.1, 19.1]",
       "overstatement L0-L2 (pp)": "11.3",
-      "tag-only overstatement L1-L2 (pp)": "0.0",
+      "rule-tag share L0-L1 (pp)": "11.3",
+      "telemetry share L1-L2 (pp)": "0.0",
       "L0": 30.42,
       "L1": 19.08,
       "L2": 19.08
@@ -826,7 +903,8 @@
       "L1 + rule tag": "19.7 [18.7, 19.7]",
       "L2 + telemetry (defended)": "19.7 [18.7, 19.7]",
       "overstatement L0-L2 (pp)": "10.9",
-      "tag-only overstatement L1-L2 (pp)": "0.0",
+      "rule-tag share L0-L1 (pp)": "10.9",
+      "telemetry share L1-L2 (pp)": "0.0",
       "L0": 30.56,
       "L1": 19.66,
       "L2": 19.66
@@ -838,7 +916,8 @@
       "L1 + rule tag": "39.5 [37.6, 39.2]",
       "L2 + telemetry (defended)": "39.5 [37.6, 39.2]",
       "overstatement L0-L2 (pp)": "19.2",
-      "tag-only overstatement L1-L2 (pp)": "0.0",
+      "rule-tag share L0-L1 (pp)": "19.2",
+      "telemetry share L1-L2 (pp)": "0.0",
       "L0": 58.68,
       "L1": 39.45,
       "L2": 39.45
@@ -850,7 +929,8 @@
       "L1 + rule tag": "25.1 [24.1, 25.1]",
       "L2 + telemetry (defended)": "25.1 [24.1, 25.1]",
       "overstatement L0-L2 (pp)": "16.4",
-      "tag-only overstatement L1-L2 (pp)": "0.0",
+      "rule-tag share L0-L1 (pp)": "16.4",
+      "telemetry share L1-L2 (pp)": "0.0",
       "L0": 41.46,
       "L1": 25.11,
       "L2": 25.11
@@ -862,7 +942,8 @@
       "L1 + rule tag": "18.7 [17.8, 18.7]",
       "L2 + telemetry (defended)": "18.7 [17.8, 18.7]",
       "overstatement L0-L2 (pp)": "12.6",
-      "tag-only overstatement L1-L2 (pp)": "0.0",
+      "rule-tag share L0-L1 (pp)": "12.6",
+      "telemetry share L1-L2 (pp)": "0.0",
       "L0": 31.28,
       "L1": 18.65,
       "L2": 18.65
@@ -870,7 +951,7 @@
   ],
   "rule_dropout_draws": 500,
   "rules": 2614,
-  "seconds": 439.2,
+  "seconds": 47.9,
   "overstatement_pp_T0": [
     24.1,
     55.7
@@ -878,5 +959,231 @@
   "overstatement_pp_T5": [
     10.9,
     26.5
-  ]
+  ],
+  "telemetry_share_dominates": {
+    "T0": {
+      "profiles": 12,
+      "telemetry_larger": 11
+    },
+    "T1": {
+      "profiles": 12,
+      "telemetry_larger": 4
+    },
+    "T2": {
+      "profiles": 12,
+      "telemetry_larger": 0
+    },
+    "T3": {
+      "profiles": 12,
+      "telemetry_larger": 0
+    },
+    "T4": {
+      "profiles": 12,
+      "telemetry_larger": 0
+    },
+    "T5": {
+      "profiles": 12,
+      "telemetry_larger": 0
+    }
+  },
+  "control_layer_cis": {
+    "T0": {
+      "detectable_pct": 13.1994,
+      "IG1": {
+        "claimed": 327,
+        "defended": 73,
+        "defended_pct": 10.4735,
+        "detectable_unclaimed": 19,
+        "paper_only": 254,
+        "paper_only_with_detect_safeguard": 5,
+        "paper_only_non_detect_only": 249,
+        "claimed_by_detect_safeguard": 7
+      },
+      "IG2": {
+        "claimed": 376,
+        "defended": 78,
+        "defended_pct": 11.1908,
+        "detectable_unclaimed": 14,
+        "paper_only": 298,
+        "paper_only_with_detect_safeguard": 68,
+        "paper_only_non_detect_only": 230,
+        "claimed_by_detect_safeguard": 82
+      },
+      "IG3": {
+        "claimed": 378,
+        "defended": 78,
+        "defended_pct": 11.1908,
+        "detectable_unclaimed": 14,
+        "paper_only": 300,
+        "paper_only_with_detect_safeguard": 68,
+        "paper_only_non_detect_only": 232,
+        "claimed_by_detect_safeguard": 82
+      }
+    },
+    "T1": {
+      "detectable_pct": 21.9512,
+      "IG1": {
+        "claimed": 327,
+        "defended": 104,
+        "defended_pct": 14.9211,
+        "detectable_unclaimed": 49,
+        "paper_only": 223,
+        "paper_only_with_detect_safeguard": 4,
+        "paper_only_non_detect_only": 219,
+        "claimed_by_detect_safeguard": 7
+      },
+      "IG2": {
+        "claimed": 376,
+        "defended": 115,
+        "defended_pct": 16.4993,
+        "detectable_unclaimed": 38,
+        "paper_only": 261,
+        "paper_only_with_detect_safeguard": 58,
+        "paper_only_non_detect_only": 203,
+        "claimed_by_detect_safeguard": 82
+      },
+      "IG3": {
+        "claimed": 378,
+        "defended": 115,
+        "defended_pct": 16.4993,
+        "detectable_unclaimed": 38,
+        "paper_only": 263,
+        "paper_only_with_detect_safeguard": 58,
+        "paper_only_non_detect_only": 205,
+        "claimed_by_detect_safeguard": 82
+      }
+    },
+    "T2": {
+      "detectable_pct": 41.3199,
+      "IG1": {
+        "claimed": 327,
+        "defended": 182,
+        "defended_pct": 26.1119,
+        "detectable_unclaimed": 106,
+        "paper_only": 145,
+        "paper_only_with_detect_safeguard": 4,
+        "paper_only_non_detect_only": 141,
+        "claimed_by_detect_safeguard": 7
+      },
+      "IG2": {
+        "claimed": 376,
+        "defended": 205,
+        "defended_pct": 29.4118,
+        "detectable_unclaimed": 83,
+        "paper_only": 171,
+        "paper_only_with_detect_safeguard": 36,
+        "paper_only_non_detect_only": 135,
+        "claimed_by_detect_safeguard": 82
+      },
+      "IG3": {
+        "claimed": 378,
+        "defended": 207,
+        "defended_pct": 29.6987,
+        "detectable_unclaimed": 81,
+        "paper_only": 171,
+        "paper_only_with_detect_safeguard": 36,
+        "paper_only_non_detect_only": 135,
+        "claimed_by_detect_safeguard": 82
+      }
+    },
+    "T3": {
+      "detectable_pct": 46.0545,
+      "IG1": {
+        "claimed": 327,
+        "defended": 203,
+        "defended_pct": 29.1248,
+        "detectable_unclaimed": 118,
+        "paper_only": 124,
+        "paper_only_with_detect_safeguard": 2,
+        "paper_only_non_detect_only": 122,
+        "claimed_by_detect_safeguard": 7
+      },
+      "IG2": {
+        "claimed": 376,
+        "defended": 228,
+        "defended_pct": 32.7116,
+        "detectable_unclaimed": 93,
+        "paper_only": 148,
+        "paper_only_with_detect_safeguard": 33,
+        "paper_only_non_detect_only": 115,
+        "claimed_by_detect_safeguard": 82
+      },
+      "IG3": {
+        "claimed": 378,
+        "defended": 230,
+        "defended_pct": 32.9986,
+        "detectable_unclaimed": 91,
+        "paper_only": 148,
+        "paper_only_with_detect_safeguard": 33,
+        "paper_only_non_detect_only": 115,
+        "claimed_by_detect_safeguard": 82
+      }
+    },
+    "T4": {
+      "detectable_pct": 50.6456,
+      "IG1": {
+        "claimed": 327,
+        "defended": 227,
+        "defended_pct": 32.5681,
+        "detectable_unclaimed": 126,
+        "paper_only": 100,
+        "paper_only_with_detect_safeguard": 1,
+        "paper_only_non_detect_only": 99,
+        "claimed_by_detect_safeguard": 7
+      },
+      "IG2": {
+        "claimed": 376,
+        "defended": 254,
+        "defended_pct": 36.4419,
+        "detectable_unclaimed": 99,
+        "paper_only": 122,
+        "paper_only_with_detect_safeguard": 27,
+        "paper_only_non_detect_only": 95,
+        "claimed_by_detect_safeguard": 82
+      },
+      "IG3": {
+        "claimed": 378,
+        "defended": 256,
+        "defended_pct": 36.7288,
+        "detectable_unclaimed": 97,
+        "paper_only": 122,
+        "paper_only_with_detect_safeguard": 27,
+        "paper_only_non_detect_only": 95,
+        "claimed_by_detect_safeguard": 82
+      }
+    },
+    "T5": {
+      "detectable_pct": 52.0803,
+      "IG1": {
+        "claimed": 327,
+        "defended": 233,
+        "defended_pct": 33.429,
+        "detectable_unclaimed": 130,
+        "paper_only": 94,
+        "paper_only_with_detect_safeguard": 1,
+        "paper_only_non_detect_only": 93,
+        "claimed_by_detect_safeguard": 7
+      },
+      "IG2": {
+        "claimed": 376,
+        "defended": 261,
+        "defended_pct": 37.4462,
+        "detectable_unclaimed": 102,
+        "paper_only": 115,
+        "paper_only_with_detect_safeguard": 27,
+        "paper_only_non_detect_only": 88,
+        "claimed_by_detect_safeguard": 82
+      },
+      "IG3": {
+        "claimed": 378,
+        "defended": 263,
+        "defended_pct": 37.7331,
+        "detectable_unclaimed": 100,
+        "paper_only": 115,
+        "paper_only_with_detect_safeguard": 27,
+        "paper_only_non_detect_only": 88,
+        "claimed_by_detect_safeguard": 82
+      }
+    }
+  }
 }

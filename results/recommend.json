@@ -1,7 +1,16 @@
 {
-  "generated": "2026-09-26",
-  "python": "3.14.3",
-  "platform": "Windows-11",
+  "generated": "2026-10-03",
+  "python": "3.12.14",
+  "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+  "provenance": {
+    "commit": "6ff466dd621526507cd859c89d765eb209dcf879",
+    "run_id": "37092934843",
+    "run_url": "https://github.com/rakshit-737/vantage/actions/runs/37092934843",
+    "workflow": "realdata",
+    "runner": "ubuntu24",
+    "python": "3.12.14",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39"
+  },
   "start_detectable": 153,
   "candidates": 99,
   "budgets": [
@@ -13,8 +22,12 @@
       "most-rules": 8,
       "cheapest": 0,
       "random(mean)": 1.1,
-      "greedy_ms": 201,
-      "ilp_ms": 42
+      "random 2.5-97.5%": "0.0-8.0",
+      "greedy/random(mean)": 7.5,
+      "greedy_ms": 74,
+      "ilp_ms": 8,
+      "random_p2.5": 0.0,
+      "random_p97.5": 8.0
     },
     {
       "budget": 2,
@@ -24,8 +37,12 @@
       "most-rules": 51,
       "cheapest": 6,
       "random(mean)": 4.6,
-      "greedy_ms": 176,
-      "ilp_ms": 23
+      "random 2.5-97.5%": "0.0-42.0",
+      "greedy/random(mean)": 11.2,
+      "greedy_ms": 77,
+      "ilp_ms": 10,
+      "random_p2.5": 0.0,
+      "random_p97.5": 42.0
     },
     {
       "budget": 3,
@@ -35,8 +52,12 @@
       "most-rules": 33,
       "cheapest": 7,
       "random(mean)": 3.8,
-      "greedy_ms": 302,
-      "ilp_ms": 79
+      "random 2.5-97.5%": "0.0-32.2",
+      "greedy/random(mean)": 17.0,
+      "greedy_ms": 113,
+      "ilp_ms": 29,
+      "random_p2.5": 0.0,
+      "random_p97.5": 32.2
     },
     {
       "budget": 5,
@@ -46,8 +67,12 @@
       "most-rules": 61,
       "cheapest": 8,
       "random(mean)": 11.0,
-      "greedy_ms": 934,
-      "ilp_ms": 251
+      "random 2.5-97.5%": "0.2-48.8",
+      "greedy/random(mean)": 7.7,
+      "greedy_ms": 151,
+      "ilp_ms": 36,
+      "random_p2.5": 0.23,
+      "random_p97.5": 48.85
     },
     {
       "budget": 8,
@@ -57,8 +82,12 @@
       "most-rules": 152,
       "cheapest": 9,
       "random(mean)": 19.5,
-      "greedy_ms": 1287,
-      "ilp_ms": 59
+      "random 2.5-97.5%": "2.0-118.9",
+      "greedy/random(mean)": 7.8,
+      "greedy_ms": 131,
+      "ilp_ms": 8,
+      "random_p2.5": 2.0,
+      "random_p97.5": 118.87
     },
     {
       "budget": 12,
@@ -68,8 +97,12 @@
       "most-rules": 155,
       "cheapest": 10,
       "random(mean)": 25.7,
-      "greedy_ms": 2384,
-      "ilp_ms": 52
+      "random 2.5-97.5%": "4.5-63.8",
+      "greedy/random(mean)": 6.8,
+      "greedy_ms": 246,
+      "ilp_ms": 6,
+      "random_p2.5": 4.45,
+      "random_p97.5": 63.85
     },
     {
       "budget": 20,
@@ -79,9 +112,25 @@
       "most-rules": 185,
       "cheapest": 13,
       "random(mean)": 51.4,
-      "greedy_ms": 5880,
-      "ilp_ms": 58
+      "random 2.5-97.5%": "14.0-156.5",
+      "greedy/random(mean)": 3.9,
+      "greedy_ms": 531,
+      "ilp_ms": 9,
+      "random_p2.5": 14.0,
+      "random_p97.5": 156.52
     }
+  ],
+  "greedy_over_random_mean": [
+    3.91,
+    16.84
+  ],
+  "greedy_over_random_p97.5": [
+    1.0,
+    2.74
+  ],
+  "greedy_minus_most_rules": [
+    0,
+    31
   ],
   "greedy_plan": [
     {

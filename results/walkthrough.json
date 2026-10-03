@@ -1,0 +1,55 @@
+{
+  "generated": "2026-10-03",
+  "python": "3.12.14",
+  "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+  "provenance": {
+    "commit": "6ff466dd621526507cd859c89d765eb209dcf879",
+    "run_id": "37092934843",
+    "run_url": "https://github.com/rakshit-737/vantage/actions/runs/37092934843",
+    "workflow": "realdata",
+    "runner": "ubuntu24",
+    "python": "3.12.14",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39"
+  },
+  "org": "Acme Corp (synthetic, real catalog)",
+  "techniques": [
+    {
+      "technique": "T1003.001 OS Credential Dumping: LSASS Memory",
+      "claimed by (IG2 safeguards)": 14,
+      "live rules": 7,
+      "dead rules (deployed, log source missing)": 61,
+      "most common missing source": "`windows/process_creation` (28)",
+      "status": "defended"
+    },
+    {
+      "technique": "T1055 Process Injection",
+      "claimed by (IG2 safeguards)": 7,
+      "live rules": 0,
+      "dead rules (deployed, log source missing)": 29,
+      "most common missing source": "`windows/process_creation` (12)",
+      "status": "paper_only"
+    }
+  ],
+  "totals": {
+    "claimed_pct": 53.9,
+    "defended_pct": 17.6,
+    "paper_only": 253,
+    "dead_rules": 2132,
+    "spof": "windows/security",
+    "spof_kind": "log_source",
+    "spof_dark": 39,
+    "spof_pct": 5.6
+  },
+  "first_recommendation": {
+    "target": "windows/ps_script",
+    "cost": 1.15,
+    "rules_unlocked": 134,
+    "newly_detectable": 51,
+    "defended_before": 123,
+    "defended_before_pct": 17.6,
+    "defended_after_with_unlocked_rules": 153,
+    "defended_after_own_rules_only": 152,
+    "defended_after_pct": 22.0,
+    "defended_gain": 30
+  }
+}

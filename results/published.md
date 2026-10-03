@@ -20,3 +20,7 @@ Setup differences:
 - ATT&CK release: CTID labels target v16.1; we carry them to v19.2 and rank only techniques that existed in v16.1 (653 candidates).
 - Model: they use an SBERT ensemble; the numbers above use the encoder named in the row.
 - TRAM classifies CTI report sentences into about 50 techniques; its published scores come from a private 2023 dataset with unseeded splits, so there is no matching setup for control text.
+
+The VANTAGE rows are read from `results/crossframework.json` (run 37092934843 at commit `6ff466dd6215`).
+
+_Source: GitHub Actions `realdata` run [37092934843](https://github.com/rakshit-737/vantage/actions/runs/37092934843) at commit `6ff466dd6215` (Linux-6.17.0-1022-azure-x86_64-with-glibc2.39, Python 3.12.14)._
