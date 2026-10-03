@@ -51,7 +51,7 @@ class TransferMapper:
     def __init__(self, cat: Catalog, train: Sequence[Control], encoder: str = "tfidf",
                  model: str = DEFAULT_EMBED_MODEL, k_nn: int = 10, beta: float | None = None,
                  gamma: float | None = None, train_name: str = "train",
-                 bridge: MitigationBridgeMapper | None = None, universe: frozenset[str] | None = None):
+                 bridge: MitigationBridgeMapper | None = None, universe: frozenset[str] | None = None) -> None:
         """``universe`` restricts the candidate techniques (e.g. those that existed in the ATT&CK
         release a framework was mapped against); ``bridge`` lets callers share one encoder."""
         self.bridge = bridge or MitigationBridgeMapper(cat, encoder, model=model)
@@ -101,7 +101,8 @@ class TransferMapper:
         return [b[i] for i in self._keep]
 
     @staticmethod
-    def _combine(b, kn, pr, beta, gamma) -> list[float]:
+    def _combine(b: Sequence[float], kn: Sequence[float], pr: Sequence[float], beta: float,
+                 gamma: float) -> list[float]:
         return [x + beta * y + gamma * z for x, y, z in zip(b, kn, pr, strict=True)]
 
     # -- fitting ---------------------------------------------------------------------------------
@@ -159,20 +160,23 @@ class TransferMapper:
         return _top(self.ids, self.scores(text), k)
 
     def rank_for(self, control: Control, k: int) -> list[tuple[str, float]]:
+        """Top-k techniques for a control, leaving it out of the training labels."""
         return _top(self.ids, self.scores(control_text(control), exclude=control), k)
 
 
 class PriorTransferBaseline:
     """Labels-only transfer: rank techniques by how often the *training* framework maps them."""
 
-    def __init__(self, train: Sequence[Control], train_name: str = "train"):
+    def __init__(self, train: Sequence[Control], train_name: str = "train") -> None:
         self.train = list(train)
         self.name = f"prior-only[train={train_name}]"
 
     def rank_for(self, control: Control, k: int) -> list[tuple[str, float]]:
+        """Most frequent training techniques, excluding the query control's own labels."""
         c = Counter(t for x in self.train if x.id != control.id for t in x.mitigates)
         return [(t, float(n)) for t, n in sorted(c.items(), key=lambda x: (-x[1], x[0]))[:k] if n > 0]
 
     def rank(self, text: str, k: int = 5) -> list[tuple[str, float]]:
+        """Most frequent training techniques (the text is ignored)."""
         c = Counter(t for x in self.train for t in x.mitigates)
         return [(t, float(n)) for t, n in c.most_common(k)]

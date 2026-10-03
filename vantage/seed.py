@@ -144,6 +144,7 @@ _C = [
 
 
 def load_seed_catalog() -> Catalog:
+    """The bundled 33-technique toy catalog (offline demo and tests)."""
     cat = Catalog(
         techniques={t[0]: Technique(*t) for t in _T},
         controls={c[0]: Control(c[0], c[1], c[2], frozenset(c[3]), c[4]) for c in _C},

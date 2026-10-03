@@ -23,35 +23,44 @@ import random
 import re
 from collections import Counter
 from collections.abc import Iterable
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
-from .models import Catalog, Control
+from .models import Catalog, Control, Mitigation, Technique
+
+if TYPE_CHECKING:  # numpy only comes with the optional ml extra
+    import numpy as np
 
 _STOP = set("a an and the to of for in on or by as is are be with from such so that this "
             "can after into over all any its it via may use used using".split())
 
 
 def tokenize(text: str) -> list[str]:
+    """Lower-case word tokens without stop words, with crude plural stemming."""
     toks = [t for t in re.findall(r"[a-z0-9]+", text.lower()) if t not in _STOP and len(t) > 1]
     return [t[:-1] if t.endswith("s") and len(t) > 4 else t for t in toks]  # crude stemming
 
 
 class Mapper(Protocol):
+    """Anything that ranks ATT&CK techniques for a free-text control."""
     name: str
 
-    def rank(self, text: str, k: int = 5) -> list[tuple[str, float]]: ...
+    def rank(self, text: str, k: int = 5) -> list[tuple[str, float]]:
+        """Top-k ``(technique id, score)`` pairs for free text, best first."""
+        ...
 
 
-def technique_doc(t) -> str:
+def technique_doc(t: Technique) -> str:
+    """Text a technique is matched on (name weighted twice, then description)."""
     return f"{t.name}. {t.name}. {t.description}"
 
 
-def mitigation_doc(m) -> str:
+def mitigation_doc(m: Mitigation) -> str:
+    """Text a mitigation is matched on (name weighted twice, then description)."""
     return f"{m.name}. {m.name}. {m.description}"
 
 
 class _Tfidf:
-    def __init__(self, docs: list[str]):
+    def __init__(self, docs: list[str]) -> None:
         toks = [tokenize(d) for d in docs]
         df = Counter(tok for d in toks for tok in set(d))
         n = len(toks)
@@ -76,16 +85,19 @@ def _top(ids: list[str], scores: Iterable[float], k: int) -> list[tuple[str, flo
 
 
 class TfidfMapper:
+    """TF-IDF cosine between the control text and each technique's name and description."""
     name = "tfidf-direct"
 
-    def __init__(self, cat: Catalog):
+    def __init__(self, cat: Catalog) -> None:
         self.ids = list(cat.techniques)
         self.model = _Tfidf([technique_doc(t) for t in cat.techniques.values()])
 
     def scores(self, text: str) -> list[float]:
+        """Similarity to every technique, aligned with ``self.ids``."""
         return self.model.sims(text)
 
     def rank(self, text: str, k: int = 5) -> list[tuple[str, float]]:
+        """Top-k techniques for free text."""
         return _top(self.ids, self.scores(text), k)
 
 
@@ -103,7 +115,7 @@ class _Encoder:
     ``model`` may also be a local folder; ``VANTAGE_EMBED_MODEL`` overrides the default model."""
     _cache: dict = {}
 
-    def __init__(self, model: str):
+    def __init__(self, model: str) -> None:
         try:
             from sentence_transformers import SentenceTransformer
         except ImportError as e:  # pragma: no cover - optional
@@ -112,7 +124,7 @@ class _Encoder:
             self._cache[model] = SentenceTransformer(model, revision=MODEL_REVISIONS.get(model))
         self.m = self._cache[model]
 
-    def encode(self, texts: list[str]):
+    def encode(self, texts: list[str]) -> np.ndarray:  # (n, dim)
         return self.m.encode(texts, normalize_embeddings=True, batch_size=64, show_progress_bar=False)
 
 
@@ -120,16 +132,19 @@ DEFAULT_EMBED_MODEL = os.environ.get("VANTAGE_EMBED_MODEL") or "sentence-transfo
 
 
 class EmbeddingMapper:
-    def __init__(self, cat: Catalog, model: str = DEFAULT_EMBED_MODEL):
+    """Sentence-embedding cosine between the control text and each technique (``ml`` extra)."""
+    def __init__(self, cat: Catalog, model: str = DEFAULT_EMBED_MODEL) -> None:
         self.name = f"embed-direct[{model.split('/')[-1]}]"
         self.enc = _Encoder(model)
         self.ids = list(cat.techniques)
         self.mat = self.enc.encode([technique_doc(t) for t in cat.techniques.values()])
 
-    def scores(self, text: str):
+    def scores(self, text: str) -> np.ndarray:  # aligned with the catalog's techniques
+        """Similarity to every technique, aligned with ``self.ids``."""
         return self.mat @ self.enc.encode([text])[0]
 
     def rank(self, text: str, k: int = 5) -> list[tuple[str, float]]:
+        """Top-k techniques for free text."""
         return _top(self.ids, self.scores(text), k)
 
 
@@ -141,7 +156,7 @@ class MitigationBridgeMapper:
     """
 
     def __init__(self, cat: Catalog, encoder: str = "tfidf", alpha: float = 0.1,
-                 model: str = DEFAULT_EMBED_MODEL):
+                 model: str = DEFAULT_EMBED_MODEL) -> None:
         if not cat.mitigations:
             raise ValueError("catalog has no ATT&CK mitigations (use the real catalog)")
         self.name = f"mitigation-bridge[{encoder if encoder == 'tfidf' else model.split('/')[-1]}]"
@@ -178,6 +193,7 @@ class MitigationBridgeMapper:
         return out
 
     def rank(self, text: str, k: int = 5) -> list[tuple[str, float]]:
+        """Top-k techniques for free text."""
         return _top(self.ids, self.scores(text), k)
 
 
@@ -185,43 +201,48 @@ class PopularityBaseline:
     """Always predicts the techniques most often mapped by *other* controls (leave-one-out)."""
     name = "baseline-popularity"
 
-    def __init__(self, cat: Catalog):
+    def __init__(self, cat: Catalog) -> None:
         self.cat = cat
         self.counts = Counter(t for c in cat.controls.values() for t in c.mitigates)
 
     def rank_for(self, control: Control, k: int) -> list[tuple[str, float]]:
+        """Top-k techniques for a control from the other controls' labels (leave-one-out)."""
         c = self.counts.copy()
         c.subtract(control.mitigates)
         return [(t, float(n)) for t, n in sorted(c.items(), key=lambda x: (-x[1], x[0]))[:k] if n > 0]
 
     def rank(self, text: str, k: int = 5) -> list[tuple[str, float]]:
+        """Top-k techniques for free text."""
         return [(t, float(n)) for t, n in self.counts.most_common(k)]
 
 
 class RandomBaseline:
+    """Uniformly random ranking (seeded per text): the floor for the benchmark."""
     name = "baseline-random"
 
-    def __init__(self, cat: Catalog, seed: int = 0):
+    def __init__(self, cat: Catalog, seed: int = 0) -> None:
         self.ids = sorted(cat.techniques)
         self.seed = seed
 
     def rank(self, text: str, k: int = 5) -> list[tuple[str, float]]:
+        """Top-k techniques for free text."""
         # benchmark baseline, not a security use
         rng = random.Random(f"{self.seed}:{text}")  # nosec B311
         return [(t, 1.0) for t in rng.sample(self.ids, min(k, len(self.ids)))]
 
 
 def control_text(c: Control) -> str:
+    """Text a mapper sees for a control: title, then description if any."""
     return f"{c.title}. {c.text}" if c.text else c.title
 
 
-def _ranked(mapper, c: Control, depth: int) -> list[str]:
+def _ranked(mapper: Mapper, c: Control, depth: int) -> list[str]:
     if hasattr(mapper, "rank_for"):  # label-using mappers exclude the query control (leave-one-out)
         return [t for t, _ in mapper.rank_for(c, depth)]
     return [t for t, _ in mapper.rank(control_text(c), depth)]
 
 
-def per_control_scores(mapper, cat: Catalog, ks: tuple[int, ...] = (5, 10, 20, 50),
+def per_control_scores(mapper: Mapper, cat: Catalog, ks: tuple[int, ...] = (5, 10, 20, 50),
                        depth: int = 200) -> dict[str, list[float]]:
     """Per-control P@k, R@k and AP@depth against each control's `mitigates` set (controls
     with no mapped techniques are skipped). Lists are aligned by control."""
@@ -264,7 +285,7 @@ def paired_bootstrap_ci(a: list[float], b: list[float], n: int = 2000, seed: int
     return sum(d) / len(d), lo, hi
 
 
-def evaluate_mapper(mapper, cat: Catalog, ks: tuple[int, ...] = (5, 10, 20, 50),
+def evaluate_mapper(mapper: Mapper, cat: Catalog, ks: tuple[int, ...] = (5, 10, 20, 50),
                     depth: int = 200, ci: bool = False) -> dict:
     """Macro-averaged P@k, R@k and MAP@depth. With ci=True also adds `<metric>_ci` = 95%
     bootstrap interval over controls."""

@@ -48,10 +48,12 @@ def data_dir() -> Path:
 
 
 def processed_dir() -> Path:
+    """Folder for the built catalogs."""
     return data_dir() / "processed"
 
 
 def catalog_path() -> Path:
+    """Path of the built CIS catalog."""
     return processed_dir() / "catalog.json"
 
 
@@ -61,4 +63,5 @@ def nist_catalog_path() -> Path:
 
 
 def have_real_data() -> bool:
+    """True if the real catalog has been built."""
     return catalog_path().exists()

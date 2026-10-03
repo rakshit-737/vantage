@@ -27,6 +27,7 @@ def live_detections(cat: Catalog, deployed: set[str], ingested: set[str]) -> set
 
 @dataclass
 class CoverageResult:
+    """Per-technique status plus the claims and live rules behind it."""
     status: dict[str, CoverageStatus]
     claimed: dict[str, set[str]]          # technique -> controls claiming it
     detected_by: dict[str, set[str]]      # technique -> live detections
@@ -48,13 +49,16 @@ class CoverageResult:
         return self._confidence
 
     def by_status(self, s: CoverageStatus) -> list[str]:
+        """Technique ids with status ``s``, sorted."""
         return sorted(t for t, v in self.status.items() if v == s)
 
     @property
     def total(self) -> int:
+        """Number of techniques scored."""
         return len(self.status)
 
     def pct(self, s: CoverageStatus) -> float:
+        """Share of techniques with status ``s``, in percent."""
         return 100.0 * len(self.by_status(s)) / self.total if self.total else 0.0
 
     @property
@@ -65,6 +69,7 @@ class CoverageResult:
 
     @property
     def true_pct(self) -> float:
+        """Defended (claimed AND detectable) share, in percent."""
         return self.pct(CoverageStatus.DEFENDED)
 
     @property
@@ -76,9 +81,11 @@ class CoverageResult:
         return 100.0 * sum(self.confidence.get(t, 0.0) for t in self.status if self.claimed[t]) / self.total
 
     def detected_set(self) -> set[str]:
+        """Techniques with at least one live rule, whatever is claimed."""
         return {t for t, d in self.detected_by.items() if d}
 
     def summary(self) -> dict:
+        """Rounded headline numbers, status counts and dead rules (CLI and API output)."""
         return {
             "techniques": self.total,
             "claimed_pct": round(self.claimed_pct, 1),
@@ -97,6 +104,7 @@ def compute_coverage(
     deployed: set[str] | None = None,
     controls: set[str] | None = None,
 ) -> CoverageResult:
+    """Score every technique; keyword overrides replace the org's ingested, deployed or claimed sets."""
     ingested = org.ingested_log_sources if ingested is None else ingested
     deployed = org.deployed_detections if deployed is None else deployed
     controls = org.claimed_controls if controls is None else controls

@@ -18,6 +18,7 @@ _PARAM = re.compile(r"\{\{\s*insert:\s*param,\s*([\w.\-]+)\s*\}\}")
 
 
 def norm_id(oscal_id: str) -> str:
+    """OSCAL control id (``ac-2.1``) in CTID form (``AC-02(01)``)."""
     base, _, enh = oscal_id.strip().lower().partition(".")
     fam, _, num = base.partition("-")
     out = f"{fam.upper()}-{int(num):02d}"
@@ -26,6 +27,7 @@ def norm_id(oscal_id: str) -> str:
 
 @dataclass
 class OscalControl:
+    """One OSCAL rev5 control: title, statement text and SP 800-53B baselines."""
     id: str                  # AC-02 / AC-02(01)
     title: str
     family: str              # AC
@@ -57,6 +59,7 @@ def _walk(ctrl: dict, fam: str, fam_name: str, out: dict[str, OscalControl]) -> 
 
 
 def parse_catalog(doc: dict) -> dict[str, OscalControl]:
+    """Controls and enhancements from the OSCAL rev5 catalog, parameters substituted."""
     out: dict[str, OscalControl] = {}
     for g in doc["catalog"]["groups"]:
         for c in g.get("controls", []):
@@ -65,6 +68,7 @@ def parse_catalog(doc: dict) -> dict[str, OscalControl]:
 
 
 def parse_profile(doc: dict) -> set[str]:
+    """Control ids included by an OSCAL baseline profile."""
     ids: set[str] = set()
     for imp in doc["profile"].get("imports", []):
         for inc in imp.get("include-controls", []):
@@ -73,6 +77,7 @@ def parse_profile(doc: dict) -> set[str]:
 
 
 def load_catalog_with_baselines(catalog: str | Path, profiles: dict[str, str | Path]) -> dict[str, OscalControl]:
+    """OSCAL catalog with each control's SP 800-53B baseline membership."""
     with open(catalog, encoding="utf-8") as fh:
         ctrls = parse_catalog(json.load(fh))
     for name, p in profiles.items():

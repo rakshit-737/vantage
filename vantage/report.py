@@ -27,6 +27,7 @@ def tactic_table(cat: Catalog, cov: CoverageResult) -> list[dict]:
 
 
 def heatmap(cat: Catalog, cov: CoverageResult, max_cells: int = 150) -> str:
+    """Plain-text heatmap: cells for small catalogs, per-tactic bars for full ATT&CK."""
     if len(cat.techniques) > max_cells:  # full ATT&CK: per-tactic bar chart instead of cells
         lines = ["tactic                  defended  paper  det-only  blind  total  true%"]
         for r in tactic_table(cat, cov):
@@ -47,6 +48,7 @@ def heatmap(cat: Catalog, cov: CoverageResult, max_cells: int = 150) -> str:
 
 
 def audit_report(cat: Catalog, org: OrgPosture) -> str:
+    """The compliant-but-undetectable audit report as Markdown."""
     cov = compute_coverage(cat, org)
     s = cov.summary()
     zt = score_zero_trust(org.zero_trust, cat)

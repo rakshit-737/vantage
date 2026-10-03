@@ -11,6 +11,7 @@ Every technique id is carried forward to the catalog's ATT&CK release through re
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 
 from . import paths
@@ -24,6 +25,7 @@ TEXT_RICH = ("CIS v8", "NIST 800-53", "CSA-CCM-4.1", "CRI-2.1")   # have more th
 
 @dataclass
 class Framework:
+    """One control framework's controls, carried forward to the current ATT&CK release."""
     name: str
     controls: dict[str, Control]
     stats: dict = field(default_factory=dict)
@@ -31,14 +33,16 @@ class Framework:
 
     @property
     def mapped(self) -> list[Control]:
+        """Controls with at least one mapped technique."""
         return [c for c in self.controls.values() if c.mitigates]
 
     @property
     def techniques(self) -> set[str]:
+        """Every technique some control of the framework maps to."""
         return {t for c in self.controls.values() for t in c.mitigates}
 
 
-def _carry(ids, attack: AttackData, stats: Counter) -> frozenset[str]:
+def _carry(ids: Iterable[str], attack: AttackData, stats: Counter) -> frozenset[str]:
     out = set()
     for t in ids:
         new = attack.resolve(t)

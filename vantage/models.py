@@ -9,10 +9,11 @@ TECHNIQUE_RE = re.compile(r"^T\d{4}(\.\d{3})?$")
 
 
 class ValidationError(ValueError):
-    pass
+    """Invalid catalog, posture file or selector (the CLI prints it and exits 2)."""
 
 
 class CoverageStatus(str, Enum):
+    """Status of one technique for one org."""
     DEFENDED = "defended"            # control claims it AND live detection covers it
     PAPER_ONLY = "paper_only"        # control claims it, no live detection ("compliant but blind")
     DETECTED_ONLY = "detected_only"  # live detection, but no control claims it
@@ -21,6 +22,7 @@ class CoverageStatus(str, Enum):
 
 @dataclass(frozen=True)
 class Technique:
+    """An ATT&CK (sub-)technique."""
     id: str
     name: str
     tactic: str
@@ -29,6 +31,7 @@ class Technique:
 
     @property
     def all_tactics(self) -> tuple[str, ...]:
+        """Every tactic the technique belongs to."""
         return self.tactics or (self.tactic,)
 
     def __post_init__(self) -> None:
@@ -38,6 +41,7 @@ class Technique:
 
 @dataclass(frozen=True)
 class Control:
+    """A framework control and the techniques its official mapping assigns to it."""
     id: str
     framework: str
     title: str
@@ -50,6 +54,7 @@ class Control:
 
 @dataclass(frozen=True)
 class LogSource:
+    """A telemetry source that Sigma rules depend on."""
     id: str
     name: str
     cost: float = 1.0  # relative onboarding cost for the recommender
@@ -61,6 +66,7 @@ class LogSource:
 
 @dataclass(frozen=True)
 class Detection:
+    """A detection rule, its techniques and the log sources it needs."""
     id: str
     title: str
     techniques: frozenset[str]
@@ -79,12 +85,14 @@ class Detection:
 
 @dataclass(frozen=True)
 class Segment:
+    """A network segment and its criticality (1-3)."""
     name: str
     criticality: int = 1  # 1..3
 
 
 @dataclass
 class ZeroTrustFacts:
+    """Declared segmentation and identity facts for the Zero-Trust score."""
     segments: list[Segment] = field(default_factory=list)
     # pairs of segment names allowed to talk freely (flat network = many pairs)
     open_flows: set[frozenset[str]] = field(default_factory=set)
@@ -96,6 +104,7 @@ class ZeroTrustFacts:
     total_accounts: int = 1
 
     def validate(self) -> None:
+        """Raise ValidationError for unknown segments or out-of-range values."""
         names = {s.name for s in self.segments}
         for flow in self.open_flows:
             if len(flow) != 2 or not flow <= names:
@@ -129,6 +138,7 @@ class Mitigation:
 
 @dataclass
 class Catalog:
+    """Techniques, controls, log sources, detections and mitigations, with provenance."""
     techniques: dict[str, Technique]
     controls: dict[str, Control]
     log_sources: dict[str, LogSource]
@@ -137,6 +147,7 @@ class Catalog:
     meta: dict = field(default_factory=dict)  # provenance: versions, counts, sources
 
     def validate(self) -> None:
+        """Raise ValidationError if any edge points at an unknown id."""
         for c in self.controls.values():
             missing = c.mitigates - self.techniques.keys()
             if missing:
@@ -148,6 +159,7 @@ class Catalog:
                 raise ValidationError(f"detection {d.id} requires unknown log source")
 
     def validate_org(self, org: OrgPosture) -> None:
+        """Raise ValidationError if the posture names ids the catalog does not have."""
         for kind, ids, known in (
             ("control", org.claimed_controls, self.controls),
             ("log source", org.ingested_log_sources, self.log_sources),

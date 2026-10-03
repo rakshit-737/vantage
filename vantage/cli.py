@@ -5,6 +5,7 @@ import argparse
 import copy
 import json
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 from . import __version__, automap
@@ -13,7 +14,7 @@ from .coverage import compute_coverage
 from .failure import rank_control_spofs, rank_spofs, simulate_failure
 from .graph import build_graph, to_cypher, to_json
 from .io import load_org, save_org
-from .models import CoverageStatus, ValidationError
+from .models import Catalog, CoverageStatus, OrgPosture, ValidationError
 from .recommend import recommend
 from .report import audit_report, heatmap
 from .selectors import expand_org
@@ -24,15 +25,16 @@ REAL_DEMO_ORG = Path(__file__).resolve().parent / "postures" / "acme-real.yaml" 
 NIST_DEMO_ORG = REAL_DEMO_ORG.with_name("acme-nist.yaml")
 
 
-def _catalog(args):
+def _catalog(args: argparse.Namespace) -> Catalog:
     return load_catalog(getattr(args, "catalog", None))
 
 
-def is_real(args) -> bool:
+def is_real(args: argparse.Namespace) -> bool:
+    """True unless the offline seed catalog is selected."""
     return getattr(args, "catalog", None) not in (None, "", "seed")
 
 
-def _org(args):
+def _org(args: argparse.Namespace) -> tuple[Catalog, OrgPosture]:
     cat = _catalog(args)
     if getattr(args, "org", None):
         org = load_org(args.org)
@@ -45,7 +47,8 @@ def _org(args):
     return cat, org
 
 
-def cmd_coverage(a):
+def cmd_coverage(a: argparse.Namespace) -> None:
+    """``vantage coverage``: summary JSON and a per-tactic heatmap."""
     cat, org = _org(a)
     cov = compute_coverage(cat, org)
     s = cov.summary()
@@ -55,7 +58,8 @@ def cmd_coverage(a):
     print(heatmap(cat, cov))
 
 
-def cmd_failure(a):
+def cmd_failure(a: argparse.Namespace) -> None:
+    """``vantage failure``: single points of failure, or the impact of failing one node."""
     cat, org = _org(a)
     if a.node:
         impacts = [simulate_failure(cat, org, a.kind, a.node)]
@@ -69,7 +73,8 @@ def cmd_failure(a):
               f"({i.pct_of_matrix}%)  {shown}")
 
 
-def cmd_recommend(a):
+def cmd_recommend(a: argparse.Namespace) -> None:
+    """``vantage recommend``: greedy set-cover recommendations."""
     cat, org = _org(a)
     actions = ("onboard_log_source",) if a.log_sources_only else ("deploy_detection", "onboard_log_source")
     for n, r in enumerate(recommend(cat, org, budget=a.budget, max_steps=a.steps, actions=actions), 1):
@@ -77,7 +82,8 @@ def cmd_recommend(a):
         print(f"{n}. {r.action:<19} {r.target:<28} cost={r.cost:<5g} +{len(r.new_techniques)} {shown}")
 
 
-def cmd_zt(a):
+def cmd_zt(a: argparse.Namespace) -> None:
+    """``vantage zt``: Zero-Trust score and its components."""
     cat, org = _org(a)
     s = score_zero_trust(org.zero_trust, cat)
     print(json.dumps({"score": s.score, "components": s.components,
@@ -86,7 +92,8 @@ def cmd_zt(a):
                      indent=2))
 
 
-def cmd_report(a):
+def cmd_report(a: argparse.Namespace) -> None:
+    """``vantage report``: compliant-but-undetectable audit report (Markdown and/or PDF)."""
     cat, org = _org(a)
     text = audit_report(cat, org)
     if a.pdf:
@@ -101,7 +108,8 @@ def cmd_report(a):
         print(text)
 
 
-def make_mapper(cat, method: str):
+def make_mapper(cat: Catalog, method: str) -> automap.Mapper:
+    """Auto-mapper for ``--method`` (tfidf, embed, bridge, bridge-embed)."""
     if method == "embed":
         return automap.EmbeddingMapper(cat)
     if method in ("bridge", "bridge-embed"):
@@ -109,7 +117,8 @@ def make_mapper(cat, method: str):
     return automap.TfidfMapper(cat)
 
 
-def cmd_automap(a):
+def cmd_automap(a: argparse.Namespace) -> None:
+    """``vantage automap``: rank techniques for a control text, or evaluate on the catalog."""
     cat = _catalog(a)
     if a.eval:
         print(json.dumps(automap.evaluate(cat, a.k), indent=2))
@@ -118,13 +127,15 @@ def cmd_automap(a):
         print(f"{tid:<10} {score:.3f}  {cat.techniques[tid].name}")
 
 
-def cmd_graph(a):
+def cmd_graph(a: argparse.Namespace) -> None:
+    """``vantage graph``: NetworkX JSON or a Cypher script."""
     cat, org = _org(a)
     g = build_graph(cat, org)
     print(to_cypher(g) if a.format == "cypher" else to_json(g))
 
 
-def cmd_navigator(a):
+def cmd_navigator(a: argparse.Namespace) -> None:
+    """``vantage navigator``: ATT&CK Navigator layer JSON."""
     from .navigator import to_layer_json
     cat, org = _org(a)
     text = to_layer_json(cat, compute_coverage(cat, org), f"VANTAGE: {org.name}")
@@ -135,7 +146,8 @@ def cmd_navigator(a):
         print(text)
 
 
-def cmd_serve(a):  # pragma: no cover - interactive
+def cmd_serve(a: argparse.Namespace) -> None:  # pragma: no cover - interactive
+    """``vantage serve``: FastAPI + web UI, localhost and token-protected by default."""
     import os
 
     import uvicorn
@@ -149,14 +161,16 @@ def cmd_serve(a):  # pragma: no cover - interactive
     uvicorn.run(app, host=a.host, port=a.port, server_header=False)
 
 
-def cmd_synth(a):
+def cmd_synth(a: argparse.Namespace) -> None:
+    """``vantage synth``: write a synthetic posture YAML."""
     cat = _catalog(a)
     org = demo_org() if a.demo else random_org(cat, a.seed, a.maturity)
     save_org(org, a.out)
     print(f"wrote {a.out}")
 
 
-def cmd_demo(a):
+def cmd_demo(a: argparse.Namespace) -> None:
+    """``vantage demo``: the five demo scenarios on the selected catalog."""
     cat, org = _org(a)
     cov = compute_coverage(cat, org)
     s = cov.summary()
@@ -215,13 +229,15 @@ def _positive_float(text: str) -> float:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """The ``vantage`` argument parser with every subcommand."""
     p = argparse.ArgumentParser(prog="vantage", description=__doc__)
     p.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True)
     cat_help = ("catalog: 'seed' (offline toy, default), 'real' (ATT&CK + CIS + Sigma built by "
                 "`python -m vantage.ingest.build`), 'nist' (same, NIST 800-53 rev5 controls) or a JSON path")
 
-    def add(name, fn, help_, org=True):
+    def add(name: str, fn: Callable[[argparse.Namespace], None], help_: str,
+            org: bool = True) -> argparse.ArgumentParser:
         sp = sub.add_parser(name, help=help_)
         if org:
             sp.add_argument("--org", help="org posture YAML (default: built-in demo org)")

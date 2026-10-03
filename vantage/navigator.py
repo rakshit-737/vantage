@@ -13,6 +13,7 @@ SCORES = {CoverageStatus.DEFENDED: 3, CoverageStatus.DETECTED_ONLY: 2,
 
 
 def to_layer(cat: Catalog, cov: CoverageResult, name: str = "VANTAGE coverage") -> dict:
+    """ATT&CK Navigator layer (v4.5 format) coloured by coverage status."""
     techs = []
     for tid, st in sorted(cov.status.items()):
         t = cat.techniques[tid]
@@ -35,4 +36,5 @@ def to_layer(cat: Catalog, cov: CoverageResult, name: str = "VANTAGE coverage") 
 
 
 def to_layer_json(cat: Catalog, cov: CoverageResult, name: str = "VANTAGE coverage") -> str:
+    """``to_layer`` serialised as JSON."""
     return json.dumps(to_layer(cat, cov, name), indent=1)

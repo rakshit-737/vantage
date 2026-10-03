@@ -18,6 +18,7 @@ _HTML = re.compile(r"</?code>")
 
 
 def clean_text(s: str) -> str:
+    """ATT&CK prose without citation markers and Markdown links."""
     s = _CITATION.sub("", s or "")
     s = _MDLINK.sub(r"\1", s)
     s = _HTML.sub("", s)
@@ -33,6 +34,7 @@ def _ext_id(obj: dict) -> str | None:
 
 @dataclass
 class AttackData:
+    """Techniques, mitigations and revoked-by links parsed from one ATT&CK STIX bundle."""
     version: str
     techniques: dict[str, dict] = field(default_factory=dict)        # active only
     mitigations: dict[str, dict] = field(default_factory=dict)       # active only
@@ -52,6 +54,7 @@ class AttackData:
 
 
 def parse_bundle(bundle: dict, version: str = "") -> AttackData:
+    """Parse an ATT&CK Enterprise STIX 2.1 bundle (already loaded as JSON)."""
     objs = bundle["objects"]
     by_stix = {o["id"]: o for o in objs}
     data = AttackData(version=version)
@@ -120,5 +123,6 @@ def parse_bundle(bundle: dict, version: str = "") -> AttackData:
 
 
 def load_attack(path: str | Path, version: str = "") -> AttackData:
+    """Read and parse an ATT&CK Enterprise STIX bundle from disk."""
     with open(path, encoding="utf-8") as fh:
         return parse_bundle(json.load(fh), version)

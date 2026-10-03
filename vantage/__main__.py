@@ -1,3 +1,4 @@
+"""``python -m vantage``: run the command-line interface."""
 import sys
 
 from .cli import main

@@ -15,6 +15,7 @@ Sigma status or SP 800-53B baseline name.
 """
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable
 from fnmatch import fnmatchcase
 
 from .models import Catalog, OrgPosture, ValidationError
@@ -62,7 +63,8 @@ def _match_control(cat: Catalog, cid: str, term: str) -> bool:
     raise ValidationError(f"unknown control selector {term!r}")
 
 
-def _expand(ids: set[str], universe, matcher, kind: str) -> set[str]:
+def _expand(ids: set[str], universe: Iterable[str], matcher: Callable[[str, str], bool],
+            kind: str) -> set[str]:
     out: set[str] = set()
     for entry in sorted(ids):
         if entry.startswith("@"):

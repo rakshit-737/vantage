@@ -5,6 +5,7 @@ from html import escape
 
 
 def markdown_to_pdf(md: str, path: str, max_table_rows: int = 400) -> None:
+    """Render the Markdown audit report to PDF (``report`` extra: reportlab)."""
     try:
         from reportlab.lib import colors
         from reportlab.lib.pagesizes import A4, landscape
@@ -24,7 +25,7 @@ def markdown_to_pdf(md: str, path: str, max_table_rows: int = 400) -> None:
         parts = s.split("`")
         return "".join(f"<font face='Courier'>{p}</font>" if i % 2 else p for i, p in enumerate(parts))
 
-    def flush_table():
+    def flush_table() -> None:
         if not table:
             return
         rows = [r for r in table if not set("".join(r)) <= set("- :")]

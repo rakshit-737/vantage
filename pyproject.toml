@@ -56,7 +56,13 @@ target-version = "py310"
 
 [tool.ruff.lint]
 # Explicit rule set so results do not change when ruff's defaults change between versions.
-select = ["E", "F", "W", "I", "UP", "B"]
+# The package itself must be fully annotated (ANN) and document every public object (D1);
+# magic methods and __init__ are documented on their class.
+select = ["E", "F", "W", "I", "UP", "B", "ANN", "D1"]
+ignore = ["D105", "D107"]
 
 [tool.ruff.lint.per-file-ignores]
 "vantage/seed.py" = ["E501"]  # data table
+"tests/**" = ["ANN", "D1"]
+"benchmarks/**" = ["ANN", "D1"]
+"scripts/**" = ["ANN", "D1"]

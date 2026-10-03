@@ -19,6 +19,7 @@ from .models import Catalog, OrgPosture
 
 @dataclass(frozen=True)
 class FailureImpact:
+    """Techniques that lose their defence (or claim) when one node fails."""
     kind: str                  # "log_source" | "detection" | "control"
     node: str
     techniques_gone_dark: tuple[str, ...]

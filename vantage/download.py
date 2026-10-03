@@ -100,6 +100,7 @@ SHA256.update({f"{paths.CTID_DIR}/{f}": h for f, h in _CTID_SHA.items()})
 
 
 def sha256(p: Path) -> str:
+    """Hex sha256 of a file, streamed."""
     h = hashlib.sha256()
     with open(p, "rb") as fh:
         for chunk in iter(lambda: fh.read(1 << 20), b""):
@@ -108,6 +109,7 @@ def sha256(p: Path) -> str:
 
 
 def fetch(url: str, dest: Path, retries: int = 30) -> None:
+    """Resumable HTTPS download to ``dest`` (via a ``.part`` file), with retries."""
     part = dest.with_suffix(dest.suffix + ".part")
     if not url.startswith("https://"):
         raise ValueError(f"refusing non-https URL {url}")
@@ -131,6 +133,7 @@ def fetch(url: str, dest: Path, retries: int = 30) -> None:
 
 
 def main() -> int:
+    """Download and verify every pinned dataset; exit 1 on any sha256 mismatch."""
     ap = argparse.ArgumentParser(description="Download and sha256-verify the pinned public datasets.")
     ap.add_argument("--dest", default=os.environ.get("VANTAGE_DATA_DIR") or str(paths.data_dir()),
                     help="data folder (default: $VANTAGE_DATA_DIR or the default data dir)")

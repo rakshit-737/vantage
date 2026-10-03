@@ -13,12 +13,14 @@ LATERAL_TACTICS = {"lateral-movement", "discovery"}
 
 @dataclass(frozen=True)
 class ZTScore:
+    """Zero-Trust score (0-100), its components and the exposed lateral techniques."""
     score: float
     components: dict[str, float]
     exposed_lateral_techniques: tuple[str, ...]
 
 
 def segmentation_score(zt: ZeroTrustFacts) -> float:
+    """1 minus the criticality-weighted share of segment pairs with open flows."""
     crit = {s.name: s.criticality for s in zt.segments}
     pairs = [frozenset(p) for p in combinations(sorted(crit), 2)]
     if not pairs:
@@ -30,6 +32,7 @@ def segmentation_score(zt: ZeroTrustFacts) -> float:
 
 
 def score_zero_trust(zt: ZeroTrustFacts, cat: Catalog | None = None) -> ZTScore:
+    """Score segmentation, MFA, PAM, device posture and account hygiene."""
     zt.validate()
     comps = {
         "segmentation": segmentation_score(zt),

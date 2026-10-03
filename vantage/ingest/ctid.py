@@ -21,6 +21,7 @@ POSITIVE = {"mitigates", "technique_scores", "technique_score"}
 
 @dataclass
 class CtidCapability:
+    """One CTID Mappings Explorer capability (control) and its techniques."""
     id: str
     name: str
     group: str
@@ -31,6 +32,7 @@ class CtidCapability:
 
 
 def parse_ctid(doc: dict) -> tuple[dict[str, CtidCapability], dict]:
+    """Capabilities and metadata from a Mappings Explorer JSON document (comments dropped)."""
     md = doc.get("metadata", {}) or {}
     groups = md.get("capability_groups", {}) or {}
     out: dict[str, CtidCapability] = {}
@@ -60,5 +62,6 @@ def parse_ctid(doc: dict) -> tuple[dict[str, CtidCapability], dict]:
 
 
 def load_ctid(path: str | Path) -> tuple[dict[str, CtidCapability], dict]:
+    """Read a Mappings Explorer JSON file."""
     with open(path, encoding="utf-8") as fh:
         return parse_ctid(json.load(fh))

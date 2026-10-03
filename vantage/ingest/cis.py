@@ -7,6 +7,7 @@ committed. We read the "V8-ATT&CK Low (Sub-)Techniques" sheet: one row per
 """
 from __future__ import annotations
 
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -15,6 +16,7 @@ SHEET = "V8-ATT&CK Low (Sub-)Techniques"
 
 @dataclass
 class Safeguard:
+    """One CIS v8 safeguard with its mapped ATT&CK (sub-)techniques."""
     id: str                 # e.g. "CIS-4.1"
     control: int
     title: str
@@ -25,16 +27,17 @@ class Safeguard:
     techniques: set[str] = field(default_factory=set)  # ATT&CK v8.2 ids
 
 
-def _norm(v) -> str:
+def _norm(v: object) -> str:
     return "" if v is None else str(v).strip()
 
 
-def parse_rows(rows) -> dict[str, Safeguard]:
+def parse_rows(rows: Iterable[Sequence[object]]) -> dict[str, Safeguard]:
+    """Safeguards from the rows of the CIS master-mapping sheet (first row = header)."""
     rows = iter(rows)
     header = [_norm(c) for c in next(rows)]
     col = {h: i for i, h in enumerate(header) if h}
 
-    def g(r, name):
+    def g(r: Sequence[object], name: str) -> str:
         i = col.get(name)
         return _norm(r[i]) if i is not None and i < len(r) else ""
 
@@ -56,6 +59,7 @@ def parse_rows(rows) -> dict[str, Safeguard]:
 
 
 def load_cis(path: str | Path) -> dict[str, Safeguard]:
+    """Read the CIS v8 -> ATT&CK workbook (``data`` extra: openpyxl)."""
     import openpyxl  # optional dependency ([data] extra)
 
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)

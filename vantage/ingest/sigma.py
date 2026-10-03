@@ -20,6 +20,7 @@ USABLE_STATUS = {"stable", "test", "experimental"}
 
 @dataclass(frozen=True)
 class SigmaRule:
+    """The fields of a Sigma rule VANTAGE uses (id, techniques, log source, level, status)."""
     id: str
     title: str
     status: str
@@ -30,12 +31,14 @@ class SigmaRule:
 
 
 def logsource_id(ls: dict | None) -> str:
+    """Log-source id: the ``product``, ``category`` and ``service`` of a Sigma ``logsource`` joined by ``/``."""
     ls = ls or {}
     parts = [str(ls[k]).strip().lower() for k in ("product", "category", "service") if ls.get(k)]
     return "/".join(parts) or "unknown"
 
 
 def parse_rule(doc: dict, path: str = "") -> SigmaRule | None:
+    """SigmaRule from a parsed YAML document, or None if it is not a usable rule."""
     if not isinstance(doc, dict) or "logsource" not in doc or "title" not in doc:
         return None
     techs = sorted({m.group(1).upper() for t in doc.get("tags") or []
@@ -59,6 +62,7 @@ def _docs(text: str) -> Iterator[dict]:
 
 
 def iter_rule_texts(source: str | Path) -> Iterator[tuple[str, str]]:
+    """(path, YAML text) of every rule in a SigmaHQ release zip or folder."""
     source = Path(source)
     if source.is_dir():
         for p in sorted(source.rglob("*.yml")):
@@ -71,6 +75,7 @@ def iter_rule_texts(source: str | Path) -> Iterator[tuple[str, str]]:
 
 
 def load_rules(source: str | Path, statuses: Iterable[str] = USABLE_STATUS) -> list[SigmaRule]:
+    """Parse every rule with one of the given statuses (deprecated/unsupported folders skipped)."""
     statuses = set(statuses)
     out = []
     for name, text in iter_rule_texts(source):
@@ -87,6 +92,7 @@ def load_rules(source: str | Path, statuses: Iterable[str] = USABLE_STATUS) -> l
 # 1.0 = already-standard OS/cloud audit log; 1.5 = needs an agent/config such as Sysmon or a
 # proxy tap; 2.0 = heavier telemetry (auditd rules, full EDR, packet capture/Zeek).
 def logsource_cost(ls_id: str) -> float:
+    """Assumed relative onboarding cost of a log source (ADR 0004)."""
     p = ls_id.split("/")
     prod = p[0]
     if prod == "windows":

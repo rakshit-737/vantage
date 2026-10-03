@@ -14,6 +14,7 @@ from pathlib import Path
 
 @dataclass
 class NistControl:
+    """One NIST SP 800-53 rev5 control with its CTID-mapped techniques."""
     id: str                 # e.g. "NIST-AC-2"
     control: str            # e.g. "AC-2"
     family: str             # e.g. "AC"
@@ -23,6 +24,7 @@ class NistControl:
 
 
 def parse_mapping(doc: dict) -> tuple[dict[str, NistControl], dict]:
+    """Controls and metadata from the CTID NIST 800-53 -> ATT&CK mapping."""
     families = doc.get("metadata", {}).get("capability_groups", {}) or {}
     out: dict[str, NistControl] = {}
     skipped = 0
@@ -45,5 +47,6 @@ def parse_mapping(doc: dict) -> tuple[dict[str, NistControl], dict]:
 
 
 def load_nist(path: str | Path) -> tuple[dict[str, NistControl], dict]:
+    """Read the CTID NIST 800-53 -> ATT&CK mapping file."""
     with open(path, encoding="utf-8") as fh:
         return parse_mapping(json.load(fh))

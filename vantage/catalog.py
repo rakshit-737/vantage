@@ -12,6 +12,7 @@ from .seed import load_seed_catalog
 
 
 def catalog_from_dict(d: dict) -> Catalog:
+    """Build and validate a ``Catalog`` from its JSON form."""
     cat = Catalog(
         techniques={k: Technique(v["id"], v["name"], v["tactic"], v.get("description", ""),
                                  tuple(v.get("tactics", ()))) for k, v in d["techniques"].items()},

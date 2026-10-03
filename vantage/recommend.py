@@ -16,6 +16,7 @@ from .models import Catalog, OrgPosture
 
 @dataclass(frozen=True)
 class Recommendation:
+    """One recommended action, its cost and the techniques it makes detectable."""
     action: str
     target: str
     cost: float
@@ -24,6 +25,7 @@ class Recommendation:
 
     @property
     def ratio(self) -> float:
+        """New techniques per unit cost (the greedy criterion)."""
         return len(self.new_techniques) / self.cost
 
 

@@ -14,6 +14,7 @@ from .models import Catalog, OrgPosture
 
 
 def build_graph(cat: Catalog, org: OrgPosture | None = None) -> nx.DiGraph:
+    """Control -> Technique <- Detection <- LogSource graph, with org state as node attributes."""
     g = nx.DiGraph()
     cov = compute_coverage(cat, org) if org else None
     for t in cat.techniques.values():
@@ -38,10 +39,12 @@ def build_graph(cat: Catalog, org: OrgPosture | None = None) -> nx.DiGraph:
 
 
 def techniques_reachable_from(g: nx.DiGraph, node: str) -> set[str]:
+    """Technique nodes downstream of ``node``."""
     return {n for n in nx.descendants(g, node) if g.nodes[n]["kind"] == "technique"}
 
 
 def to_json(g: nx.DiGraph) -> str:
+    """Node-link JSON of the graph."""
     return json.dumps(nx.node_link_data(g, edges="links"), indent=2, default=str)
 
 

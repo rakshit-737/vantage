@@ -31,7 +31,7 @@ from pydantic import BaseModel, Field, StringConstraints
 
 from . import __version__
 from .catalog import load_catalog
-from .coverage import compute_coverage
+from .coverage import CoverageResult, compute_coverage
 from .failure import rank_control_spofs, rank_spofs
 from .io import load_org
 from .models import CoverageStatus, OrgPosture
@@ -124,14 +124,14 @@ _HEADERS = [(b"content-security-policy", b"default-src 'self'; frame-ancestors '
 
 
 class _SecurityHeaders:
-    def __init__(self, app):
+    def __init__(self, app: Callable) -> None:
         self.app = app
 
-    async def __call__(self, scope, receive, send):
+    async def __call__(self, scope: dict, receive: Callable, send: Callable) -> None:
         if scope["type"] != "http":
             return await self.app(scope, receive, send)
 
-        async def send_h(msg):
+        async def send_h(msg: dict) -> None:
             if msg["type"] == "http.response.start":
                 msg["headers"] = list(msg.get("headers", [])) + _HEADERS
             await send(msg)
@@ -179,7 +179,7 @@ def create_app(catalog: str | None = "seed", org_path: str | None = None, token:
                 o.deployed_detections = set(cat.detections)
         return o
 
-    def matrix(cov) -> list[dict]:
+    def matrix(cov: CoverageResult) -> list[dict]:
         order = cat.meta.get("tactic_order") or sorted({x for t in cat.techniques.values()
                                                         for x in t.all_tactics})
         subs: dict[str, list[str]] = {}
@@ -215,7 +215,7 @@ def create_app(catalog: str | None = "seed", org_path: str | None = None, token:
                 "zero_trust": score_zero_trust(o.zero_trust, cat).score}
 
     @app.get("/api/meta", dependencies=api)
-    def meta():
+    def meta() -> dict:
         return {
             "version": __version__, "org": org.name,
             "catalog": {"techniques": len(cat.techniques), "controls": len(cat.controls),
@@ -231,22 +231,22 @@ def create_app(catalog: str | None = "seed", org_path: str | None = None, token:
         }
 
     @app.get("/api/coverage", dependencies=api)
-    def coverage_get():
+    def coverage_get() -> dict:
         return coverage_payload(org)
 
     @app.post("/api/coverage", dependencies=api)
-    def coverage_post(w: WhatIf):
+    def coverage_post(w: WhatIf) -> dict:
         return coverage_payload(apply(w))
 
     @app.get("/api/technique/{tid}", dependencies=api)
-    def technique(tid: str):
+    def technique(tid: str) -> dict:
         t = cat.techniques.get(tid.upper())
         if not t:
             raise HTTPException(404, "unknown technique")
         cov = compute_coverage(cat, org)
         rel = [x for x in cat.techniques if x == t.id or x.startswith(t.id + ".")]
 
-        def det(d):
+        def det(d: str) -> dict:
             x = cat.detections[d]
             return {"id": d, "title": x.title, "level": x.level, "requires": sorted(x.requires)}
         return {
@@ -261,7 +261,7 @@ def create_app(catalog: str | None = "seed", org_path: str | None = None, token:
 
     @app.post("/api/failure", dependencies=api)
     def failure(w: WhatIf | None = None, top: int = Query(10, ge=1, le=100),
-                kind: str = Query("detection", pattern="^(detection|control)$")):
+                kind: str = Query("detection", pattern="^(detection|control)$")) -> list[dict]:
         rank = rank_control_spofs if kind == "control" else rank_spofs
         return [{"kind": i.kind, "node": i.node, "dark": len(i.techniques_gone_dark),
                  "pct": i.pct_of_matrix, "techniques": list(i.techniques_gone_dark[:40])}
@@ -269,14 +269,14 @@ def create_app(catalog: str | None = "seed", org_path: str | None = None, token:
 
     @app.post("/api/recommend", dependencies=api)
     def recs(w: WhatIf | None = None, steps: int = Query(5, ge=1, le=25),
-             log_sources_only: bool = True, budget: float | None = Query(None, gt=0)):
+             log_sources_only: bool = True, budget: float | None = Query(None, gt=0)) -> list[dict]:
         acts = ("onboard_log_source",) if log_sources_only else ("deploy_detection", "onboard_log_source")
         return [{"action": r.action, "target": r.target, "cost": r.cost, "new": len(r.new_techniques),
                  "techniques": list(r.new_techniques[:40]), "enables": len(r.enables)}
                 for r in recommend(cat, apply(w), max_steps=steps, budget=budget, actions=acts)]
 
     @app.get("/api/zt", dependencies=api)
-    def zt():
+    def zt() -> dict:
         s = score_zero_trust(org.zero_trust, cat)
         return {"score": s.score, "components": s.components,
                 "exposed_lateral_techniques": list(s.exposed_lateral_techniques)}
@@ -286,7 +286,7 @@ def create_app(catalog: str | None = "seed", org_path: str | None = None, token:
     @app.get("/api/automap", dependencies=api)
     def automap_(text: str = Query(..., min_length=3, max_length=4000),
                  method: str = Query("tfidf", pattern="^(tfidf|embed|bridge|bridge-embed)$"),
-                 k: int = Query(10, ge=1, le=50)):
+                 k: int = Query(10, ge=1, le=50)) -> list[dict]:
         from .cli import make_mapper
         if method.startswith("bridge") and not cat.mitigations:
             method = "tfidf"
@@ -298,19 +298,19 @@ def create_app(catalog: str | None = "seed", org_path: str | None = None, token:
         return [{"id": t, "name": cat.techniques[t].name, "score": s} for t, s in mappers[method].rank(text, k)]
 
     @app.get("/api/report", dependencies=api, response_class=PlainTextResponse)
-    def report():
+    def report() -> str:
         return audit_report(cat, org)
 
     @app.get("/api/navigator", dependencies=api)
-    def navigator():
+    def navigator() -> dict:
         return to_layer(cat, compute_coverage(cat, org), f"VANTAGE: {org.name}")
 
     @app.get("/healthz")
-    def healthz():
+    def healthz() -> dict:
         return {"ok": True}
 
     @app.get("/", include_in_schema=False)
-    def index():
+    def index() -> FileResponse:
         return FileResponse(WEB / "index.html")
 
     app.mount("/static", StaticFiles(directory=WEB), name="static")

@@ -42,6 +42,7 @@ def forward_cis(safeguards: dict[str, Safeguard], attack: AttackData) -> tuple[d
 
 def build_catalog(attack: AttackData, safeguards: dict[str, Safeguard], rules: list[SigmaRule],
                   sources: dict | None = None) -> dict:
+    """Join ATT&CK, the CIS mapping and Sigma rules into the catalog JSON dict."""
     cis_map, cis_stats = forward_cis(safeguards, attack)
     rstats = Counter()
     detections, ls_counts = {}, Counter()
@@ -112,6 +113,7 @@ def nist_controls(controls: dict[str, NistControl], attack: AttackData,
 
 def with_nist(cat: dict, controls: dict[str, NistControl], meta: dict, attack: AttackData,
               baselines: dict[str, set[str]] | None = None) -> dict:
+    """The same catalog with NIST SP 800-53 controls (and SP 800-53B baselines) as controls."""
     ctrls, stats = nist_controls(controls, attack, baselines)
     out = dict(cat)
     out["meta"] = dict(cat["meta"]) | {"nist": {**meta, "controls": len(ctrls),
@@ -123,6 +125,7 @@ def with_nist(cat: dict, controls: dict[str, NistControl], meta: dict, attack: A
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Build catalog.json and catalog-nist.json from the downloaded datasets."""
     d = paths.data_dir()
     need = [paths.ATTACK_FILE, paths.CIS_FILE, paths.SIGMA_FILE]
     missing = [n for n in need if not (d / n).exists()]
