@@ -6,6 +6,8 @@ All notable changes are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-10-03
+
 ### Added
 - Provenance: every `results/*.json` records the commit and GitHub Actions run that produced it,
   and every `results/*.md` ends with a source line. All committed results now come from realdata
