@@ -2,5 +2,5 @@ graft tests
 prune tests/__pycache__
 graft examples
 graft scripts
-include CHANGELOG.md LICENSE README.md
+include CHANGELOG.md LICENSE README.md requirements-docker.txt
 global-exclude *.pyc

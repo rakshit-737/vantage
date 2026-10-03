@@ -5,9 +5,12 @@
 FROM python:3.12-slim@sha256:dddfd7e07f9d15aeeca61529320492139d21cac7f0070c00609243e51e4e0016
 RUN useradd --create-home --uid 10001 vantage
 WORKDIR /app
-COPY pyproject.toml README.md LICENSE ./
+# Dependencies come from a hash-locked file (uv pip compile ... --generate-hashes; regenerate it when
+# pyproject.toml changes); the package itself is installed without resolving anything else.
+COPY requirements-docker.txt pyproject.toml README.md LICENSE ./
 COPY vantage ./vantage
-RUN pip install --no-cache-dir ".[api,report]"
+RUN pip install --no-cache-dir --require-hashes -r requirements-docker.txt \
+    && pip install --no-cache-dir --no-deps .
 USER vantage
 ENV VANTAGE_DATA_DIR=/data VANTAGE_CATALOG=seed
 EXPOSE 8000
