@@ -48,6 +48,10 @@ def main() -> int:
     dump(data / "coverage.json", cov)
     dump(data / "failure.json", c.post("/api/failure?top=8", json={}).json())
     dump(data / "recommend.json", c.post("/api/recommend?steps=6&log_sources_only=true", json={}).json())
+    # the UI's export links point at these in static mode (they are /api/report and /api/navigator live)
+    # .txt: MkDocs would render a .md file under docs/ as a page instead of serving it
+    (data / "report.txt").write_text(c.get("/api/report").text, encoding="utf-8")
+    dump(data / "navigator.json", c.get("/api/navigator").json())
     for col in cov["matrix"]:
         for t in col["techniques"]:
             r = c.get(f"/api/technique/{t['id']}").json()
@@ -61,11 +65,14 @@ def main() -> int:
     html = html.replace('href="/static/style.css"', 'href="style.css"').replace(
         '<script src="/static/app.js"></script>',
         '<script>window.VANTAGE_STATIC = "data/";</script>\n<script src="app.js"></script>')
-    html = html.replace('<a href="/api/report" target="_blank" rel="noopener">Audit report (markdown)</a> &middot;',
-                        "Static snapshot of the synthetic Acme posture &middot;")
-    html = html.replace('<a href="/api/navigator" target="_blank" rel="noopener">Navigator layer</a> &middot;\n'
-                        '      <a href="/api/docs" target="_blank" rel="noopener">API docs</a>',
-                        '<a href="../">Back to the docs</a>')
+    links = {'href="/api/report"': 'href="data/report.txt"', 'href="/api/navigator"': 'href="data/navigator.json"',
+             '<a href="/api/docs" target="_blank" rel="noopener">API docs</a>': '<a href="../">Back to the docs</a>'}
+    for old, new in links.items():
+        if old not in html:
+            raise SystemExit(f"web/index.html changed: {old!r} not found; update export_demo.py")
+        html = html.replace(old, new)
+    if "/api/" in html:
+        raise SystemExit("static demo would still link to /api/ (404 on GitHub Pages)")
     (out / "index.html").write_text(html, encoding="utf-8")
     for f in ("app.js", "style.css"):
         shutil.copy(WEB / f, out / f)

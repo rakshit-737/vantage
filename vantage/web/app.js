@@ -3,7 +3,18 @@
 
 const state = { meta: null, base: null, cur: null, disabled: new Set(), enabled: new Set(),
   allRules: false, filter: "all", selected: null };
-const token = new URLSearchParams(location.hash.slice(1)).get("token");
+// The bearer token arrives once as #token=... (printed by `vantage serve`): keep it for this tab only
+// and drop it from the address bar and history.
+const token = (() => {
+  const fromHash = new URLSearchParams(location.hash.slice(1)).get("token");
+  try {
+    if (fromHash) sessionStorage.setItem("vantage-token", fromHash);
+    if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+    return fromHash || sessionStorage.getItem("vantage-token");
+  } catch (e) {
+    return fromHash;  // storage blocked: still usable for this page load
+  }
+})();
 // Static demo (GitHub Pages): responses were pre-rendered by scripts/export_demo.py.
 const STATIC = window.VANTAGE_STATIC || null;
 
@@ -172,7 +183,7 @@ async function init() {
   document.getElementById("amgo").addEventListener("click", automap);
   // report / layer links: fetched with the bearer token, saved as a Blob (plain links cannot send it)
   document.querySelectorAll("a[data-download]").forEach(a => a.addEventListener("click", async e => {
-    if (STATIC) return;
+    if (STATIC) return;  // static demo: plain links to the pre-rendered files (download attribute set)
     e.preventDefault();
     const headers = token ? { Authorization: "Bearer " + token } : {};
     const r = await fetch(a.getAttribute("href"), { headers });
@@ -182,6 +193,7 @@ async function init() {
     document.body.append(tmp); tmp.click(); tmp.remove(); URL.revokeObjectURL(url);
   }));
   if (STATIC) {
+    document.querySelectorAll("a[data-download]").forEach(a => a.setAttribute("download", a.dataset.download));
     document.querySelectorAll(".side input, .side button, #amtext, #ammethod, #amgo").forEach(x => {
       x.disabled = true; x.title = "needs the local API: python -m vantage serve";
     });

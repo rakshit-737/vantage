@@ -25,8 +25,11 @@ jobs:
           python-version: "3.12"
       - run: pip install -e ".[docs]"
       - run: mkdocs build --strict
-      - name: Static demo is not shadowed by a page
-        run: grep -q '<title>VANTAGE coverage</title>' site/demo/index.html
+      - name: Static demo is not shadowed by a page and links no API route
+        run: |
+          grep -q '<title>VANTAGE coverage</title>' site/demo/index.html
+          ! grep -q 'href="/api/' site/demo/index.html
+          test -s site/demo/data/report.txt && test -s site/demo/data/navigator.json
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         if: github.event_name != 'pull_request'
         with:
@@ -68,5 +71,14 @@ jobs:
               n = pg.locator("#matrix .cell").count()
               print("cells:", n)
               assert n > 100, n
+              # every link on the page (report / layer downloads, back to docs) must resolve
+              hrefs = pg.eval_on_selector_all("a[href]", "els => els.map(e => e.href)")
+              assert hrefs, "no links found"
+              for h in sorted(set(hrefs)):
+                  st = pg.request.get(h).status
+                  print(st, h)
+                  assert st == 200, (h, st)
               b.close()
           PY
+      - name: Old Evaluation URL redirects
+        run: curl -fsSL https://rakshit-737.github.io/vantage/benchmarks/ | grep -q "evaluation/"

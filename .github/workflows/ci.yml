@@ -84,8 +84,11 @@ jobs:
           python-version: "3.12"
       - run: pip install -e ".[docs]"
       - run: mkdocs build --strict
-      - name: Static demo is not shadowed by a page
-        run: grep -q '<title>VANTAGE coverage</title>' site/demo/index.html
+      - name: Static demo is not shadowed by a page and links no API route
+        run: |
+          grep -q '<title>VANTAGE coverage</title>' site/demo/index.html
+          ! grep -q 'href="/api/' site/demo/index.html
+          test -s site/demo/data/report.txt && test -s site/demo/data/navigator.json
 
   docker:
     runs-on: ubuntu-24.04
