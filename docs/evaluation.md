@@ -1,15 +1,17 @@
 # Evaluation
 
 All numbers come from `benchmarks/*.py` on ATT&CK v19.2 (697 techniques), CIS v8 (153
-safeguards), NIST SP 800-53 rev5 (109 mapped controls) and SigmaHQ r2026-07-01 (2,877 rules over
-116 log sources). The tables below are included verbatim from `results/*.md`, which the scripts
-regenerate.
+safeguards), NIST SP 800-53 rev5 (109 mapped controls), six more CTID Mappings Explorer
+frameworks and SigmaHQ r2026-07-01 (2,877 rules over 116 log sources). The tables below are
+included verbatim from `results/*.md`, which the scripts regenerate. Each results file ends with
+the GitHub Actions run and commit that produced it, and the matching `results/*.json` holds the
+same in its `provenance` block.
 
 Exact commands, expected outputs and measured runtimes are on the [Reproduce](reproduce.md) page.
 
 Randomness is seeded everywhere (synthetic orgs: seeds 0-24 per maturity level; random mapping
-baseline: 10 seeds; bootstrap: 1,000 resamples, seed 0). Only timings vary between runs, and
-they depend on machine load.
+baseline: 10 seeds; bootstraps and permutation tests: seed 0). Only timings vary between runs;
+`scripts/check_results.py` checks that.
 
 ## Methodology
 
@@ -17,6 +19,12 @@ they depend on machine load.
 Sigma rule tagged with it has all of its log sources ingested, and *defended* if both hold.
 Percentages are over the 697 ATT&CK v19.2 (sub-)techniques. Parents and sub-techniques are scored
 separately.
+
+**What "defended" measures.** A control mapping says a safeguard *could mitigate or detect* a
+technique; most mapped CIS safeguards are Protect-function controls. "Defended" therefore means
+*detection-backed* coverage. A technique claimed only by preventive controls is counted as
+paper-only even though it may be blocked; the ablation below reports how many such techniques
+there are, so the gap is not read as exposure.
 
 **Telemetry tiers** (cumulative; patterns are matched against the Sigma log-source ids):
 
@@ -42,11 +50,16 @@ k, and AP@200 is average precision to depth 200, normalised by min(|gold|, 200).
 macro-averaged over controls (MAP@200). Label-using mappers are scored leave-one-control-out;
 in-framework transfer is *nested* leave-one-out.
 
-**Intervals.** Auto-mapping uses 95% percentile bootstraps over controls (1,000 resamples, seed 0),
-and differences between mappers use paired bootstraps over the same controls (2,000 resamples).
-Synthetic orgs use t-intervals of the mean gap over 25 orgs. The ablation range shows the
-sensitivity to the rule set: a random 10% of the rules is removed, 500 draws. A with-replacement
-bootstrap is not used there, because coverage depends on *distinct* rules.
+**Intervals and tests.** Auto-mapping uses 95% percentile bootstraps over controls (1,000
+resamples, seed 0). Differences between mappers are paired over the same controls: a paired
+bootstrap interval (2,000 resamples) and a two-sided sign-flip permutation test (20,000 draws,
+p = (k+1)/(B+1), so never 0). In the cross-framework study the p-values are Holm-adjusted within
+each family of 16 tests (8 frameworks x 2 contrasts). Per-control scores are committed
+(`results/*_per_control.csv.gz`), so every paired number can be recomputed. Synthetic orgs use
+t-intervals of the mean gap over 25 orgs. The ablation range shows the sensitivity to the rule
+set: a random 10% of the rules is removed, 500 draws. A with-replacement bootstrap is not used
+there, because coverage depends on *distinct* rules. Counts over the full catalog (for example
+the CIS-function split) are exact, not estimates.
 
 **Threats to validity.** A Sigma tag is not proof of detection quality. Mappings were authored
 against older ATT&CK releases and are carried forward through revoked-by links. CIS and CTID built
@@ -57,7 +70,19 @@ synthetic.
 
 ![ablation](figures/ablation.png)
 
---8<-- "results/ablation.md"
+![where the gap comes from](figures/ablation_shares.png)
+
+--8<-- "results/ablation.md:3:7"
+
+--8<-- "results/ablation.md:summary"
+
+--8<-- "results/ablation.md:control-layer"
+
+??? note "Full ablation table: 12 profiles x 6 telemetry tiers (72 rows)"
+
+    --8<-- "results/ablation.md:full"
+
+--8<-- "results/ablation.md:132:134"
 
 ## 1. Paper vs real coverage
 
@@ -80,15 +105,23 @@ Each mapper sees only the safeguard's title and description. Ground truth is the
 
 --8<-- "results/recommend.md"
 
-## 4. Cross-framework comparison and transfer (round 3)
+## 4. Cross-framework comparison and transfer
 
 Frameworks side by side in ATT&CK v19.2, SP 800-53B baselines, and auto-mapping trained on one
-framework and tested on another ([ADR 0009](adr/0009-cross-framework-transfer.md)).
+framework and tested on another ([ADR 0009](adr/0009-cross-framework-transfer.md)). Added in v1.1.0.
 
-![cross-framework transfer](figures/crossframework.png)
+![cross-framework transfer, TF-IDF](figures/crossframework.png)
+
+![cross-framework transfer, MiniLM](figures/crossframework-minilm.png)
 
 --8<-- "results/crossframework.md"
 
 ## 5. Comparison with published work
 
+See also [Related work](related-work.md).
+
 --8<-- "results/published.md"
+
+## 6. Numbers on the How-it-works page
+
+--8<-- "results/walkthrough.md"

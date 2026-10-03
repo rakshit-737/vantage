@@ -37,6 +37,9 @@ not_in_nav: |
   /adr/0*.md
 plugins:
   - search
+  - redirects:
+      redirect_maps:
+        benchmarks.md: evaluation.md   # the page was served at /benchmarks/ up to v1.1.0
   - mkdocstrings:
       handlers:
         python:
@@ -50,10 +53,11 @@ nav:
   - Home: index.md
   - Getting started: getting-started.md
   - How it works: how-it-works.md
-  - Evaluation: benchmarks.md
+  - Evaluation: evaluation.md
   - Reproduce: reproduce.md
   - Live demo (static): live-demo.md
   - Architecture: architecture.md
+  - Related work: related-work.md
   - Datasets: datasets.md
   - Reference:
       - CLI: reference/cli.md
