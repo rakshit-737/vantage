@@ -19,6 +19,7 @@ import hmac
 import os
 import secrets
 import sys
+from collections.abc import Callable
 from pathlib import Path
 from typing import Annotated
 
@@ -76,38 +77,42 @@ def resolve_token() -> str | None:
 
 
 class _BodyLimit:
-    """Pure-ASGI guard: 413 for bodies over MAX_BODY (declared or streamed)."""
+    """Pure-ASGI guard: 413 for bodies over MAX_BODY, whether declared (Content-Length) or streamed
+    (chunked). The body is read and counted *before* the app runs, then replayed to it, so the app
+    never sees an oversized body and cannot turn the rejection into a different status."""
 
-    def __init__(self, app, limit: int = MAX_BODY):
+    def __init__(self, app: Callable, limit: int = MAX_BODY) -> None:
         self.app, self.limit = app, limit
 
-    async def __call__(self, scope, receive, send):
+    async def __call__(self, scope: dict, receive: Callable, send: Callable) -> None:
         if scope["type"] != "http":
             return await self.app(scope, receive, send)
         for k, v in scope.get("headers", []):
             if k == b"content-length" and v.isdigit() and int(v) > self.limit:
                 return await _reject(send)
-        seen = 0
-
-        async def capped():
-            nonlocal seen
+        chunks, seen, more = [], 0, True
+        while more:
             msg = await receive()
-            if msg["type"] == "http.request":
-                seen += len(msg.get("body", b""))
-                if seen > self.limit:
-                    raise _TooLarge
-            return msg
-        try:
-            return await self.app(scope, capped, send)
-        except _TooLarge:
-            return await _reject(send)
+            if msg["type"] != "http.request":  # client went away before sending the body
+                return None
+            body = msg.get("body", b"")
+            seen += len(body)
+            if seen > self.limit:
+                return await _reject(send)
+            chunks.append(body)
+            more = msg.get("more_body", False)
+        replayed = False
+
+        async def replay() -> dict:
+            nonlocal replayed
+            if not replayed:
+                replayed = True
+                return {"type": "http.request", "body": b"".join(chunks), "more_body": False}
+            return await receive()
+        return await self.app(scope, replay, send)
 
 
-class _TooLarge(Exception):
-    pass
-
-
-async def _reject(send) -> None:
+async def _reject(send: Callable) -> None:
     await send({"type": "http.response.start", "status": 413,
                 "headers": [(b"content-type", b"text/plain"), (b"connection", b"close")]})
     await send({"type": "http.response.body", "body": b"request body too large"})
