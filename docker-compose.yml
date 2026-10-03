@@ -1,5 +1,6 @@
 # Everything binds to 127.0.0.1 only: the coverage map is a list of your blind spots.
-#   VANTAGE_API_TOKEN=$(python -c "import secrets;print(secrets.token_urlsafe(32))") \n#   VANTAGE_DATA=/path/to/datasets/vantage VANTAGE_CATALOG=real docker compose up --build
+#   export VANTAGE_API_TOKEN=$(python -c "import secrets;print(secrets.token_urlsafe(32))")
+#   VANTAGE_DATA=/path/to/datasets/vantage VANTAGE_CATALOG=real docker compose up --build
 # then open http://127.0.0.1:8000/#token=<that token>
 services:
   vantage:
