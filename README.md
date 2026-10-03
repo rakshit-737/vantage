@@ -38,7 +38,7 @@ vantage demo
 ...
 ```
 
-The `demo` command itself takes about 3 s. CI times the wheel install plus `vantage demo` on every push (job `package`). For the real catalog, see [Quickstart](#quickstart).
+CI installs the wheel into a fresh venv and times `vantage demo` on every push (job `package`, log line `demo took N s`). For the real catalog, see [Quickstart](#quickstart).
 
 ## Headline results (real data)
 
