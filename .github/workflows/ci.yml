@@ -148,4 +148,4 @@ jobs:
           cat /tmp/constraints-min.txt
           pip-audit -r /tmp/constraints-min.txt --no-deps --disable-pip
       - name: Dependency audit (hash-locked Docker image dependencies)
-        run: pip-audit -r requirements-docker.txt --require-hashes --disable-pip
+        run: pip-audit -r docker/requirements.lock --require-hashes --disable-pip

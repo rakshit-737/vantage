@@ -6,10 +6,14 @@ updates:
     groups:
       actions:
         patterns: ["*"]
-  # pyproject.toml floors and the hash-locked requirements-docker.txt: one grouped PR a week.
+  # pyproject.toml holds minimum versions (floors), not pins: a floor is raised only when a new
+  # release falls outside the declared range, and security updates still raise vulnerable floors.
+  # The hash-locked docker/requirements.lock is regenerated with uv (command in its header), not
+  # bumped pin by pin: single-pin bumps break its exact cross-pins (pydantic / pydantic-core).
   - package-ecosystem: pip
     directory: /
     schedule: {interval: weekly}
+    versioning-strategy: increase-if-necessary
     groups:
       python:
         patterns: ["*"]

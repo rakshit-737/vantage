@@ -28,6 +28,14 @@ python -m pytest -q -m realdata
   real-data tests with `@pytest.mark.realdata`.
 - If you change mappings, costs or scoring, re-run `benchmarks/` and update `results/`, the
   README tables and an ADR if a decision changed. Report numbers honestly, including negative results.
+- Results must be reproducible: `python scripts/check_results.py` compares regenerated
+  `results/` with git `HEAD` (only timing and provenance may differ). Commit results from a
+  `realdata` workflow run, so each file names the run and commit it came from.
+- When `pyproject.toml` dependencies change, regenerate the Docker lock with the `uv pip compile`
+  command in the header of `docker/requirements.lock` (a test checks it still satisfies
+  `pyproject.toml`).
+- After a version bump, re-export the static demo (`python scripts/export_demo.py --catalog real`)
+  so `docs/demo/data/meta.json` carries the new version.
 - UI code must write third-party strings (Sigma titles, ATT&CK text) with `textContent`, never
   `innerHTML`.
 - Use conventional commits (`feat:`, `fix:`, `test:`, `docs:`, `data:`, `perf:`, `ci:`,

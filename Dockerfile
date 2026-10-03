@@ -7,9 +7,10 @@ RUN useradd --create-home --uid 10001 vantage
 WORKDIR /app
 # Dependencies come from a hash-locked file (uv pip compile ... --generate-hashes; regenerate it when
 # pyproject.toml changes); the package itself is installed without resolving anything else.
-COPY requirements-docker.txt pyproject.toml README.md LICENSE ./
+COPY docker/requirements.lock ./docker/
+COPY pyproject.toml README.md LICENSE ./
 COPY vantage ./vantage
-RUN pip install --no-cache-dir --require-hashes -r requirements-docker.txt \
+RUN pip install --no-cache-dir --require-hashes -r docker/requirements.lock \
     && pip install --no-cache-dir --no-deps .
 USER vantage
 ENV VANTAGE_DATA_DIR=/data VANTAGE_CATALOG=seed

@@ -146,14 +146,14 @@ def test_min_constraints_cover_every_floor():
 
 
 def test_docker_lock_satisfies_pyproject():
-    """requirements-docker.txt is hash-locked and covers the core + api + report requirements."""
+    """docker/requirements.lock is hash-locked and covers the core + api + report requirements."""
     from packaging.utils import canonicalize_name
-    text = (ROOT / "requirements-docker.txt").read_text(encoding="utf-8")
-    lock = _pins(ROOT / "requirements-docker.txt")
+    text = (ROOT / "docker/requirements.lock").read_text(encoding="utf-8")
+    lock = _pins(ROOT / "docker/requirements.lock")
     assert text.count("--hash=sha256:") >= len(lock)
     reqs = _requirements()
     for r in reqs["core"] + reqs["api"] + reqs["report"]:
         name = canonicalize_name(r.name)
-        assert name in lock, f"{name} not in requirements-docker.txt"
+        assert name in lock, f"{name} not in docker/requirements.lock"
         assert r.specifier.contains(lock[name]), f"{name}=={lock[name]} violates {r}"
 
