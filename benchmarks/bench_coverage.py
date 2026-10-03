@@ -7,6 +7,9 @@ Part A - telemetry tiers x CIS Implementation Group claims (deterministic profil
 Part B - 100 random synthetic orgs (vantage.synth.random_org) across four maturity levels.
 Part C - engine performance (fast one-pass SPOF ranking vs brute-force recomputation).
 Part D - the same telemetry tiers with NIST SP 800-53 rev5 claims (CTID mapping), if built.
+Part E - structural ceilings: how much of ATT&CK the CIS mapping and SigmaHQ can reach at all.
+
+Gaps are computed from unrounded percentages and rounded once.
 """
 from __future__ import annotations
 
@@ -14,7 +17,7 @@ import statistics
 import time
 from fnmatch import fnmatchcase
 
-from common import FIGS, RESULTS, md_table, write_result
+from common import FIGS, eval_catalog_v82, md_table, need, write_md, write_result
 
 from vantage.catalog import load_catalog
 from vantage.coverage import compute_coverage
@@ -57,7 +60,7 @@ def part_a(cat) -> list[dict]:
             rows.append({"tier": tier, "claims": f"IG{ig}", "log_sources": len(ingested),
                          "claimed_pct": s["claimed_pct"], "true_pct": s["true_pct"],
                          "weighted_true_pct": s["weighted_true_pct"],
-                         "gap_pp": round(s["claimed_pct"] - s["true_pct"], 1),
+                         "gap_pp": round(cov.claimed_pct - cov.true_pct, 1),
                          "detectable_pct": round(100 * detected / s["techniques"], 1),
                          "paper_only": s["paper_only"], "detected_only": s["detected_only"],
                          "dead_rules": len(cov.dead_detections)})
@@ -120,8 +123,41 @@ def part_d() -> list[dict]:
         rows.append({"tier": tier, "claims": "NIST 800-53 rev5 (all mapped)", "claimed_pct": s["claimed_pct"],
                      "detectable_pct": round(100 * len(cov.detected_set()) / s["techniques"], 1),
                      "true_pct": s["true_pct"], "weighted_true_pct": s["weighted_true_pct"],
-                     "gap_pp": round(s["claimed_pct"] - s["true_pct"], 1), "paper_only": s["paper_only"]})
+                     "gap_pp": round(cov.claimed_pct - cov.true_pct, 1), "paper_only": s["paper_only"]})
     return rows
+
+
+def part_e(cat) -> dict:
+    """Ceilings: techniques CIS can never claim (added after v8.2, or never mapped) and the share
+    SigmaHQ can detect with every log source ingested."""
+    from vantage import paths
+    from vantage.frameworks import source_universe
+    from vantage.ingest.attack import load_attack
+    need(paths.ATTACK_FILE, paths.ATTACK_CIS_FILE, paths.CIS_FILE)
+    attack = load_attack(paths.data_dir() / paths.ATTACK_FILE, paths.ATTACK_VERSION)
+    n = len(cat.techniques)
+    existed_v82 = source_universe(paths.ATTACK_CIS_FILE, attack) & set(cat.techniques)
+    cis = {t for c in cat.controls.values() if c.framework.startswith("CIS") for t in c.mitigates}
+    v82 = eval_catalog_v82()
+    cis_v82 = {t for c in v82.controls.values() for t in c.mitigates}
+    every = set(cat.log_sources)
+
+    def detectable(rules: str) -> int:
+        org = expand_org(cat, OrgPosture("ceiling", set(), set(every), {rules}))
+        return len(compute_coverage(cat, org).detected_set())
+    pct = lambda k: round(100 * k / n, 1)  # noqa: E731
+    new = n - len(existed_v82)
+    never = len(existed_v82 - cis)
+    det_st, det_all = detectable("@status:stable|test"), detectable("@all")
+    return {"techniques_v19.2": n, "cis_mapped_v19.2": len(cis), "cis_mapped_pct": pct(len(cis)),
+            "not_claimable_by_cis": n - len(cis), "not_claimable_pp": pct(n - len(cis)),
+            "added_after_v8.2": new, "added_after_v8.2_pp": pct(new),
+            "v8.2_era_never_mapped": never, "v8.2_era_never_mapped_pp": pct(never),
+            "techniques_v8.2": len(v82.techniques), "cis_mapped_v8.2": len(cis_v82),
+            "cis_coverage_v8.2_pct": round(100 * len(cis_v82) / len(v82.techniques), 1),
+            "detectable_T5_stable_test": det_st, "detectable_T5_stable_test_pct": pct(det_st),
+            "detectable_T5_all_rules": det_all, "detectable_T5_all_rules_pct": pct(det_all),
+            "rules_all": len(cat.detections)}
 
 
 def figure(rows, path):
@@ -153,6 +189,7 @@ def main() -> None:
     b = part_b(cat)
     c = part_c(cat)
     d = part_d()
+    e = part_e(cat)
     md = ["### A. Telemetry tier x claimed CIS Implementation Group", "",
           md_table(a, ["tier", "claims", "log_sources", "claimed_pct", "detectable_pct", "true_pct",
                        "weighted_true_pct", "gap_pp", "paper_only", "dead_rules"]),
@@ -165,10 +202,18 @@ def main() -> None:
         md += ["", "### D. NIST SP 800-53 rev5 claims (CTID mapping, ATT&CK v16.1 carried to v19.2)", "",
                md_table(d, ["tier", "claimed_pct", "detectable_pct", "true_pct", "weighted_true_pct", "gap_pp",
                             "paper_only"])]
-    RESULTS.mkdir(exist_ok=True)
-    (RESULTS / "coverage.md").write_text("\n".join(md) + "\n", encoding="utf-8")
+    md += ["", "### E. Structural ceilings (CIS v8 mapping, SigmaHQ)", "",
+           md_table([{"quantity": k, "value": v} for k, v in e.items()], ["quantity", "value"]), "",
+           f"The CIS mapping reaches {e['cis_mapped_pct']}% of ATT&CK v19.2. Of the {e['not_claimable_pp']} pp it "
+           f"cannot claim, {e['added_after_v8.2_pp']} pp are {e['added_after_v8.2']} techniques added after "
+           f"v8.2 and {e['v8.2_era_never_mapped_pp']} pp are {e['v8.2_era_never_mapped']} v8.2-era techniques "
+           f"CIS never mapped. On v8.2 itself CIS covers {e['cis_coverage_v8.2_pct']}% "
+           f"({e['cis_mapped_v8.2']} of {e['techniques_v8.2']}). With every log source ingested, stable+test "
+           f"rules detect {e['detectable_T5_stable_test_pct']}% and all {e['rules_all']} rules "
+           f"{e['detectable_T5_all_rules_pct']}%."]
+    write_md("coverage", md)
     write_result("coverage", {"catalog": cat.meta, "tiers": a, "random_orgs": b, "performance": c,
-                             "nist_tiers": d})
+                             "nist_tiers": d, "ceilings": e})
     FIGS.mkdir(parents=True, exist_ok=True)
     figure(a, FIGS / "coverage_gap.png")
     print("\n".join(md))
