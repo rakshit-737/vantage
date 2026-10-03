@@ -15,6 +15,12 @@ on B's official mapping; a pooled source (all frameworks except B) is the pre-sp
 The in-framework estimate is nested leave-one-control-out. Zero-shot
 (mitigation bridge, no labels) and a labels-only prior baseline are reported per test framework.
 Cells: macro MAP@200 over B's mapped controls; 95% bootstrap intervals in the JSON.
+
+Paired contrasts per test framework (same controls): bridge - direct and pooled - zero-shot (the
+pre-specified family, m = 16 over 8 frameworks x 2), and nested LOO - zero-shot and nested LOO -
+pooled (secondary family, m = 16). Each has a paired bootstrap 95% interval and a two-sided
+sign-flip permutation p-value (20,000 draws, (k+1)/(B+1)), Holm-adjusted within its family.
+Per-control AP@200 for every method is written to results/crossframework_per_control.csv.gz.
 """
 from __future__ import annotations
 
@@ -23,7 +29,7 @@ import copy
 import dataclasses
 import time
 
-from common import FIGS, RESULTS, md_table, need, write_result
+from common import FIGS, fmt_p, holm, md_table, need, sign_flip_p, write_csv_gz, write_md, write_result
 
 from vantage import automap, paths
 from vantage.catalog import load_catalog
@@ -120,7 +126,7 @@ def part2(fws, cat, encoder: str, universes: dict) -> dict:
     direct = bridge.direct
     tests = {b: _restricted_controls(fws[b].mapped, universes[b]) for b in names}
     out = {"zero_shot": {}, "direct": {}, "prior": {}, "transfer": {}, "pooled": {}, "loo_nested": {},
-           "fitted": {}, "per_control": {}}
+           "fitted": {}, "per_control": {}, "ids": {b: [c.id for c in tests[b]] for b in names}}
     pc = out["per_control"]
     for b in names:
         out["zero_shot"][b], pc[f"zero_shot|{b}"] = evaluate(bridge, cat, tests[b], universes[b])
@@ -165,10 +171,40 @@ def _ci(r) -> str:
     return f"{r['MAP@200']:.3f} [{lo:.3f}, {hi:.3f}]"
 
 
-def _delta(res, x: str, y: str) -> str:
-    m, lo, hi = automap.paired_bootstrap_ci(res["per_control"][x], res["per_control"][y])
-    flag = "" if lo <= 0 <= hi else " *"
-    return f"{m:+.3f} [{lo:+.3f}, {hi:+.3f}]{flag}"
+# contrast label -> (minuend, subtrahend, Holm family); family 1 is the pre-specified one
+CONTRASTS = {"bridge - direct": ("zero_shot", "direct", 1), "pooled - zero-shot": ("pooled", "zero_shot", 1),
+             "nested LOO - zero-shot": ("loo_nested", "zero_shot", 2),
+             "nested LOO - pooled": ("loo_nested", "pooled", 2)}
+
+
+def paired_tests(res: dict, names: list[str]) -> dict:
+    """Paired bootstrap CI + sign-flip p for every contrast x test framework, Holm within family."""
+    out = {}
+    for label, (x, y, fam) in CONTRASTS.items():
+        for b in names:
+            a, c = res["per_control"][f"{x}|{b}"], res["per_control"][f"{y}|{b}"]
+            if len(a) != len(c):
+                raise ValueError(f"{label} {b}: unaligned per-control lists")
+            m, lo, hi = automap.paired_bootstrap_ci(a, c)
+            out[f"{label}|{b}"] = {"mean": m, "ci": [lo, hi],
+                                   "p": sign_flip_p([u - v for u, v in zip(a, c, strict=True)]), "family": fam}
+    for fam in (1, 2):
+        adj = holm({k: v["p"] for k, v in out.items() if v["family"] == fam})
+        for k, v in adj.items():
+            out[k]["p_holm"] = v
+    return out
+
+
+def rounded_tests(tests: dict) -> dict:
+    """JSON copy of ``paired_tests`` output (tables are formatted from the unrounded values)."""
+    return {k: {"mean": round(v["mean"], 4), "ci": [round(x, 4) for x in v["ci"]], "p": round(v["p"], 6),
+                "p_holm": round(v["p_holm"], 6), "family": v["family"]} for k, v in tests.items()}
+
+
+def _pcell(t: dict) -> str:
+    lo, hi = t["ci"]
+    flag = " *" if t["p_holm"] < 0.05 else ""
+    return f"{t['mean']:+.3f} [{lo:+.3f}, {hi:+.3f}], Holm p {fmt_p(t['p_holm'])}{flag}"
 
 
 def summary(res: dict, names: list[str]) -> list[dict]:
@@ -177,40 +213,94 @@ def summary(res: dict, names: list[str]) -> list[dict]:
         z = res["zero_shot"][b]
         single = [res["transfer"][f"{a} -> {b}"]["MAP@200"] for a in names if a != b]
         neg = sum(v < z["MAP@200"] for v in single)
-        rows.append({"test framework": b, "n": z["controls"],
+        rows.append({"test framework": b, "text": "rich" if b in TEXT_RICH else "sparse", "n": z["controls"],
                      "direct (no bridge)": f"{res['direct'][b]['MAP@200']:.3f}",
                      "zero-shot bridge": _ci(z),
-                     "bridge - direct (paired)": _delta(res, f"zero_shot|{b}", f"direct|{b}"),
                      "pooled transfer (all other fw)": _ci(res["pooled"][b]),
-                     "pooled - zero-shot (paired)": _delta(res, f"pooled|{b}", f"zero_shot|{b}"),
+                     "in-framework nested LOO": _ci(res["loo_nested"][b]),
                      "single-source transfer mean (min-max)":
                          f"{sum(single) / len(single):.3f} ({min(single):.3f}-{max(single):.3f})",
-                     "sources below zero-shot": f"{neg}/{len(single)}",
-                     "in-framework nested LOO": _ci(res["loo_nested"][b])})
+                     "sources below zero-shot": f"{neg}/{len(single)}"})
     return rows
 
 
-def figure(res: dict, names: list[str], path) -> None:
+def contrast_table(tests: dict, names: list[str]) -> list[dict]:
+    return [{"test framework": b, **{label: _pcell(tests[f"{label}|{b}"]) for label in CONTRASTS}} for b in names]
+
+
+def contrast_counts(tests: dict, names: list[str]) -> dict:
+    """Per contrast: frameworks whose interval is above / below 0, and Holm p < 0.05 by direction."""
+    out = {}
+    for label in CONTRASTS:
+        ts = {b: tests[f"{label}|{b}"] for b in names}
+        out[label] = {"ci_above_0": [b for b, t in ts.items() if t["ci"][0] > 0],
+                      "ci_below_0": [b for b, t in ts.items() if t["ci"][1] < 0],
+                      "holm_sig_positive": [b for b, t in ts.items() if t["p_holm"] < 0.05 and t["mean"] > 0],
+                      "holm_sig_negative": [b for b, t in ts.items() if t["p_holm"] < 0.05 and t["mean"] < 0]}
+    return out
+
+
+def counts_lines(counts: dict, n: int) -> list[str]:
+    out = []
+    for label, c in counts.items():
+        up, down = c["holm_sig_positive"], c["holm_sig_negative"]
+        out.append(f"- {label}: interval above 0 on {len(c['ci_above_0'])} of {n} "
+                   f"({', '.join(c['ci_above_0']) or '-'}), below 0 on {len(c['ci_below_0'])}; "
+                   f"Holm p < 0.05 (m = 16): {len(up)} of {n} positive ({', '.join(up) or '-'}), "
+                   f"{len(down)} negative ({', '.join(down) or '-'}).")
+    return out
+
+
+ENC_NAME = {"tfidf": "TF-IDF", "embed": "MiniLM-L6-v2"}
+FIG_NAME = {"tfidf": "crossframework.png", "embed": "crossframework-minilm.png"}
+
+
+def figure(res: dict, names: list[str], path, encoder: str) -> None:
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    m = [[res["transfer"][f"{a} -> {b}"]["MAP@200"] for b in names] for a in names]
+    from matplotlib.patches import Rectangle
     z = [res["zero_shot"][b]["MAP@200"] for b in names]
-    fig, ax = plt.subplots(figsize=(8.2, 6.2))
-    im = ax.imshow([z, *m], cmap="viridis", vmin=0, vmax=max(max(r) for r in [z, *m]))
+    pooled = [res["pooled"][b]["MAP@200"] for b in names]
+    m = [[res["loo_nested"][b]["MAP@200"] if a == b else res["transfer"][f"{a} -> {b}"]["MAP@200"]
+          for b in names] for a in names]
+    rows = [z, pooled, *m]
+    vmax = max(max(r) for r in rows)
+    fig, ax = plt.subplots(figsize=(8.4, 6.6))
+    im = ax.imshow(rows, cmap="viridis", vmin=0, vmax=vmax)
     ax.set_xticks(range(len(names)), names, rotation=35, ha="right", fontsize=8)
-    ax.set_yticks(range(len(names) + 1), ["zero-shot (no labels)", *[f"train: {a}" for a in names]], fontsize=8)
-    ax.axhline(0.5, color="white", lw=2)
-    for i, row in enumerate([z, *m]):
+    ax.set_yticks(range(len(rows)), ["zero-shot bridge (no labels)", "pooled: all other frameworks",
+                                     *[f"train: {a}" for a in names]], fontsize=8)
+    ax.axhline(1.5, color="white", lw=2)
+    for i, row in enumerate(rows):
         for j, v in enumerate(row):
             ax.text(j, i, f"{v:.2f}", ha="center", va="center", fontsize=7,
-                    color="white" if v < 0.6 * max(max(r) for r in m) else "black")
+                    color="white" if v < 0.6 * vmax else "black")
+    for j in range(len(names)):  # diagonal = in-framework nested leave-one-out
+        ax.add_patch(Rectangle((j - 0.5, j + 1.5), 1, 1, fill=False, edgecolor="#ff4d4d", lw=1.6))
     ax.set_xlabel("test framework (official mapping)")
-    ax.set_title("Control -> ATT&CK auto-mapping, MAP@200: train on one framework, test on another\n"
-                 "(diagonal = leave-one-out, weights tuned on the same folds: optimistic)", fontsize=9)
+    ax.set_title(f"Control -> ATT&CK auto-mapping, MAP@200, {ENC_NAME[encoder]} encoder" + chr(10) +
+                 "train on one framework, test on another" + chr(10) +
+                 "outlined diagonal = in-framework nested leave-one-out", fontsize=9)
     fig.colorbar(im, ax=ax, fraction=0.035)
     fig.tight_layout()
-    fig.savefig(path, dpi=105)
+    fig.savefig(path, dpi=100)
+    plt.close(fig)
+
+
+def per_control_rows(res_by_enc: dict, names: list[str]) -> tuple[list[str], list[list]]:
+    """One row per (encoder, test framework, control): AP@200 of every method."""
+    header = ["encoder", "test_framework", "control", "direct", "zero_shot", "pooled", "loo_nested",
+              *[f"from:{a}" for a in names]]
+    rows = []
+    for e, res in res_by_enc.items():
+        pc = res["per_control"]
+        for b in names:
+            for i, cid in enumerate(res["ids"][b]):
+                rows.append([e, b, cid,
+                             *(f"{pc[f'{k}|{b}'][i]:.6f}" for k in ("direct", "zero_shot", "pooled", "loo_nested")),
+                             *("" if a == b else f"{pc[f'transfer|{a} -> {b}'][i]:.6f}" for a in names)])
+    return header, rows
 
 
 def main() -> None:
@@ -245,8 +335,9 @@ def main() -> None:
     abl = {e: {"statement": res[e]["zero_shot"]["NIST 800-53"]["MAP@200"],
                "title only": evaluate(automap.MitigationBridgeMapper(cat, e, model=MODEL), cat,
                                       _restricted_controls(title_only, nu), nu)[0]["MAP@200"]} for e in encoders}
-    main_e = encoders[-1]
-    enc_name = {"tfidf": "TF-IDF", "embed": "MiniLM-L6-v2"}
+    for e in encoders:
+        res[e]["paired"] = paired_tests(res[e], names)
+        res[e]["paired_counts"] = contrast_counts(res[e]["paired"], names)
     md = ["### Frameworks in one ATT&CK release (v19.2)", "",
           md_table(rows, list(rows[0])), "",
           "`candidate techniques` = v19.2 techniques that existed (directly or via revoked-by) in the ATT&CK "
@@ -260,35 +351,52 @@ def main() -> None:
           f"({', '.join(extra['MODERATE minus LOW']) or '-'}); HIGH adds {len(extra['HIGH minus MODERATE'])} "
           "over MODERATE.", ""]
     for e in encoders:
-        md += [f"### Auto-mapping transfer summary ({enc_name[e]} encoder)", "",
-               "MAP@200 with 95% bootstrap intervals over the test framework's controls; differences are paired "
-               "bootstraps over the same controls (`*` = interval excludes 0). The pooled source (every *other* "
-               "framework's labels) is fixed in advance, so no test labels pick it. Nested LOO re-chooses the "
-               "transfer weights without the held-out control. Text-rich frameworks: "
-               f"{', '.join(TEXT_RICH)}; the cloud security-stack mappings only give a product name.", "",
-               md_table(summary(res[e], names), list(summary(res[e], names)[0])), "",
-               f"#### Single-source transfer matrix, MAP@200 ({e}); first row = zero-shot bridge", "",
-               "Diagonal = leave-one-out with weights tuned on the same folds (optimistic; see nested LOO above).",
-               "",
+        en = ENC_NAME[e]
+        summ = summary(res[e], names)
+        ctab = contrast_table(res[e]["paired"], names)
+        md += [f"### Auto-mapping transfer summary ({en} encoder)", "",
+               "MAP@200 with 95% bootstrap intervals over the test framework's controls. The pooled source "
+               "(every *other* framework's labels) is fixed in advance, so no test labels pick it. Nested LOO "
+               "re-chooses the transfer weights without the held-out control. `text`: rich = "
+               f"{', '.join(TEXT_RICH)}; sparse = the cloud security-stack mappings, which only give a "
+               "product name.", "",
+               md_table(summ, list(summ[0])), "",
+               f"#### Paired differences ({en} encoder)", "",
+               "Mean difference in AP@200 over the same controls, paired bootstrap 95% interval (2,000 "
+               "resamples), and a two-sided sign-flip permutation p-value (20,000 draws, never 0), "
+               "Holm-adjusted within its family of 16 tests (8 frameworks x 2 contrasts): bridge - direct "
+               "and pooled - zero-shot are the pre-specified family; the two nested-LOO contrasts are a "
+               "second, exploratory family. `*` = Holm p < 0.05.", "",
+               md_table(ctab, list(ctab[0])), "",
+               *counts_lines(res[e]["paired_counts"], len(names)), "",
+               f"#### Single-source transfer matrix, MAP@200 ({en}); first row = zero-shot bridge", "",
+               "Diagonal = leave-one-out with weights tuned on the same folds (optimistic; the nested LOO "
+               "column above is the honest in-framework estimate, and the figure shows nested LOO on the "
+               "diagonal).", "",
                md_table([{"train / test": "zero-shot",
                           **{b: f"{res[e]['zero_shot'][b]['MAP@200']:.3f}" for b in names}},
                          *matrix(res[e], names, "transfer")], ["train / test", *names]), "",
-               f"Labels-only prior (train framework's technique frequencies), MAP@200 ({e}):", "",
+               f"Labels-only prior (train framework's technique frequencies), MAP@200 ({en}):", "",
                md_table(matrix(res[e], names, "prior"), ["train / test", *names]), "",
                "Fitted weights (beta = kNN label transfer, gamma = prior): " +
                "; ".join(f"{k}: {v['beta']}/{v['gamma']}" for k, v in res[e]["fitted"].items()), ""]
     md += ["NIST 800-53 zero-shot MAP@200, full OSCAL statement vs CTID title only: " +
-           "; ".join(f"{e}: {v['statement']:.3f} vs {v['title only']:.3f}" for e, v in abl.items()), "",
-           f"Wall time: {time.perf_counter() - t_start:.0f} s ({', '.join(encoders)})."]
-    RESULTS.mkdir(exist_ok=True)
-    (RESULTS / "crossframework.md").write_text(chr(10).join(md) + chr(10), encoding="utf-8")
-    slim = {e: {k: v for k, v in r.items() if k != "per_control"} for e, r in res.items()}
+           "; ".join(f"{ENC_NAME[e]}: {v['statement']:.3f} vs {v['title only']:.3f}" for e, v in abl.items()), "",
+           "Per-control AP@200 for every method: `results/crossframework_per_control.csv.gz`.", "",
+           f"Wall time: {time.perf_counter() - t_start:.0f} s ({', '.join(ENC_NAME[e] for e in encoders)})."]
+    write_md("crossframework", md)
+    header, pcr = per_control_rows(res, names)
+    write_csv_gz("crossframework_per_control", header, pcr)
+    slim = {e: {k: rounded_tests(v) if k == "paired" else v for k, v in r.items() if k not in ("per_control", "ids")}
+            for e, r in res.items()}
     write_result("crossframework", {"attack_version": paths.ATTACK_VERSION, "frameworks": rows,
                                     "overlap_jaccard": overlap, "nist_baselines": bl, "extra": extra,
+                                    "text_rich": list(TEXT_RICH),
                                     "automap": slim, "nist_text_ablation": abl, "embed_model": MODEL,
                                     "encoders": encoders, "seconds": round(time.perf_counter() - t_start, 1)})
     FIGS.mkdir(parents=True, exist_ok=True)
-    figure(res[main_e], names, FIGS / "crossframework.png")
+    for e in encoders:
+        figure(res[e], names, FIGS / FIG_NAME[e], e)
     print(chr(10).join(md))
 
 
