@@ -142,5 +142,10 @@ jobs:
         run: |
           pip install -e ".[data,api,report,bench,docs,dev]"
           pip-audit --skip-editable
-      - name: Dependency audit (declared minimum versions)
-        run: pip-audit -r requirements.txt
+      - name: Dependency audit (declared minimum version of every extra, pinned exactly)
+        run: |
+          python scripts/min_constraints.py > /tmp/constraints-min.txt
+          cat /tmp/constraints-min.txt
+          pip-audit -r /tmp/constraints-min.txt --no-deps --disable-pip
+      - name: Dependency audit (hash-locked Docker image dependencies)
+        run: pip-audit -r requirements-docker.txt --require-hashes --disable-pip

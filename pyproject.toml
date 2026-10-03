@@ -16,11 +16,19 @@ dependencies = ["networkx>=3.0", "PyYAML>=6.0"]
 data = ["openpyxl>=3.1", "defusedxml>=0.7"]
 api = ["fastapi>=0.110", "starlette>=1.3.1", "uvicorn>=0.54.0"]
 report = ["reportlab>=4.0"]
-ml = ["sentence-transformers>=2.6"]
+ml = ["sentence-transformers>=5.6.0"]  # < 5.6.0: PYSEC-2026-4164 (local model loading)
 bench = ["scipy>=1.15.3", "matplotlib>=3.8"]
-docs = ["mkdocs-material>=9.5", "mkdocstrings[python]>=0.25"]
-dev = ["pytest>=7", "pytest-cov>=5", "ruff>=0.6", "build>=1.0", "twine>=5", "httpx>=0.27", "openpyxl>=3.1",
-       "defusedxml>=0.7", "fastapi>=0.110", "starlette>=1.3.1", "uvicorn>=0.54.0", "reportlab>=4.0"]
+docs = ["mkdocs-material>=9.7.7", "mkdocstrings[python]>=0.25", "mkdocs-redirects>=1.2"]
+dev = ["pytest>=9.0.3", "pytest-cov>=7.1.0", "ruff>=0.16.9", "build>=1.0", "twine>=5", "httpx>=0.27",
+       "httpx2>=2.13", "openpyxl>=3.1", "defusedxml>=0.7", "fastapi>=0.110", "starlette>=1.3.1",
+       "uvicorn>=0.54.0", "reportlab>=4.0"]
+
+[project.urls]
+Homepage = "https://rakshit-737.github.io/vantage/"
+Documentation = "https://rakshit-737.github.io/vantage/"
+Source = "https://github.com/rakshit-737/vantage"
+Changelog = "https://github.com/rakshit-737/vantage/blob/main/CHANGELOG.md"
+Issues = "https://github.com/rakshit-737/vantage/issues"
 
 [project.scripts]
 vantage = "vantage.cli:main"
@@ -38,6 +46,9 @@ vantage = ["web/*", "postures/*.yaml"]
 testpaths = ["tests"]
 markers = ["realdata: needs the downloaded datasets (skipped when absent)",
            "ml: needs sentence-transformers and a model download (skipped when absent)"]
+# Newer Starlette warns when its TestClient runs on httpx instead of httpx2 (in the dev extra):
+# fail loudly if that fallback ever happens. Matched on the message, so it is inert without Starlette.
+filterwarnings = ["error:Using .httpx. with .starlette.testclient. is deprecated:UserWarning"]
 
 [tool.ruff]
 line-length = 120
