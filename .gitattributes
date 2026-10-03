@@ -3,3 +3,4 @@
 *.png binary
 *.xlsx binary
 *.zip binary
+*.gz binary
