@@ -102,7 +102,12 @@ python scripts/check_results.py           # compare regenerated results/ with gi
 `scripts/check_results.py` compares every `results/*.json` with the committed version, ignoring
 only timing keys (`seconds`, `*_ms`, `spof_*_s`, `speedup`) and provenance (`generated`,
 `python`, `platform`, `provenance`), and compares the per-control `.csv.gz` files after
-decompression. The Markdown tables carry timing columns and the source line, so they are not
+decompression. Strings, integers and row sets must match exactly; floats may differ by 0.002
+(JSON, reported to 3 decimals) and per-control scores by 0.01. The tolerance exists because the
+embedding encoders run on whatever CPU model the runner gets: two runs on ubuntu-24.04 (37092934843
+and 37094692311) agreed on every reported number, but 2 of 1,680 per-safeguard and 2 of 934
+per-control MiniLM/bge APs differed by at most 0.00013, from near-tied techniques swapping places
+deep in a ranking. TF-IDF results are bit-identical. The Markdown tables carry timing columns and the source line, so they are not
 diffed directly. The check needs the `ml` extra: without it the embedding rows are missing and
 it reports the difference. The `realdata` workflow runs it after every weekly run.
 
