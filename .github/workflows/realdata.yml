@@ -1,12 +1,18 @@
 name: realdata
 
-# Downloads the pinned public datasets (about 180 MB, sha256-verified), builds the catalogs, runs
-# the realdata tests, the Quickstart and the benchmarks. Weekly, so upstream drift is noticed.
+# Downloads the pinned public datasets (about 190 MB, sha256-verified), builds the catalogs, runs
+# the realdata tests, the Quickstart and every benchmark, then checks that the regenerated
+# results/ match the committed ones (timing and provenance fields ignored). Weekly, so upstream
+# drift or nondeterminism is noticed. Every results/*.json records the run id and commit it came from.
 on:
   workflow_dispatch:
     inputs:
       embed:
-        description: "also run the MiniLM embedding encoder in bench_crossframework (slow)"
+        description: "run the sentence-embedding encoders (MiniLM, bge-small) in the auto-mapping benchmarks"
+        type: boolean
+        default: true
+      check:
+        description: "fail if the regenerated results differ from the committed ones"
         type: boolean
         default: true
   schedule:
@@ -22,6 +28,9 @@ jobs:
     env:
       VANTAGE_DATA_DIR: ${{ github.workspace }}/vdata
       HF_HUB_DISABLE_TELEMETRY: "1"
+      # schedule runs have no inputs: default to embeddings on and the check on
+      EMBED: ${{ github.event_name != 'workflow_dispatch' || inputs.embed }}
+      CHECK: ${{ github.event_name != 'workflow_dispatch' || inputs.check }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -36,8 +45,13 @@ jobs:
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/huggingface
-          key: hf-minilm-v1
+          key: hf-minilm-bge-v1
       - run: pip install -e ".[dev,data,bench]"
+      - name: Embedding encoders (CPU-only torch)
+        if: env.EMBED == 'true'
+        run: |
+          pip install "torch==2.11.0" --index-url https://download.pytorch.org/whl/cpu
+          pip install -e ".[ml]"
       - name: Download (fails on any sha256 MISMATCH)
         run: python -m vantage.download | tee download.log
       - name: Build catalogs
@@ -51,16 +65,17 @@ jobs:
           python -m vantage failure --catalog real --kind control --top 5
           python -m vantage report --catalog real --out out/report.md
           python -m vantage navigator --catalog real --out out/layer.json
-      - name: Cross-framework benchmark
+      - name: Benchmarks (every results/ file)
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.embed }}" = "true" ]; then
-            pip install -e ".[ml]"
-            (cd benchmarks && python bench_crossframework.py) 2>&1 | tee bench.log
-          else
-            (cd benchmarks && python bench_crossframework.py --no-embed) 2>&1 | tee bench.log
-          fi
-      - name: Coverage-gap ablation benchmark
-        run: (cd benchmarks && python bench_ablation.py) 2>&1 | tee ablation.log
+          flag=""; [ "$EMBED" = "true" ] || flag="--no-embed"
+          cd benchmarks
+          for b in coverage recommend ablation walkthrough; do
+            /usr/bin/time -f "bench_$b: %e s, max RSS %M KB" python bench_$b.py 2>&1 | tee ../bench_$b.log
+          done
+          for b in automap crossframework; do
+            /usr/bin/time -f "bench_$b: %e s, max RSS %M KB" python bench_$b.py $flag 2>&1 | tee ../bench_$b.log
+          done
+          python bench_published.py | tee ../bench_published.log
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
@@ -70,3 +85,6 @@ jobs:
             out/
             results/
             docs/figures/
+      - name: Determinism check against the committed results
+        if: env.CHECK == 'true' && env.EMBED == 'true'
+        run: python scripts/check_results.py
