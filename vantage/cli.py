@@ -182,13 +182,36 @@ def cmd_demo(a):
     print(f"[4] ZT delta: microsegment finance/servers from general -> score {before.score} -> "
           f"{after.score}, exposed lateral techniques {len(before.exposed_lateral_techniques)} -> "
           f"{len(after.exposed_lateral_techniques)}")
-    print("[5] Audit report: run `python -m vantage report --out report.md --pdf report.pdf`")
+    opts = (f" --catalog {a.catalog}" if is_real(a) else "") + (f" --org {a.org}" if a.org else "")
+    print(f"[5] Audit report: run `python -m vantage report{opts} --out report.md --pdf report.pdf`")
     if not cat.mitigations:
         ev = automap.evaluate(cat)
         print(f"[+] Auto-map (TF-IDF) vs seed labels @k={ev['k']}: P={ev['precision']} R={ev['recall']}")
     blind = cov.by_status(CoverageStatus.BLIND)
     shown = ", ".join(blind[:15]) + (f" ... (+{len(blind) - 15})" if len(blind) > 15 else "")
     print(f"[+] Blind techniques ({len(blind)}): {shown or 'none'}")
+
+
+def _positive_int(text: str) -> int:
+    """argparse type: an integer >= 1 (matches the API bounds)."""
+    try:
+        v = int(text)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"expected a positive integer, got {text!r}") from None
+    if v < 1:
+        raise argparse.ArgumentTypeError(f"must be >= 1, got {v}")
+    return v
+
+
+def _positive_float(text: str) -> float:
+    """argparse type: a number > 0."""
+    try:
+        v = float(text)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"expected a positive number, got {text!r}") from None
+    if not v > 0:
+        raise argparse.ArgumentTypeError(f"must be > 0, got {text}")
+    return v
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -212,10 +235,10 @@ def build_parser() -> argparse.ArgumentParser:
                    help="node type to fail; 'control' = a claimed control lapses (techniques lose their claim). "
                         "Without --node, log_source/detection rank both detection-side kinds together")
     f.add_argument("--node", help="fail this one node id instead of ranking all single points of failure")
-    f.add_argument("--top", type=int, default=10, help="how many SPOFs to list (default 10)")
+    f.add_argument("--top", type=_positive_int, default=10, help="how many SPOFs to list (default 10)")
     r = add("recommend", cmd_recommend, "greedy set-cover recommendations")
-    r.add_argument("--budget", type=float, help="total onboarding cost budget (default: no limit)")
-    r.add_argument("--steps", type=int, default=5, help="maximum number of recommended actions (default 5)")
+    r.add_argument("--budget", type=_positive_float, help="total onboarding cost budget, > 0 (default: no limit)")
+    r.add_argument("--steps", type=_positive_int, default=5, help="maximum number of recommended actions (default 5)")
     r.add_argument("--log-sources-only", action="store_true", help="only 'onboard log source' actions")
     add("zt", cmd_zt, "Zero-Trust posture score")
     rp = add("report", cmd_report, "compliant-but-undetectable audit report (markdown / PDF)")
@@ -231,7 +254,7 @@ def build_parser() -> argparse.ArgumentParser:
     add("demo", cmd_demo, "run the five demo scenarios")
     am = add("automap", cmd_automap, "map free-text control to ATT&CK", org=False)
     am.add_argument("text", nargs="?", default="", help="control text to map (required unless --eval)")
-    am.add_argument("-k", type=int, default=5, help="number of techniques to return (default 5)")
+    am.add_argument("-k", type=_positive_int, default=5, help="number of techniques to return (default 5)")
     am.add_argument("--eval", action="store_true", help="evaluate the mapper against the catalog's own labels")
     am.add_argument("--method", choices=["tfidf", "embed", "bridge", "bridge-embed"], default="tfidf",
                     help="tfidf/embed: match technique text; bridge*: route through ATT&CK mitigations "
