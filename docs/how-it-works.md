@@ -15,7 +15,12 @@ flowchart TB
 
 A technique is **defended** only when all three hold: a claimed control maps to it, a deployed rule
 is tagged with it, and every log source that rule reads is ingested. Otherwise it is
-`paper_only` (claimed, not detectable), `detected_only` or `blind`.
+`paper_only` (claimed, not detectable), `detected_only` or `blind`. "Defended" is detection-backed
+coverage: a technique claimed only by a preventive control may still be blocked, so `paper_only`
+means *no detection evidence*, not *exposed*.
+
+Every number on this page is computed by `benchmarks/bench_walkthrough.py`
+([results](evaluation.md#6-numbers-on-the-how-it-works-page)).
 
 ## Step 1: the claim
 
@@ -53,23 +58,32 @@ controls and the live and dead rules with the log sources they need.
   and rule by how many techniques go dark (`vantage failure`), and every claimed control by how
   many techniques lose their only claim (`vantage failure --kind control`). For Acme, losing
   `windows/security` blinds 39 techniques.
-* **The recommender** runs greedy budgeted set cover over "onboard a log source (and unlock its
-  dead rules)". Onboarding `windows/ps_script` (cost 1.15) unlocks 134 rules and lifts defended
-  coverage from 17.6% to 21.8% (+51 techniques). On this instance greedy matched an exact ILP at
-  every budget tested ([Evaluation](benchmarks.md#3-recommender-vs-exact-optimum)).
+* **The recommender** runs greedy budgeted set cover over "onboard a log source (and deploy the
+  rules it unlocks)". Onboarding `windows/ps_script` (cost 1.15) unlocks 134 rules and makes 51
+  techniques newly detectable; defended coverage rises from 17.6% to 22.0% (123 -> 153
+  techniques, +30), because only claimed techniques count as defended. The recommender maximises
+  newly *detectable* techniques, not defended ones. On this instance greedy matched an exact ILP
+  at every budget tested ([Evaluation](evaluation.md#3-recommender-vs-exact-optimum)).
 
 ## Step 5: is the gap real or an artefact of one framework?
 
-The [ablation](benchmarks.md#0-ablation-what-each-evidence-requirement-removes) repeats steps 1-3
+The [ablation](evaluation.md#0-ablation-what-each-evidence-requirement-removes) repeats steps 1-3
 for 12 framework profiles: CIS IG1-3, NIST SP 800-53B LOW/MODERATE/HIGH, CRI Profile, CSA CCM, and
 the AWS, Azure, GCP and M365 security-stack mappings. It does this at every telemetry tier. The
-overstatement appears for every framework, and most of it comes from step 3: tagged rules whose
-log sources are missing.
+overstatement appears for every framework. With classic Windows logs (T0), most of the gap is
+missing telemetry (step 3: tagged rules whose log sources are not ingested), in 11 of 12
+profiles. Once Sysmon-class endpoint logs are ingested (T2 and up), most of what remains is
+claimed techniques with no tagged SigmaHQ rule at all (step 2).
+
+![where the gap comes from](figures/ablation_shares.png)
+
+The same page reports a detection-only (DeTT&CT-style) view next to defended coverage, and splits
+the paper-only techniques by the CIS Security Function of the safeguards that claim them.
 
 ## Where the mappings come from
 
 Control-to-technique edges come from official public mappings (see [Datasets](datasets.md)). For a
 new framework with no mapping, VANTAGE can suggest one: the mitigation-bridge auto-mapper matches
 control text to ATT&CK mitigations, and the TransferMapper adds labels learned from other
-frameworks. Both are evaluated in [Evaluation](benchmarks.md) and are suggestion tools, not ground
+frameworks. Both are evaluated in [Evaluation](evaluation.md) and are suggestion tools, not ground
 truth.

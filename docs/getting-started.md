@@ -26,7 +26,7 @@ python -m vantage recommend --catalog real --log-sources-only --steps 5
 python -m vantage report    --catalog real --out report.md --pdf report.pdf
 python -m vantage navigator --catalog real --out layer.json
 python -m vantage automap   --catalog real --method bridge "Require MFA for all remote access"
-python -m vantage serve     --catalog real      # http://127.0.0.1:8000
+python -m vantage serve     --catalog real      # prints http://127.0.0.1:8000/#token=...
 ```
 
 ## Posture file
@@ -42,9 +42,14 @@ zero_trust: {segments: [...], open_flows: [[finance, general]], mfa_coverage: 0.
 ## Docker
 
 ```bash
-docker run --rm -p 127.0.0.1:8000:8000 ghcr.io/rakshit-737/vantage:latest   # seed catalog
-VANTAGE_DATA=/path/to/data VANTAGE_CATALOG=real docker compose up --build   # real catalog
+# seed catalog: open the http://127.0.0.1:8000/#token=... link it prints (also in `docker logs`)
+docker run --rm -p 127.0.0.1:8000:8000 ghcr.io/rakshit-737/vantage:latest
+
+# real catalog (compose refuses to start without a token)
+export VANTAGE_API_TOKEN=$(python -c "import secrets;print(secrets.token_urlsafe(32))")
+VANTAGE_DATA=/path/to/data VANTAGE_CATALOG=real docker compose up --build
+# then open http://127.0.0.1:8000/#token=<that token>
 ```
 
-The container runs as a non-root user (read-only filesystem in compose) and publishes on
-127.0.0.1 only.
+The container runs as a non-root user (read-only filesystem in compose), publishes on 127.0.0.1
+only, and installs its Python dependencies from the hash-locked `docker/requirements.lock`.
