@@ -187,7 +187,7 @@ def cmd_demo(a: argparse.Namespace) -> None:
     if top:
         r = top[0]
         print(f"[3] Cheapest win: {r.action} '{r.target}' (cost {r.cost:g}) -> "
-              f"+{len(r.new_techniques)} techniques")
+              f"+{len(r.new_techniques)} newly detectable techniques")
     before = score_zero_trust(org.zero_trust, cat)
     zt = copy.deepcopy(org.zero_trust)
     zt.open_flows.discard(frozenset({"finance", "general"}))
