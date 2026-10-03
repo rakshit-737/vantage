@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 
-from common import RESULTS, md_table
+from common import RESULTS, md_table, write_md
 
 
 def main() -> None:
@@ -50,7 +50,10 @@ def main() -> None:
           "every difference. It is context, not a head-to-head result.", "",
           md_table(rows, ["system", "ground truth", "metric", "value"]), "",
           "Setup differences:", "", *[f"- {d}" for d in diffs], ""]
-    (RESULTS / "published.md").write_text("\n".join(md), encoding="utf-8")
+    prov = cf.get("provenance", {})
+    md += [f"The VANTAGE rows are read from `results/crossframework.json` (run {prov.get('run_id', '?')} at "
+           f"commit `{prov.get('commit', '?')[:12]}`)."]
+    write_md("published", md)
     print("\n".join(md))
 
 

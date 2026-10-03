@@ -13,10 +13,9 @@ data:            ## download ATT&CK STIX, CIS v8 mapping, SigmaHQ (sha256-verifi
 catalog: data    ## parse + join into $(VANTAGE_DATA_DIR)/processed/catalog.json
 	$(PY) -m vantage.ingest.build
 
-bench: catalog   ## regenerate results/*.md|json and docs/figures/*.png
-	$(PY) benchmarks/bench_automap.py
-	$(PY) benchmarks/bench_coverage.py
-	$(PY) benchmarks/bench_recommend.py
+bench: catalog   ## regenerate results/*.md|json and docs/figures/*.png (embeddings need .[ml])
+	cd benchmarks && for b in coverage recommend ablation walkthrough automap crossframework published; do $(PY) bench_$$b.py || exit 1; done
+	$(PY) scripts/check_results.py   ## determinism: only timing/provenance may differ from git HEAD
 
 demo:            ## offline toy catalog (no downloads)
 	$(PY) -m vantage demo
