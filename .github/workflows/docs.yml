@@ -66,7 +66,7 @@ jobs:
           with sync_playwright() as p:
               b = p.chromium.launch()
               pg = b.new_page()
-              pg.goto("https://rakshit-737.github.io/vantage/demo/", wait_until="networkidle")
+              pg.goto("https://rakshit-737.github.io/vantage-compliance-attack-mapping/demo/", wait_until="networkidle")
               pg.wait_for_selector("#matrix .cell", timeout=30000)
               n = pg.locator("#matrix .cell").count()
               print("cells:", n)
@@ -81,4 +81,4 @@ jobs:
               b.close()
           PY
       - name: Old Evaluation URL redirects
-        run: curl -fsSL https://rakshit-737.github.io/vantage/benchmarks/ | grep -q "evaluation/"
+        run: curl -fsSL https://rakshit-737.github.io/vantage-compliance-attack-mapping/benchmarks/ | grep -q "evaluation/"

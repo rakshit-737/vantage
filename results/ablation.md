@@ -131,4 +131,4 @@ Detectable = a live rule exists, whatever is claimed (what a DeTT&CT-style data-
 
 Wall time: 48 s.
 
-_Source: GitHub Actions `realdata` run [37092934843](https://github.com/rakshit-737/vantage/actions/runs/37092934843) at commit `6ff466dd6215` (Linux-6.17.0-1022-azure-x86_64-with-glibc2.39, Python 3.12.14)._
+_Source: GitHub Actions `realdata` run [37092934843](https://github.com/rakshit-737/vantage-compliance-attack-mapping/actions/runs/37092934843) at commit `6ff466dd6215` (Linux-6.17.0-1022-azure-x86_64-with-glibc2.39, Python 3.12.14)._

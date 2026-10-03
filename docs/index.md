@@ -39,7 +39,7 @@ ruleset (2,877 ATT&CK-tagged rules).
 ## Headline results
 
 Every number comes from a committed result file produced by the `realdata` GitHub Actions run
-[37092934843](https://github.com/rakshit-737/vantage/actions/runs/37092934843) (ubuntu-24.04,
+[37092934843](https://github.com/rakshit-737/vantage-compliance-attack-mapping/actions/runs/37092934843) (ubuntu-24.04,
 Python 3.12.14).
 
 | Finding | Number |

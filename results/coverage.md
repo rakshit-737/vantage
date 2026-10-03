@@ -75,4 +75,4 @@ Values are mean +/- sd over 25 orgs (seeds 0-24); gap_95ci is a t-interval of th
 
 The CIS mapping reaches 54.2% of ATT&CK v19.2. Of the 45.8 pp it cannot claim, 24.7 pp are 172 techniques added after v8.2 and 21.1 pp are 147 v8.2-era techniques CIS never mapped. On v8.2 itself CIS covers 72.3% (383 of 530). With every log source ingested, stable+test rules detect 52.1% and all 2877 rules 54.2%.
 
-_Source: GitHub Actions `realdata` run [37092934843](https://github.com/rakshit-737/vantage/actions/runs/37092934843) at commit `6ff466dd6215` (Linux-6.17.0-1022-azure-x86_64-with-glibc2.39, Python 3.12.14)._
+_Source: GitHub Actions `realdata` run [37092934843](https://github.com/rakshit-737/vantage-compliance-attack-mapping/actions/runs/37092934843) at commit `6ff466dd6215` (Linux-6.17.0-1022-azure-x86_64-with-glibc2.39, Python 3.12.14)._

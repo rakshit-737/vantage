@@ -1,8 +1,8 @@
 site_name: VANTAGE
 site_description: Control -> Detection -> ATT&CK coverage graph and Zero-Trust posture engine (defensive, lab-only)
-site_url: https://rakshit-737.github.io/vantage/
-repo_url: https://github.com/rakshit-737/vantage
-repo_name: rakshit-737/vantage
+site_url: https://rakshit-737.github.io/vantage-compliance-attack-mapping/
+repo_url: https://github.com/rakshit-737/vantage-compliance-attack-mapping
+repo_name: rakshit-737/vantage-compliance-attack-mapping
 edit_uri: edit/main/docs/
 theme:
   name: material

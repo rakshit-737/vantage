@@ -3,7 +3,7 @@
 ## Install
 
 ```bash
-git clone https://github.com/rakshit-737/vantage && cd vantage
+git clone https://github.com/rakshit-737/vantage-compliance-attack-mapping && cd vantage-compliance-attack-mapping
 pip install -e ".[dev]"          # core + API + report + test deps
 python -m vantage demo           # offline toy catalog, no downloads
 ```
@@ -43,7 +43,7 @@ zero_trust: {segments: [...], open_flows: [[finance, general]], mfa_coverage: 0.
 
 ```bash
 # seed catalog: open the http://127.0.0.1:8000/#token=... link it prints (also in `docker logs`)
-docker run --rm -p 127.0.0.1:8000:8000 ghcr.io/rakshit-737/vantage:latest
+docker run --rm -p 127.0.0.1:8000:8000 ghcr.io/rakshit-737/vantage-compliance-attack-mapping:latest
 
 # real catalog (compose refuses to start without a token)
 export VANTAGE_API_TOKEN=$(python -c "import secrets;print(secrets.token_urlsafe(32))")

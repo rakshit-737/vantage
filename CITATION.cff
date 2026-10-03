@@ -5,9 +5,9 @@ type: software
 authors:
   - given-names: Rakshit
     affiliation: "VIT Chennai"
-version: 1.1.1
+version: 1.1.2
 date-released: 2026-10-03
 license: MIT
-repository-code: "https://github.com/rakshit-737/vantage"
-url: "https://rakshit-737.github.io/vantage/"
+repository-code: "https://github.com/rakshit-737/vantage-compliance-attack-mapping"
+url: "https://rakshit-737.github.io/vantage-compliance-attack-mapping/"
 keywords: [mitre-attack, cis-controls, nist-800-53, sigma, detection-engineering, coverage]

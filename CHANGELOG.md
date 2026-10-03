@@ -6,6 +6,14 @@ All notable changes are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-10-03
+
+### Changed
+- Repository renamed to `rakshit-737/vantage-compliance-attack-mapping`. Docs moved to
+  <https://rakshit-737.github.io/vantage-compliance-attack-mapping/> and the container image is now
+  `ghcr.io/rakshit-737/vantage-compliance-attack-mapping`. Links in older entries below refer to the
+  old name and are kept as historical record.
+
 ## [1.1.1] - 2026-10-03
 
 ### Added

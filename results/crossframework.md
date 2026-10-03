@@ -177,4 +177,4 @@ Per-control AP@200 for every method: `results/crossframework_per_control.csv.gz`
 
 Wall time: 232 s (TF-IDF, MiniLM-L6-v2).
 
-_Source: GitHub Actions `realdata` run [37092934843](https://github.com/rakshit-737/vantage/actions/runs/37092934843) at commit `6ff466dd6215` (Linux-6.17.0-1022-azure-x86_64-with-glibc2.39, Python 3.12.14)._
+_Source: GitHub Actions `realdata` run [37092934843](https://github.com/rakshit-737/vantage-compliance-attack-mapping/actions/runs/37092934843) at commit `6ff466dd6215` (Linux-6.17.0-1022-azure-x86_64-with-glibc2.39, Python 3.12.14)._

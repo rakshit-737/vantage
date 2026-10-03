@@ -5,7 +5,7 @@ and `results/*.md`. This page lists the exact commands, what they should print, 
 took.
 
 **Environment of the published run:** every committed result file comes from the `realdata`
-GitHub Actions run [37092934843](https://github.com/rakshit-737/vantage/actions/runs/37092934843)
+GitHub Actions run [37092934843](https://github.com/rakshit-737/vantage-compliance-attack-mapping/actions/runs/37092934843)
 at commit `6ff466d`: ubuntu-24.04 runner (4 vCPU, 16 GB), Python 3.12.14, CPU-only torch 2.11.0.
 Each `results/*.json` names that run and commit in its `provenance` block, and each
 `results/*.md` ends with a source line. Before v1.1.0 some files came from a Windows 11 laptop;
@@ -16,7 +16,7 @@ results and figures as an artefact.
 ## 1. Install
 
 ```bash
-git clone https://github.com/rakshit-737/vantage && cd vantage
+git clone https://github.com/rakshit-737/vantage-compliance-attack-mapping && cd vantage-compliance-attack-mapping
 pip install -e ".[dev,data,bench]"      # add ".[ml]" for the embedding encoders
 export VANTAGE_DATA_DIR=$PWD/data       # any folder; datasets are never committed
 ```

@@ -1,15 +1,15 @@
 # VANTAGE
 
-[![ci](https://github.com/rakshit-737/vantage/actions/workflows/ci.yml/badge.svg)](https://github.com/rakshit-737/vantage/actions/workflows/ci.yml)
-[![docs](https://github.com/rakshit-737/vantage/actions/workflows/docs.yml/badge.svg)](https://rakshit-737.github.io/vantage/)
-[![realdata](https://github.com/rakshit-737/vantage/actions/workflows/realdata.yml/badge.svg)](https://github.com/rakshit-737/vantage/actions/workflows/realdata.yml)
-[![release](https://img.shields.io/github/v/release/rakshit-737/vantage)](https://github.com/rakshit-737/vantage/releases)
+[![ci](https://github.com/rakshit-737/vantage-compliance-attack-mapping/actions/workflows/ci.yml/badge.svg)](https://github.com/rakshit-737/vantage-compliance-attack-mapping/actions/workflows/ci.yml)
+[![docs](https://github.com/rakshit-737/vantage-compliance-attack-mapping/actions/workflows/docs.yml/badge.svg)](https://rakshit-737.github.io/vantage-compliance-attack-mapping/)
+[![realdata](https://github.com/rakshit-737/vantage-compliance-attack-mapping/actions/workflows/realdata.yml/badge.svg)](https://github.com/rakshit-737/vantage-compliance-attack-mapping/actions/workflows/realdata.yml)
+[![release](https://img.shields.io/github/v/release/rakshit-737/vantage-compliance-attack-mapping)](https://github.com/rakshit-737/vantage-compliance-attack-mapping/releases)
 ![python](https://img.shields.io/badge/python-3.10%2B-blue)
 [![license: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 ![ATT&CK](https://img.shields.io/badge/ATT%26CK-v19.2-red)
 ![Sigma](https://img.shields.io/badge/SigmaHQ-r2026--07--01-purple)
 
-**Docs: <https://rakshit-737.github.io/vantage/>** · [static UI demo](https://rakshit-737.github.io/vantage/demo/) · image `ghcr.io/rakshit-737/vantage`
+**Docs: <https://rakshit-737.github.io/vantage-compliance-attack-mapping/>** · [static UI demo](https://rakshit-737.github.io/vantage-compliance-attack-mapping/demo/) · image `ghcr.io/rakshit-737/vantage-compliance-attack-mapping`
 
 **VANTAGE joins your controls, your detections and MITRE ATT&CK into one graph, then shows the gap between *compliant* and *defensible*.**
 
@@ -23,12 +23,12 @@ Organisations pass CIS or NIST audits and still get breached, because "we have a
 
 ## Try it in 60 seconds
 
-**Zero install:** open the [static demo](https://rakshit-737.github.io/vantage/demo/). It is the real UI, pre-rendered for the synthetic Acme posture on the real catalog.
+**Zero install:** open the [static demo](https://rakshit-737.github.io/vantage-compliance-attack-mapping/demo/). It is the real UI, pre-rendered for the synthetic Acme posture on the real catalog.
 
 **Local, offline:** install from the repo and run the demo on the bundled 33-technique seed catalog (no downloads):
 
 ```bash
-pip install "git+https://github.com/rakshit-737/vantage"
+pip install "git+https://github.com/rakshit-737/vantage-compliance-attack-mapping"
 vantage demo
 ```
 
@@ -42,7 +42,7 @@ CI installs the wheel into a fresh venv and times `vantage demo` on every push (
 
 ## Headline results (real data)
 
-Every number below is in a committed result file, and every result file was produced by the `realdata` GitHub Actions run [37092934843](https://github.com/rakshit-737/vantage/actions/runs/37092934843) (commit `6ff466d`, ubuntu-24.04, Python 3.12.14), which it names in its footer and `provenance` block.
+Every number below is in a committed result file, and every result file was produced by the `realdata` GitHub Actions run [37092934843](https://github.com/rakshit-737/vantage-compliance-attack-mapping/actions/runs/37092934843) (commit `6ff466d`, ubuntu-24.04, Python 3.12.14), which it names in its footer and `provenance` block.
 
 | Result | Number | Source |
 |---|---|---|
@@ -160,7 +160,7 @@ Code layout (`vantage/`): `ingest/` (`attack.py`, `cis.py`, `nist.py`, `ctid.py`
 ## Quickstart
 
 ```bash
-git clone https://github.com/rakshit-737/vantage && cd vantage
+git clone https://github.com/rakshit-737/vantage-compliance-attack-mapping && cd vantage-compliance-attack-mapping
 pip install -e ".[dev]"                 # core + API + report + test deps
 python -m vantage demo                  # offline toy catalog, no downloads
 
@@ -228,7 +228,7 @@ None of these files are committed (about 190 MB in total). `python -m vantage.do
 
 ## Reproducibility
 
-Exact commands, expected outputs and measured runtimes are on the [Reproduce](https://rakshit-737.github.io/vantage/reproduce/) page. In short:
+Exact commands, expected outputs and measured runtimes are on the [Reproduce](https://rakshit-737.github.io/vantage-compliance-attack-mapping/reproduce/) page. In short:
 
 ```bash
 pip install -e ".[dev,data,bench,ml]"
@@ -238,7 +238,7 @@ python -m pytest -q                     # from the repo root; realdata tests run
 python scripts/check_results.py         # determinism: only timing and provenance may differ from git HEAD
 ```
 
-The committed results come from the `realdata` workflow on an ubuntu-24.04 runner (run [37092934843](https://github.com/rakshit-737/vantage/actions/runs/37092934843), Python 3.12.14, CPU only); each `results/*.json` names its run and commit in a `provenance` block. That workflow re-runs every benchmark weekly, fails on any sha256 mismatch, and fails if anything other than timing or provenance changes. Without the `ml` extra the embedding rows are skipped and the check reports the difference.
+The committed results come from the `realdata` workflow on an ubuntu-24.04 runner (run [37092934843](https://github.com/rakshit-737/vantage-compliance-attack-mapping/actions/runs/37092934843), Python 3.12.14, CPU only); each `results/*.json` names its run and commit in a `provenance` block. That workflow re-runs every benchmark weekly, fails on any sha256 mismatch, and fails if anything other than timing or provenance changes. Without the `ml` extra the embedding rows are skipped and the check reports the difference.
 
 ## Prior art and how this differs
 
@@ -257,7 +257,7 @@ The committed results come from the `realdata` workflow on an ubuntu-24.04 runne
 - **Automatic control → ATT&CK mapping.** Lee et al. [1] route control text through ATT&CK mitigations with an SBERT ensemble on Korean RMF control text, evaluated against the CTID NIST mapping. VANTAGE's mitigation bridge is an independent re-implementation of that idea, evaluated on CIS v8 and 7 other frameworks. **No directly comparable benchmark exists**: their Recall@restricted metric is defined only in the full text, which we could not retrieve; see [results/published.md](results/published.md) for every setup difference. The same authors earlier compared BERT-based models for this task [2].
 - **Mapping unstructured CTI to ATT&CK.** Orbinato et al. [4] compare traditional and deep-learning classifiers on threat-report text. CTID [TRAM](https://github.com/center-for-threat-informed-defense/tram) classifies CTI sentences into about 50 techniques. That is a different task, and its published scores come from a private dataset.
 
-References (titles, authors and DOIs are checked against Crossref and DataCite by the `citations` workflow; more on the [Related work](https://rakshit-737.github.io/vantage/related-work/) page):
+References (titles, authors and DOIs are checked against Crossref and DataCite by the `citations` workflow; more on the [Related work](https://rakshit-737.github.io/vantage-compliance-attack-mapping/related-work/) page):
 
 1. Hanhee Lee, Sukjoon Yoon, Yunkyung Lee, Jiwon Kang. *Enhancing RMF and ATT&CK Mapping Accuracy Through Integration of Sentence-BERT and Mitigation Parameters*. Electronics 15(6):1248, 2026. [doi:10.3390/electronics15061248](https://doi.org/10.3390/electronics15061248)
 2. Hanhee Lee, Sukjoon Yoon, Yun-kyung Lee, Jiwon Kang. *Evaluating BERT-Based Models for Mapping RMF Security Controls to MITRE ATT&CK Techniques*. Journal of Information and Security 25(5):11-20, 2025. [doi:10.33778/kcsa.2025.25.5.011](https://doi.org/10.33778/kcsa.2025.25.5.011)

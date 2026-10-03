@@ -9,4 +9,4 @@ Matrix: claimed 53.9% vs defended 17.6% of 697 techniques, 253 paper-only, 2132 
 
 Recommender's first pick: onboard `windows/ps_script` (cost 1.15), which unlocks 134 rules and makes 51 techniques newly detectable. Defended coverage goes from 123 (17.6%) to 153 (22.0%) techniques, +30 (152 if only the posture's already-deployed rules come alive). The recommender maximises newly *detectable* techniques, not defended ones.
 
-_Source: GitHub Actions `realdata` run [37092934843](https://github.com/rakshit-737/vantage/actions/runs/37092934843) at commit `6ff466dd6215` (Linux-6.17.0-1022-azure-x86_64-with-glibc2.39, Python 3.12.14)._
+_Source: GitHub Actions `realdata` run [37092934843](https://github.com/rakshit-737/vantage-compliance-attack-mapping/actions/runs/37092934843) at commit `6ff466dd6215` (Linux-6.17.0-1022-azure-x86_64-with-glibc2.39, Python 3.12.14)._

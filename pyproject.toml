@@ -24,11 +24,11 @@ dev = ["pytest>=9.0.3", "pytest-cov>=7.1.0", "ruff>=0.16.9", "build>=1.0", "twin
        "uvicorn>=0.54.0", "reportlab>=4.0"]
 
 [project.urls]
-Homepage = "https://rakshit-737.github.io/vantage/"
-Documentation = "https://rakshit-737.github.io/vantage/"
-Source = "https://github.com/rakshit-737/vantage"
-Changelog = "https://github.com/rakshit-737/vantage/blob/main/CHANGELOG.md"
-Issues = "https://github.com/rakshit-737/vantage/issues"
+Homepage = "https://rakshit-737.github.io/vantage-compliance-attack-mapping/"
+Documentation = "https://rakshit-737.github.io/vantage-compliance-attack-mapping/"
+Source = "https://github.com/rakshit-737/vantage-compliance-attack-mapping"
+Changelog = "https://github.com/rakshit-737/vantage-compliance-attack-mapping/blob/main/CHANGELOG.md"
+Issues = "https://github.com/rakshit-737/vantage-compliance-attack-mapping/issues"
 
 [project.scripts]
 vantage = "vantage.cli:main"

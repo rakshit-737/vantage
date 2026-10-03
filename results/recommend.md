@@ -22,4 +22,4 @@ Greedy finds 3.9-16.8x the mean of 50 random orders and 1.0-2.7x their 97.5th pe
 | 4 | linux/process_creation | 2.6 | 16 | 96 |
 | 5 | bitbucket/audit | 1.0 | 4 | 12 |
 
-_Source: GitHub Actions `realdata` run [37092934843](https://github.com/rakshit-737/vantage/actions/runs/37092934843) at commit `6ff466dd6215` (Linux-6.17.0-1022-azure-x86_64-with-glibc2.39, Python 3.12.14)._
+_Source: GitHub Actions `realdata` run [37092934843](https://github.com/rakshit-737/vantage-compliance-attack-mapping/actions/runs/37092934843) at commit `6ff466dd6215` (Linux-6.17.0-1022-azure-x86_64-with-glibc2.39, Python 3.12.14)._

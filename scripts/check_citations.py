@@ -24,7 +24,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 FILES = [ROOT / "docs" / "related-work.md", ROOT / "README.md"]
-UA = {"User-Agent": "vantage-citation-check/1.0 (https://github.com/rakshit-737/vantage)"}
+UA = {"User-Agent": "vantage-citation-check/1.0 (https://github.com/rakshit-737/vantage-compliance-attack-mapping)"}
 REF = re.compile(r"\*(?P<title>[^*]+)\*.*?doi\.org/(?P<doi>10\.[^)\s\]]+)")
 
 
