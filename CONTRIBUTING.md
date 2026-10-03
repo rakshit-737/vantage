@@ -34,8 +34,9 @@ python -m pytest -q -m realdata
 - When `pyproject.toml` dependencies change, regenerate the Docker lock with the `uv pip compile`
   command in the header of `docker/requirements.lock` (a test checks it still satisfies
   `pyproject.toml`).
-- After a version bump, re-export the static demo (`python scripts/export_demo.py --catalog real`)
-  so `docs/demo/data/meta.json` carries the new version.
+- A release bumps `vantage/__init__.py`, `CITATION.cff` (`version` and `date-released`) and the
+  CHANGELOG, then re-exports the static demo (`python scripts/export_demo.py --catalog real`) so
+  `docs/demo/data/meta.json` carries the new version.
 - UI code must write third-party strings (Sigma titles, ATT&CK text) with `textContent`, never
   `innerHTML`.
 - Use conventional commits (`feat:`, `fix:`, `test:`, `docs:`, `data:`, `perf:`, `ci:`,

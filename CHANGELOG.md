@@ -6,10 +6,47 @@ All notable changes are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+- Provenance: every `results/*.json` records the commit and GitHub Actions run that produced it,
+  and every `results/*.md` ends with a source line. All committed results now come from realdata
+  run 37092934843; the `realdata` workflow runs every benchmark and fails if anything other than
+  timing or provenance changes (`scripts/check_results.py`).
+- Statistics: paired sign-flip permutation tests with Holm adjustment for the cross-framework
+  contrasts (bridge - direct, pooled - zero-shot, nested LOO - zero-shot, nested LOO - pooled) and
+  for the auto-mapper comparisons; per-control scores committed as
+  `results/*_per_control.csv.gz`; the random recommender baseline reports its 2.5-97.5% range.
+- Ablation: rule-tag vs telemetry share of the gap per tier, a detection-only (DeTT&CT-style)
+  arm, and paper-only techniques split by CIS Security Function; `bench_walkthrough.py` computes
+  every number on the How-it-works page; coverage section E reports the structural ceilings.
+- Docs: Related work page with full, link-checked references (`citations` workflow), the
+  Evaluation page at `/evaluation/` (old `/benchmarks/` redirects), a TF-IDF and a MiniLM
+  cross-framework figure, and a collapsible full ablation table.
+- Static demo: the audit report and Navigator layer download links work on GitHub Pages.
+- Docker image dependencies are installed from the hash-locked `docker/requirements.lock`.
+
+### Changed
+- The contribution is stated as control-mapping coverage vs *detection-backed* coverage, with a
+  limitation that preventive controls can block techniques no rule detects. "Most of the gap is
+  telemetry" now holds only for classic Windows logs (T0); from T2 on most of the gap is claimed
+  techniques without a tagged rule.
+- Cross-framework prose in the README, limitations and ADR 0009 names its encoder and only calls a
+  difference significant when it survives Holm adjustment (pooled transfer: 4 of 8 frameworks).
+- Coverage gaps are computed from unrounded values (CIS IG2 T0 42.7 -> 42.8 pp, NIST T5
+  26.6 -> 26.5 pp).
+- Malformed posture YAML gives one `vantage: error: <file>: ...` line (exit 2); selectors or globs
+  that match nothing, and unknown Sigma statuses or SP 800-53B baselines, are errors.
+- `--top`, `--steps`, `-k` and `--budget` must be positive; the demo's report hint names the active
+  catalog; the cheapest-win line says "newly detectable".
+- The API answers 413 for chunked bodies over 64 KiB (it answered 400); the UI removes the token
+  from the URL fragment.
+- Raised floors with known vulnerabilities: sentence-transformers>=5.6.0, mkdocs-material>=9.7.7,
+  pytest>=9.0.3; CI audits the exact declared minimum of every extra. The dev extra adds httpx2.
+- The public API is fully type-annotated and documented; ruff enforces ANN and D1 for `vantage/`.
+
 ## [1.1.0] - 2026-10-02
 
 ### Added
-- Round 3, cross-framework: CTID Mappings Explorer CRI Profile v2.1, CSA CCM 4.1 and the AWS, Azure,
+- Cross-framework: CTID Mappings Explorer CRI Profile v2.1, CSA CCM 4.1 and the AWS, Azure,
   GCP and M365 security-stack mappings; the NIST OSCAL rev5 catalog (control statements) and the
   SP 800-53B LOW/MODERATE/HIGH/PRIVACY baselines. Parsers `vantage.ingest.ctid` and
   `vantage.ingest.oscal`, registry `vantage.frameworks` (ADR 0009).
